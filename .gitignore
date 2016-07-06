@@ -1,0 +1,6 @@
+target/
+nohup.out
+.project
+.classpath
+.settings
+.bpmn
