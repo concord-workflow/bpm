@@ -11,9 +11,14 @@
     
     <groupId>io.takari.bpm.examples</groupId>
     <artifactId>examples-async</artifactId>
-    <packaging>jar</packaging>
+    <packaging>takari-jar</packaging>
     
     <dependencies>
+        <dependency>
+            <groupId>io.takari.bpm</groupId>
+            <artifactId>bpm-engine-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>io.takari.bpm</groupId>
             <artifactId>bpm-engine-impl</artifactId>

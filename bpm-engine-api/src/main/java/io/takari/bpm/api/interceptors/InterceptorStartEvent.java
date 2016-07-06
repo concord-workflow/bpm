@@ -20,7 +20,7 @@ public class InterceptorStartEvent implements Serializable {
         this.executionId = executionId;
         
         // TODO deep-copy the variables map
-        this.variables = variables != null ? new HashMap<>(variables) : Collections.emptyMap();
+        this.variables = variables != null ? new HashMap<>(variables) : Collections.<String, Object>emptyMap();
     }
 
     public String getProcessBusinessKey() {

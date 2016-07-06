@@ -9,9 +9,14 @@
     </parent>
 
     <artifactId>testkit</artifactId>
-    <packaging>bundle</packaging>
+    <packaging>takari-jar</packaging>
 
     <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>bpm-engine-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>bpm-engine-impl</artifactId>
@@ -21,6 +26,14 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>persistence-leveldb</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.iq80.leveldb</groupId>
+            <artifactId>leveldb-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.iq80.leveldb</groupId>
+            <artifactId>leveldb</artifactId>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

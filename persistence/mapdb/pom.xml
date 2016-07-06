@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>persistence-mapdb</artifactId>
-    <packaging>bundle</packaging>
+    <packaging>takari-jar</packaging>
 
     <dependencies>
         <dependency>

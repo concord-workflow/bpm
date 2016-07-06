@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>benchmark</artifactId>
-    <packaging>jar</packaging>
+    <packaging>takari-jar</packaging>
 
     <properties>
         <jmh.version>1.12</jmh.version>
@@ -31,6 +31,11 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>bpm-engine-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>bpm-engine-impl</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -43,6 +48,22 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>persistence-mapdb</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.iq80.leveldb</groupId>
+            <artifactId>leveldb-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.iq80.leveldb</groupId>
+            <artifactId>leveldb</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mapdb</groupId>
+            <artifactId>mapdb</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
