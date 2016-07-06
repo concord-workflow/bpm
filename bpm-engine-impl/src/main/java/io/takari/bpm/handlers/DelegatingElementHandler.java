@@ -1,0 +1,74 @@
+package io.takari.bpm.handlers;
+
+import io.takari.bpm.AbstractEngine;
+import io.takari.bpm.DefaultExecution;
+import io.takari.bpm.IndexedProcessDefinitionProvider;
+import io.takari.bpm.ProcessDefinitionUtils;
+import io.takari.bpm.api.ExecutionException;
+import io.takari.bpm.commands.ProcessElementCommand;
+import io.takari.bpm.model.AbstractElement;
+import io.takari.bpm.model.CallActivity;
+import io.takari.bpm.model.EndEvent;
+import io.takari.bpm.model.EventBasedGateway;
+import io.takari.bpm.model.ExclusiveGateway;
+import io.takari.bpm.model.InclusiveGateway;
+import io.takari.bpm.model.IntermediateCatchEvent;
+import io.takari.bpm.model.ParallelGateway;
+import io.takari.bpm.model.ProcessDefinition;
+import io.takari.bpm.model.SequenceFlow;
+import io.takari.bpm.model.ServiceTask;
+import io.takari.bpm.model.StartEvent;
+import io.takari.bpm.model.SubProcess;
+import java.util.HashMap;
+import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * Determines the element type and delegates its handling to the concrete
+ * processor.
+ */
+public class DelegatingElementHandler implements ElementHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(DelegatingElementHandler.class);
+
+    private final AbstractEngine engine;
+    private final Map<String, ElementHandler> delegates = new HashMap<>();
+
+    public DelegatingElementHandler(AbstractEngine engine) {
+        this.engine = engine;
+
+        register(CallActivity.class, new CallActivityElementHandler(engine));
+        register(EndEvent.class, new EndEventHandler(engine));
+        register(EventBasedGateway.class, new EventBasedGatewayHandler(engine));
+        register(InclusiveGateway.class, new InclusiveGatewayHandler(engine));
+        register(ExclusiveGateway.class, new ExclusiveGatewayHandler(engine));
+        register(ParallelGateway.class, new ParallelGatewayHandler(engine));
+        register(IntermediateCatchEvent.class, new IntermediateCatchEventHandler(engine));
+        register(SequenceFlow.class, new SequenceFlowHandler(engine));
+        register(ServiceTask.class, new ServiceTaskHandler(engine));
+        register(StartEvent.class, new StartEventHandler(engine));
+        register(SubProcess.class, new SubProcessElementHandler(engine));
+    }
+
+    private void register(Class<? extends AbstractElement> k, ElementHandler h) {
+        delegates.put(k.getName(), h);
+    }
+
+    @Override
+    public void handle(DefaultExecution s, ProcessElementCommand c) throws ExecutionException {
+        IndexedProcessDefinitionProvider provider = engine.getProcessDefinitionProvider();
+        ProcessDefinition pd = provider.getById(c.getProcessDefinitionId());
+        AbstractElement e = ProcessDefinitionUtils.findElement(pd, c.getElementId());
+
+        String key = e.getClass().getName();
+        log.debug("handle ['{}', '{}'] -> got {} ('{}')", s.getId(), c.getProcessDefinitionId(), key, e.getId());
+
+        ElementHandler h = delegates.get(key);
+        if (h != null) {
+            h.handle(s, c);
+        } else {
+            throw new ExecutionException("Unsupported element %s '%s' of process '%s'", e.getClass().getSimpleName(), e.getId(), pd.getId());
+        }
+    }
+}

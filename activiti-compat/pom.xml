@@ -41,7 +41,7 @@
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <Import-Package>*</Import-Package>
                         <Export-Package>
-                            jet.bpm.engine.xml.activiti
+                            io.takari.bpm.xml.activiti
                         </Export-Package>
                     </instructions>
                 </configuration>

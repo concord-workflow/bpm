@@ -74,8 +74,8 @@
                             *
                         </Import-Package>
                         <Export-Package>
-                            jet.bpm.engine,
-                            jet.bpm.engine.*
+                            io.takari.bpm,
+                            io.takari.bpm.*
                         </Export-Package>
                     </instructions>
                 </configuration>

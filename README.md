@@ -5,7 +5,11 @@ BPM Engine
 ==
 
 A simple implementation of an BPM engine, designed to mimic Activiti's behaviour. Optimized for high performance (rather than for the strict following of the BPMN specification).
-It is based on the original implementation at [ibodrov/bpm](https://github.com/ibodrov/bpm)
+
+It is based on the original implementation at [ibodrov/bpm](https://github.com/ibodrov/bpm).
+Original contributors:
+- Ivan Bodrov <ibodrov@gmail.com>
+- Yuri Brigadirenko <ybrigo@gmail.com>
 
 Main features
 --
@@ -34,5 +38,5 @@ Supported elements:
 Limitations
 --
 - in the current implementation of the engine, "inclusive gateways" work exactly as "exclusive" - e.g. without the evaluation of flow expressions.
-- tasks with TimerBoundaryEvents executed in the separate thread inside an unbounded Executor
+- tasks with TimerBoundaryEvents executed in the separate thread inside of an unbounded Executor
  

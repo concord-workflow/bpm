@@ -22,9 +22,9 @@
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <Import-Package>*</Import-Package>
                         <Export-Package>
-                            jet.bpm.engine.api;version=${project.version},
-                            jet.bpm.engine.model;version=${project.version},
-                            jet.bpm.engine.model.graphics;version=${project.version}
+                            io.takari.bpm.api;version=${project.version},
+                            io.takari.bpm.model;version=${project.version},
+                            io.takari.bpm.model.graphics;version=${project.version}
                         </Export-Package>
                     </instructions>
                 </configuration>

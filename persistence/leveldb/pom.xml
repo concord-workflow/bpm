@@ -53,8 +53,8 @@
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <Import-Package>*</Import-Package>
                         <Export-Package>
-                            jet.bpm.engine.leveldb,
-                            jet.bpm.engine.leveldb.index
+                            io.takari.bpm.leveldb,
+                            io.takari.bpm.leveldb.index
                         </Export-Package>
                     </instructions>
                 </configuration>
