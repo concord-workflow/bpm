@@ -49,6 +49,7 @@ public class DefaultExpressionManager implements ExpressionManager {
             ELResolver r = createResolver(ctx);
             SimpleContext sc = new SimpleContext(r);
             sc.setVariable("execution", expressionFactory.createValueExpression(ctx, ExecutionContext.class));
+            sc.putContext(ExpressionFactory.class, expressionFactory);
             
             ValueExpression x = expressionFactory.createValueExpression(sc, expr, type);
             return (T) x.getValue(sc);
