@@ -148,7 +148,7 @@
     </build>
 
     <scm>
-        <developerConnection>scm:git:https://github.com/takari/bpm.git</developerConnection>
+        <developerConnection>scm:git:git@github.com:takari/bpm.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
 </project>
