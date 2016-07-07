@@ -51,10 +51,10 @@ public class IntermediateCatchEventHandler extends AbstractElementHandler {
                     new ProcessElementCommand(pd.getId(), next.getId(), c.getGroupId(), c.isExclusive()));
         } else {
             // standalone event
-            s.push(new SuspendExecutionCommand());
-            
             SequenceFlow next = ProcessDefinitionUtils.findOutgoingFlow(pd, c.getElementId());
             s.push(new ProcessElementCommand(pd.getId(), next.getId(), c.getGroupId(), c.isExclusive()));
+            
+            s.push(new SuspendExecutionCommand());
         }
         
         getEngine().getEventManager().add(e);
