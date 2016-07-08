@@ -14,6 +14,7 @@ import io.takari.bpm.model.ServiceTask;
 import io.takari.bpm.model.StartEvent;
 import java.util.Arrays;
 import java.util.UUID;
+import static org.junit.Assert.fail;
 import org.junit.Test;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.spy;
@@ -90,6 +91,7 @@ public class TimerBoundaryEvent extends AbstractEngineTest {
             public void execute(ExecutionContext ctx) throws ExecutionException {
                 try {
                     Thread.sleep(5000);
+                    fail("Should've been interrupted by the timer");
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }

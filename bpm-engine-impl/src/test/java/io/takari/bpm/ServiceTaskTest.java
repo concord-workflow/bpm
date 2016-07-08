@@ -68,16 +68,11 @@ public class ServiceTaskTest extends AbstractEngineTest {
 
         verify(helloTask, times(1)).execute(any(ExecutionContext.class));
     }
-
-    /**
-     * start --> t1 ----------> end
-     *             \        /
-     *              error --
-     */
+    
     @Test
-    public void testBoundaryError() throws Exception {
+    public void testDelegateBoundaryError() throws Exception {
         final String errorRef = "test#" + System.currentTimeMillis();
-
+        
         JavaDelegate t1 = spy(new JavaDelegate() {
 
             @Override
@@ -86,14 +81,42 @@ public class ServiceTaskTest extends AbstractEngineTest {
             }
         });
         getServiceTaskRegistry().register("t1", t1);
+        
+        ServiceTask t = new ServiceTask("t1", ExpressionType.DELEGATE, "${t1}");
+        testBoundaryError(t, errorRef);
+        
+        verify(t1, times(1)).execute(any(ExecutionContext.class));
+    }
+    
+    @Test
+    public void testExpressionBoundaryError() throws Exception {
+        final String errorRef = "test#" + System.currentTimeMillis();
+        
+        SampleTask t1 = spy(new SampleTask() {
+            
+            public void doIt(long i) {
+                throw new BpmnError(errorRef);
+            }
+        });
+        getServiceTaskRegistry().register("t1", t1);
+        
+        ServiceTask t = new ServiceTask("t1", ExpressionType.SIMPLE, "${t1.doIt(123)}");
+        testBoundaryError(t, errorRef);
+        
+        verify(t1, times(1)).doIt(anyLong());
+    }
 
-        // ---
-
+    /**
+     * start --> t1 ----------> end
+     *             \        /
+     *              error --
+     */
+    public void testBoundaryError(ServiceTask t, String errorRef) throws Exception {
         String processId = "test";
         deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "t1"),
-                new ServiceTask("t1", ExpressionType.DELEGATE, "${t1}"),
+                t,
                 new BoundaryEvent("be1", "t1", errorRef),
                 new SequenceFlow("f2", "be1", "end"),
                 new SequenceFlow("f3", "t1", "end"),
@@ -114,10 +137,6 @@ public class ServiceTaskTest extends AbstractEngineTest {
                 "f2",
                 "end");
         assertNoMoreActivations();
-
-        // ---
-
-        verify(t1, times(1)).execute(any(ExecutionContext.class));
     }
     
     /**

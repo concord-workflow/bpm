@@ -60,6 +60,10 @@ public abstract class AbstractEngineTest {
         return engine;
     }
 
+    public EventPersistenceManager getEventManager() {
+        return eventManager;
+    }
+    
     protected void register(String key, JavaDelegate d) {
         serviceTaskRegistry.register(key, d);
     }

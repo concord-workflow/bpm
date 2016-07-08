@@ -25,6 +25,9 @@ public class InclusiveGatewayHandler extends ParallelGatewayHandler {
             return;
         }
         
+        // flows, that had conditions eval'ed to `false`, should be marked as
+        // activated and they will be counted as processed
+        
         IndexedProcessDefinition pd = getProcessDefinition(c);
         String gwId = ProcessDefinitionUtils.findNextGatewayId(pd, c.getElementId());
         int count = inactive.size();

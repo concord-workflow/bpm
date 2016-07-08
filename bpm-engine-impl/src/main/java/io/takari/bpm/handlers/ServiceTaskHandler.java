@@ -68,8 +68,10 @@ public class ServiceTaskHandler extends AbstractElementHandler {
 
             Invoker invoker;
             if (timers.isEmpty()) {
+                log.debug("handle ['{}', '{}', '{}'] -> using direct invoker", s.getBusinessKey(), c.getElementId(), expr);
                 invoker = new DirectInvoker(em, type, expr, ctx, c.getElementId());
             } else {
+                log.debug("handle ['{}', '{}', '{}'] -> using timer invoker ({})", s.getBusinessKey(), c.getElementId(), expr, timers);
                 invoker = new TimerInvoker(em, type, expr, ctx, c.getElementId(), timerExecutor, timers);
             }
             
@@ -161,6 +163,11 @@ public class ServiceTaskHandler extends AbstractElementHandler {
         public TimerDefinition(String timerId, long duration) {
             this.timerId = timerId;
             this.duration = duration;
+        }
+
+        @Override
+        public String toString() {
+            return "TimerDefinition{" + "timerId=" + timerId + ", duration=" + duration + '}';
         }
     }
 
