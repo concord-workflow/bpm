@@ -1,0 +1,11 @@
+XmlDefinitions
+XmlEndEvent
+XmlEventBasedGateway
+XmlExclusiveGateway
+XmlInclusiveGateway
+XmlIntermediateCatchEvent
+XmlIntermediateThrowEvent
+XmlProcess
+XmlSequenceFlow
+XmlServiceTask
+XmlStartEvent
