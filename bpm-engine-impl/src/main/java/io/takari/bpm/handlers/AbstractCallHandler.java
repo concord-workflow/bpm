@@ -16,7 +16,7 @@ import io.takari.bpm.model.VariableMapping;
 import java.util.Set;
 
 /**
- * Common logic of (sub)process calling.
+ * Common logic of the (sub)process calling.
  */
 public abstract class AbstractCallHandler extends AbstractElementHandler {
 
@@ -30,10 +30,9 @@ public abstract class AbstractCallHandler extends AbstractElementHandler {
         
         ProcessDefinition sub = findCalledProcess(c);
 
-        // add the error handling command to stack
+        // add an error handling command to the stack
         s.push(new HandleRaisedErrorCommand(c));
 
-        // TODO refactor out
         Set<VariableMapping> inVariables = null;
         Set<VariableMapping> outVariables = null;
         
@@ -51,18 +50,18 @@ public abstract class AbstractCallHandler extends AbstractElementHandler {
         // set IN-parameters of the called process
         ExecutionContextHelper.copyVariables(getEngine().getExpressionManager(), parent, child, inVariables);
         
-        // make the child context our current, this will be reverted in merge
-        // command below
+        // make the child context as our current, this will be reverted in the
+        // merge command below
         s.setContext(child);
 
         // add the context merging command to the current stack. It will perform
-        // OUT-parametes handling later
+        // the OUT-parametes handling later
         s.push(makeMergeCommand(parent, child, outVariables));
 
         // get the ID of the called process. Depending on the call type
-        // ('sub-process' or 'call activity') it can be:
-        // - ID of process, which contains the element of calling process;
-        // - ID of external process from a separate process definition
+        // ('sub-process' or 'call activity') it could be:
+        // - ID of a process, which contains an element of the calling process;
+        // - ID of an external process from a separate process definition
         String id = getCalledProcessId(c, sub);
 
         // push the first command to the called process' stack
