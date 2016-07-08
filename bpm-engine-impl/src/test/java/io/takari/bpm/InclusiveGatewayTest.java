@@ -184,4 +184,56 @@ public class InclusiveGatewayTest extends AbstractEngineTest {
         verify(taskB, times(1)).execute(any(ExecutionContext.class));
         verify(taskC, times(1)).execute(any(ExecutionContext.class));
     }
+    
+    /**
+     * start --> gw1 --> t1 ---0-> gw2 --> end
+     *              \             /
+     *               \--> t2 ---->
+     *                \          /
+     *                 --> t3 -->
+     */
+    @Test
+    public void testPartiallyInactive() throws Exception {
+        String processId = "test";
+        deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "gw1"),
+                new InclusiveGateway("gw1"),
+
+                    new SequenceFlow("f2", "gw1", "t1"),
+                    new ServiceTask("t1"),
+                    new SequenceFlow("f3", "t1", "gw2"),
+
+                    new SequenceFlow("f4", "gw1", "t2", "${false}"),
+                    new ServiceTask("t2"),
+                    new SequenceFlow("f5", "t2", "gw2"),
+
+                    new SequenceFlow("f6", "gw1", "t3", "${false}"),
+                    new ServiceTask("t3"),
+                    new SequenceFlow("f7", "t3", "gw2"),
+
+                new InclusiveGateway("gw2"),
+                new SequenceFlow("f8", "gw2", "end"),
+                new EndEvent("end")
+        )));
+
+        // ---
+
+        String key = UUID.randomUUID().toString();
+        getEngine().start(key, processId, null);
+
+        // ---
+
+        assertActivations(key, processId,
+                "start",
+                "f1",
+                "gw1",
+                "f2",
+                "t1",
+                "f3",
+                "gw2",
+                "f8",
+                "end");
+        assertNoMoreActivations();
+    }
 }

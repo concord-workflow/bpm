@@ -1,11 +1,15 @@
 package io.takari.bpm;
 
 import com.google.common.collect.Lists;
+import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.commands.ProcessElementCommand;
+import io.takari.bpm.el.ExpressionManager;
 import io.takari.bpm.model.AbstractElement;
 import io.takari.bpm.model.SequenceFlow;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import org.slf4j.Logger;
@@ -31,10 +35,10 @@ public final class FlowUtils {
         IndexedProcessDefinitionProvider provider = engine.getProcessDefinitionProvider();
         IndexedProcessDefinition pd = provider.getById(processDefinitionId);
         List<SequenceFlow> flows = ProcessDefinitionUtils.findOutgoingFlows(pd, elementId);
-        
+
         followFlows(execution, processDefinitionId, elementId, groupId, exclusive, flows);
     }
-    
+
     public static void followFlows(DefaultExecution execution, ProcessElementCommand c, List<SequenceFlow> flows) {
         followFlows(execution, c.getProcessDefinitionId(), c.getElementId(), c.getGroupId(), c.isExclusive(), flows);
     }
@@ -46,22 +50,39 @@ public final class FlowUtils {
             execution.push(new ProcessElementCommand(processDefinitionId, next.getId(), groupId, exclusive));
         }
     }
-    
+
     public static void activateFilteredFlows(DefaultExecution s, IndexedProcessDefinition pd, String from, String ... filtered) throws ExecutionException {
         Collection<SequenceFlow> flows = ProcessDefinitionUtils.filterOutgoingFlows(pd, from, filtered);
         activateFlows(s, pd, flows);
     }
-    
+
     public static void activateFlows(DefaultExecution s, IndexedProcessDefinition pd, Collection<? extends AbstractElement> elements) throws ExecutionException {
         for (AbstractElement f : elements) {
             String gwId = ProcessDefinitionUtils.findNextGatewayId(pd, f.getId());
             if (gwId == null) {
                 return;
             }
-            
+
             log.debug("activateFlows ['{}', '{}'] -> activating '{}' via '{}'", s.getId(), pd.getId(), gwId, f.getId());
             s.inc(pd.getId(), gwId, 1);
         }
+    }
+
+    public static List<SequenceFlow> filterInactive(ExpressionManager em, ExecutionContext ctx, List<SequenceFlow> flows) {
+        List<SequenceFlow> result = new ArrayList<SequenceFlow>(flows);
+        
+        for (Iterator<SequenceFlow> i = result.iterator(); i.hasNext();) {
+            SequenceFlow f = i.next();
+            if (f.getExpression() != null) {
+                String expr = f.getExpression();
+                boolean b = em.eval(ctx, expr, Boolean.class);
+                if (!b) {
+                    i.remove();
+                }
+            }
+        }
+        
+        return result;
     }
 
     private FlowUtils() {

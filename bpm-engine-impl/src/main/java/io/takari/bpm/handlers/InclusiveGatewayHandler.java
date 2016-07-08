@@ -2,6 +2,7 @@ package io.takari.bpm.handlers;
 
 import io.takari.bpm.AbstractEngine;
 import io.takari.bpm.DefaultExecution;
+import io.takari.bpm.FlowUtils;
 import io.takari.bpm.IndexedProcessDefinition;
 import io.takari.bpm.ProcessDefinitionUtils;
 import io.takari.bpm.api.ExecutionException;
@@ -33,5 +34,10 @@ public class InclusiveGatewayHandler extends ParallelGatewayHandler {
         int count = inactive.size();
         log.debug("processInactive ['{}', '{}'] -> adding '{}' activations '{}' time(s)", s.getId(), c.getElementId(), gwId, count);
         s.inc(c.getProcessDefinitionId(), gwId, count);
+    }
+
+    @Override
+    protected List<SequenceFlow> filter(DefaultExecution s, ProcessElementCommand c, List<SequenceFlow> flows) {
+        return FlowUtils.filterInactive(getEngine().getExpressionManager(), s.getContext(), flows);
     }
 }

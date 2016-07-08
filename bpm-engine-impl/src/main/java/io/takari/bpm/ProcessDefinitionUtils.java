@@ -106,6 +106,11 @@ public final class ProcessDefinitionUtils {
         }
         return l.get(0);
     }
+    
+    public static SequenceFlow findAnyOutgoingFlow(IndexedProcessDefinition pd, String from) throws ExecutionException {
+        List<SequenceFlow> l = findOutgoingFlows(pd, from);
+        return l.get(0);
+    }
 
     /**
      * Finds all incoming flows for the specified element.
@@ -202,7 +207,7 @@ public final class ProcessDefinitionUtils {
     public static String findNextGatewayId(IndexedProcessDefinition pd, String from) throws ExecutionException {
         AbstractElement e = findElement(pd, from);
         if (!(e instanceof SequenceFlow)) {
-            e = findOutgoingFlow(pd, from);
+            e = findAnyOutgoingFlow(pd, from);
         }
         
         while (e != null) {
