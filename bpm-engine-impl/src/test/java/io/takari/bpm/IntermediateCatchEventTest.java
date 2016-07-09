@@ -13,7 +13,6 @@ import io.takari.bpm.model.StartEvent;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.UUID;
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -115,6 +114,8 @@ public class IntermediateCatchEventTest extends AbstractEngineTest {
     }
     
     public static class TestBean implements Serializable {
+    	
+    	private static final long serialVersionUID = 1L;
         
         private final String duration;
 

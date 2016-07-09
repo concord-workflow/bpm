@@ -12,6 +12,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class DefaultExecution implements Execution, Serializable {
+	
+	private static final long serialVersionUID = 1L;
 
     private final UUID id;
     private final String processBusinessKey;
@@ -108,6 +110,8 @@ public class DefaultExecution implements Execution, Serializable {
     }
     
     private static final class ActivationKey implements Serializable {
+    	
+    	private static final long serialVersionUID = 1L;
 
         private final String processDefinitionId;
         private final String elementId;

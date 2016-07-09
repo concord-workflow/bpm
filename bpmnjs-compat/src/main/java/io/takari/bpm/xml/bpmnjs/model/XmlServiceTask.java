@@ -5,6 +5,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(namespace = Constants.MODEL_NS, name = "serviceTask")
 public class XmlServiceTask extends AbstractXmlElement {
+	
+	private static final long serialVersionUID = 1L;
     
     private String expression;
     private String delegateExpression;

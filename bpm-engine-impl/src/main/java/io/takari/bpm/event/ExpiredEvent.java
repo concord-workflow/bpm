@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.UUID;
 
 public class ExpiredEvent implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
 
     private final UUID id;
     private final Date expiredAt;

@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Set;
 
 public class ExecutionContextImpl implements ExecutionContext {
+	
+	private static final long serialVersionUID = 1L;
     
     private final ExecutionContext parent;
     private final Map<String, Object> variables = Collections.synchronizedMap(new HashMap<String, Object>());

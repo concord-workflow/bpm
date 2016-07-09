@@ -3,6 +3,8 @@ package io.takari.bpm.model;
 import java.util.Set;
 
 public class CallActivity extends AbstractElement {
+	
+	private static final long serialVersionUID = 1L;
 
     private String name;
     private final String calledElement;

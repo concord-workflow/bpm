@@ -6,6 +6,8 @@ import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.persistence.PersistenceManager;
 
 public class PersistExecutionCommand implements ExecutionCommand {
+	
+	private static final long serialVersionUID = 1L;
 
     @Override
     public DefaultExecution exec(AbstractEngine engine, DefaultExecution execution) throws ExecutionException {

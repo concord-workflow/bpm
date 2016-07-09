@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.UUID;
 
 public class InterceptorStartEvent implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
     
     private final String processBusinessKey;
     private final String processDefinitionId;

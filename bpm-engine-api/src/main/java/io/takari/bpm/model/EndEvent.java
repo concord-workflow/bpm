@@ -1,6 +1,8 @@
 package io.takari.bpm.model;
 
 public class EndEvent extends AbstractElement {
+	
+	private static final long serialVersionUID = 1L;
 
     private final String errorRef;
 

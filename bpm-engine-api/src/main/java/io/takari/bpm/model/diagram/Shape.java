@@ -3,6 +3,8 @@ package io.takari.bpm.model.diagram;
 import java.io.Serializable;
 
 public class Shape implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
 
     private final String id;
     private final String elementId;

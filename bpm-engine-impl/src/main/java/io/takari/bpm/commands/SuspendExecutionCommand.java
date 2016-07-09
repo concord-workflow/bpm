@@ -9,6 +9,8 @@ import io.takari.bpm.api.ExecutionException;
  * interrupts it execution.
  */
 public class SuspendExecutionCommand implements ExecutionCommand {
+	
+	private static final long serialVersionUID = 1L;
 
     @Override
     public DefaultExecution exec(AbstractEngine e, DefaultExecution s) throws ExecutionException {

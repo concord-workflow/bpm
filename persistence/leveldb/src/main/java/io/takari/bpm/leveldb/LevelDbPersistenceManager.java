@@ -21,11 +21,9 @@ public class LevelDbPersistenceManager implements PersistenceManager {
     private static final Logger log = LoggerFactory.getLogger(LevelDbPersistenceManager.class);
 
     private final LevelDb db;
-    private final Serializer serializer;
 
-    public LevelDbPersistenceManager(Configuration cfg, DBFactory dbFactory, Serializer serializer) {
+    public LevelDbPersistenceManager(Configuration cfg, DBFactory dbFactory) {
         this.db = new LevelDb(dbFactory, cfg.getExecutionPath(), cfg.isSyncWrite());
-        this.serializer = serializer;
     }
 
     public void init() {

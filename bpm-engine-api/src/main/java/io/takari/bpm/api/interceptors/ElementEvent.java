@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.UUID;
 
 public class ElementEvent implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
 
     private final String processBusinessKey;
     private final String processDefinitionId;

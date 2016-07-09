@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 
 public class IndexedProcessDefinition extends ProcessDefinition {
+	
+	private static final long serialVersionUID = 1L;
 
     private final Map<String, List<SequenceFlow>> outgoingFlows;
 

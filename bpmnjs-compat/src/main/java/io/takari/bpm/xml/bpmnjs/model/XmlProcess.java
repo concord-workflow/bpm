@@ -9,6 +9,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(namespace = Constants.MODEL_NS, name = "process")
 public class XmlProcess implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
     
     private String id;  
     private List<AbstractXmlElement> elements = new ArrayList<>();

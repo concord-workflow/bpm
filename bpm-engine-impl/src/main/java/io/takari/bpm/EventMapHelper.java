@@ -96,6 +96,8 @@ public class EventMapHelper {
     }
 
     public static final class EventRecord implements Serializable {
+    	
+    	private static final long serialVersionUID = 1L;
 
         private final UUID groupId;
         private final List<ExecutionCommand> commands;

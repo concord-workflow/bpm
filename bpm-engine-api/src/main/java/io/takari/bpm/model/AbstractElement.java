@@ -4,8 +4,10 @@ import java.io.Serializable;
 import java.util.Objects;
 
 public abstract class AbstractElement implements Serializable {
-
-    private final String id;
+	
+	private static final long serialVersionUID = 1L;
+	
+	private final String id;
 
     public AbstractElement(String id) {
         this.id = id;

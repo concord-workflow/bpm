@@ -1,6 +1,8 @@
 package io.takari.bpm.model;
 
 public class SequenceFlow extends AbstractElement {
+	
+	private static final long serialVersionUID = 1L;
 
     private String name;
     private final String from;
@@ -9,11 +11,11 @@ public class SequenceFlow extends AbstractElement {
     private final ExecutionListener[] listeners;
 
     public SequenceFlow(String id, String from, String to) {
-        this(id, from, to, null, null);
+        this(id, from, to, null, (ExecutionListener[]) null);
     }
     
     public SequenceFlow(String id, String from, String to, String expression) {
-        this(id, from, to, expression, null);
+        this(id, from, to, expression, (ExecutionListener[]) null);
     }
     
     public SequenceFlow(String id, String from, String to, ExecutionListener ... listeners) {

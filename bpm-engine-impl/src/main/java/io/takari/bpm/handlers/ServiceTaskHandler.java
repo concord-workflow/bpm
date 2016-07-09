@@ -156,6 +156,8 @@ public class ServiceTaskHandler extends AbstractElementHandler {
     }
 
     private static class TimerDefinition implements Serializable {
+    	
+    	private static final long serialVersionUID = 1L;
 
         private final String timerId;
         private final long duration;

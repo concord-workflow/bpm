@@ -96,7 +96,6 @@ public abstract class AbstractEngineTest {
     }
 
     protected void assertNoMoreActivations() {
-        StringBuilder b = new StringBuilder();
         int s = 0;
         for (List<String> l : activations.values()) {
             s += l.size();

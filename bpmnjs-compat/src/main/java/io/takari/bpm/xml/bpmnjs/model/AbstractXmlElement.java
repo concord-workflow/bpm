@@ -18,7 +18,9 @@ import javax.xml.bind.annotation.XmlType;
     XmlStartEvent.class,
 })
 public class AbstractXmlElement implements Serializable {
-    
+	
+	private static final long serialVersionUID = 1L;
+	
     private String id;
 
     @XmlAttribute

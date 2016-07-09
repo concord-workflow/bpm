@@ -8,7 +8,6 @@ import io.takari.bpm.event.EventPersistenceManager;
 import io.takari.bpm.event.EventPersistenceManagerImpl;
 import io.takari.bpm.event.InMemEventStorage;
 import io.takari.bpm.leveldb.Configuration;
-import io.takari.bpm.leveldb.KryoSerializer;
 import io.takari.bpm.leveldb.LevelDbPersistenceManager;
 import io.takari.bpm.lock.StripedLockManagerImpl;
 import io.takari.bpm.model.ProcessDefinition;
@@ -57,7 +56,7 @@ public class EngineRule implements TestRule {
             Configuration cfg = new Configuration();
             cfg.setExecutionPath("/tmp/bpm/" + System.currentTimeMillis());
             DBFactory f = new Iq80DBFactory();
-            LevelDbPersistenceManager levelDbPersistenceManager = new LevelDbPersistenceManager(cfg, f, new KryoSerializer());
+            LevelDbPersistenceManager levelDbPersistenceManager = new LevelDbPersistenceManager(cfg, f	);
             levelDbPersistenceManager.init();
             
             engine = new EngineBuilder()

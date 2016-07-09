@@ -47,6 +47,7 @@ public class KryoSerializerTest {
         assertEquals(e.getId(), ee.getId());
         assertEquals(e.getBusinessKey(), ee.getBusinessKey());
         assertEquals(e.size(), ee.size());
+        assertEquals("sid", ((Service)ee.getContext().getVariable("v2")).sid);
     }
 
     private static class Service {
@@ -54,10 +55,6 @@ public class KryoSerializerTest {
 
         public Service(String sid) {
             this.sid = sid;
-        }
-
-        public String getSid() {
-            return sid;
         }
     }
 }

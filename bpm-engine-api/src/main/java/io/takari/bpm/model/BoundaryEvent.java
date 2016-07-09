@@ -1,6 +1,8 @@
 package io.takari.bpm.model;
 
 public class BoundaryEvent extends AbstractElement {
+	
+	private static final long serialVersionUID = 1L;
 
     private final String attachedToRef;
     private final String errorRef;

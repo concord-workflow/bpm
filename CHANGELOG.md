@@ -5,6 +5,9 @@
 - `bpmnjs-compat` module: a [bpmn.io](http://bpmn.io) compactible xml format parser (only a partial support for the current set of elements).
 - `InclusiveGateway` now supports expressions for outgoing flows. Some of outgoing `SequenceFlow` can be "inactive" (have their expressions evaluated to `false`).
 
+### Breaking
+- `io.takari.bpm.leveldb.LevelDbPersistenceManager` -- a serialized removed from its constructor. It wasn't used in any way, just a relic of the past. 
+
 ## [0.7.1] - 2016-07-07
 ### Changed
 - a bug was preventing standalone intermediate catch events from working.

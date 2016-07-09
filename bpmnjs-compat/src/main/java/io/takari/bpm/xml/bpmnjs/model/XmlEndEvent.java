@@ -6,6 +6,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(namespace = Constants.MODEL_NS, name = "endEvent")
 public class XmlEndEvent extends AbstractXmlElement {
+	
+	private static final long serialVersionUID = 1L;
     
     private XmlErrorEventDefinition errorEventDefinition;
 
@@ -19,6 +21,8 @@ public class XmlEndEvent extends AbstractXmlElement {
     
     @XmlRootElement(namespace = Constants.MODEL_NS, name = "errorEventDefinition")
     public static class XmlErrorEventDefinition implements Serializable {
+    	
+    	private static final long serialVersionUID = 1L;
         
         private String errorRef;
 

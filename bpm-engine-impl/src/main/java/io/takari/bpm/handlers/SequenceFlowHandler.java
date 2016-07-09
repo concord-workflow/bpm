@@ -58,13 +58,20 @@ public class SequenceFlowHandler extends AbstractElementHandler {
 
             try {
                 switch (type) {
-                    case SIMPLE:
+                    case SIMPLE: {
                         em.eval(ctx, expr, Object.class);
                         break;
+                    }
 
-                    case DELEGATE:
+                    case DELEGATE: {
                         ExecutionListener d = em.eval(ctx, expr, ExecutionListener.class);
                         d.notify(ctx);
+                        break;
+                    }
+                    
+                    case NONE: {
+                    	// NOOP
+                    }
                 }
             } catch (Exception e) {
                 log.error("processListeners ['{}'] -> error", f.getId(), e);

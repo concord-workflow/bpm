@@ -1,6 +1,8 @@
 package io.takari.bpm.model;
 
 public class ServiceTask extends AbstractElement {
+	
+	private static final long serialVersionUID = 1L;
     
     private String name;
     private final String expression;

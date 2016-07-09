@@ -5,6 +5,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(namespace = Constants.MODEL_NS, name = "definitions")
 public class XmlDefinitions implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
     
     private XmlProcess process;
 
