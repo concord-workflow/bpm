@@ -1,13 +1,16 @@
 package io.takari.bpm.event;
 
-import io.takari.bpm.api.NoEventFoundException;
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import static java.util.concurrent.TimeUnit.SECONDS;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.takari.bpm.api.NoEventFoundException;
 
 public final class EventScheduler {
 

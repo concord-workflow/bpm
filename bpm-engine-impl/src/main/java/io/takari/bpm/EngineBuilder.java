@@ -1,5 +1,8 @@
 package io.takari.bpm;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import io.takari.bpm.api.Engine;
 import io.takari.bpm.el.DefaultExpressionManager;
 import io.takari.bpm.el.ExpressionManager;
@@ -7,24 +10,28 @@ import io.takari.bpm.event.EventPersistenceManager;
 import io.takari.bpm.event.EventPersistenceManagerImpl;
 import io.takari.bpm.event.EventStorage;
 import io.takari.bpm.event.InMemEventStorage;
-import io.takari.bpm.handlers.DelegatingElementHandler;
-import io.takari.bpm.handlers.ElementHandler;
 import io.takari.bpm.lock.LockManager;
 import io.takari.bpm.lock.StripedLockManagerImpl;
-import io.takari.bpm.persistence.DummyPersistenceManager;
+import io.takari.bpm.persistence.InMemPersistenceManager;
 import io.takari.bpm.persistence.PersistenceManager;
+import io.takari.bpm.planner.DefaultPlanner;
+import io.takari.bpm.planner.Planner;
 import io.takari.bpm.task.ServiceTaskRegistry;
 
 public final class EngineBuilder {
 
     private static final int DEFAULT_CONCURRENCY_LEVEL = 64;
     
-    private ProcessDefinitionProvider definitionProvider;
     private EventPersistenceManager eventManager;
-    private PersistenceManager persistenceManager;
-    private ServiceTaskRegistry taskRegistry;
+    private ExecutionInterceptorHolder interceptors;
+    private Executor executor;
+    private ExecutorService threadPool;
     private ExpressionManager expressionManager;
     private LockManager lockManager;
+    private PersistenceManager persistenceManager;
+    private Planner planner;
+    private ProcessDefinitionProvider definitionProvider;
+    private ServiceTaskRegistry taskRegistry;
     private UuidGenerator uuidGenerator;
     
     public EngineBuilder withDefinitionProvider(ProcessDefinitionProvider definitionProvider) {
@@ -64,7 +71,7 @@ public final class EngineBuilder {
         }
         
         if (persistenceManager == null) {
-            persistenceManager = new DummyPersistenceManager();
+            persistenceManager = new InMemPersistenceManager();
         }
         
         if (taskRegistry == null) {
@@ -84,52 +91,64 @@ public final class EngineBuilder {
             uuidGenerator = new RandomUuidGenerator();
         }
         
+        if (planner == null) {
+            planner = new DefaultPlanner();
+        }
+
+        if (interceptors == null) {
+            interceptors = new ExecutionInterceptorHolder();
+        }
+
+        if (threadPool == null) {
+            threadPool = Executors.newCachedThreadPool();
+        }
+
+        IndexedProcessDefinitionProvider indexedDefinitionProvider = new IndexedProcessDefinitionProvider(definitionProvider);
+
+        if (executor == null) {
+            executor = new DefaultExecutor(expressionManager, threadPool, interceptors, indexedDefinitionProvider, uuidGenerator,
+                    eventManager, persistenceManager);
+        }
+
         return new EngineImpl(new IndexedProcessDefinitionProvider(definitionProvider),
-                null, eventManager, persistenceManager, taskRegistry,
-                expressionManager, lockManager, uuidGenerator);
+                eventManager, persistenceManager, lockManager, uuidGenerator, executor, planner, interceptors);
     }
     
     public static final class EngineImpl extends AbstractEngine {
 
         private final IndexedProcessDefinitionProvider definitionProvider;
-        private final ElementHandler elementHandler;
         private final EventPersistenceManager eventManager;
         private final PersistenceManager persistenceManager;
-        private final ServiceTaskRegistry taskRegistry;
-        private final ExpressionManager expressionManager;
         private final LockManager lockManager;
         private final UuidGenerator uuidGenerator;
+        private final Executor executor;
+        private final Planner planner;
+        private final ExecutionInterceptorHolder interceptors;
 
         public EngineImpl(
                 IndexedProcessDefinitionProvider definitionProvider,
-                ElementHandler elementHandler,
                 EventPersistenceManager eventManager,
                 PersistenceManager persistenceManager,
-                ServiceTaskRegistry taskRegistry,
-                ExpressionManager expressionManager,
                 LockManager lockManager,
-                UuidGenerator uuidGenerator) {
-            
-            // TODO cyclic dependency
-            this.elementHandler = elementHandler == null ? new DelegatingElementHandler(this) : elementHandler;
+                UuidGenerator uuidGenerator,
+                Executor executor,
+                Planner planner,
+                ExecutionInterceptorHolder interceptors) {
             
             this.definitionProvider = definitionProvider;
             this.eventManager = eventManager;
             this.persistenceManager = persistenceManager;
-            this.taskRegistry = taskRegistry;
-            this.expressionManager = expressionManager;
             this.lockManager = lockManager;
             this.uuidGenerator = uuidGenerator;
+
+            this.executor = executor;
+            this.planner = planner;
+            this.interceptors = interceptors;
         }
         
         @Override
         public IndexedProcessDefinitionProvider getProcessDefinitionProvider() {
             return definitionProvider;
-        }
-
-        @Override
-        public ElementHandler getElementHandler() {
-            return elementHandler;
         }
 
         @Override
@@ -143,16 +162,6 @@ public final class EngineBuilder {
         }
 
         @Override
-        public ServiceTaskRegistry getServiceTaskRegistry() {
-            return taskRegistry;
-        }
-
-        @Override
-        public ExpressionManager getExpressionManager() {
-            return expressionManager;
-        }
-
-        @Override
         public LockManager getLockManager() {
             return lockManager;
         }
@@ -160,6 +169,21 @@ public final class EngineBuilder {
         @Override
         public UuidGenerator getUuidGenerator() {
             return uuidGenerator;
+        }
+
+        @Override
+        protected ExecutionInterceptorHolder getInterceptorHolder() {
+            return interceptors;
+        }
+
+        @Override
+        protected Planner getPlanner() {
+            return planner;
+        }
+
+        @Override
+        protected Executor getExecutor() {
+            return executor;
         }
     }
 }

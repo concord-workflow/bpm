@@ -186,7 +186,7 @@ public class InclusiveGatewayTest extends AbstractEngineTest {
     }
     
     /**
-     * start --> gw1 --> t1 ---0-> gw2 --> end
+     * start --> gw1 --> t1 ------> gw2 --> end
      *              \             /
      *               \--> t2 ---->
      *                \          /

@@ -134,7 +134,7 @@ public class SubProcessTest extends AbstractEngineTest {
 
                 new SequenceFlow("f6", "sub", "t2"),
                 new ServiceTask("t2", ExpressionType.DELEGATE, "${t2}"),
-                new SequenceFlow("f6", "t2", "end"),
+                new SequenceFlow("f7", "t2", "end"),
                 new EndEvent("end")
         )));
 

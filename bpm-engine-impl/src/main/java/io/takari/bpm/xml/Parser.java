@@ -1,7 +1,8 @@
 package io.takari.bpm.xml;
 
-import io.takari.bpm.model.ProcessDefinition;
 import java.io.InputStream;
+
+import io.takari.bpm.model.ProcessDefinition;
 
 public interface Parser {
 

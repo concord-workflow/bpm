@@ -17,7 +17,11 @@
             <artifactId>bpm-engine-api</artifactId>
             <version>${project.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.organicdesign</groupId>
+            <artifactId>UncleJim</artifactId>
+            <version>1.0.3</version>
+        </dependency>
         <dependency>
             <groupId>de.odysseus.juel</groupId>
             <artifactId>juel-api</artifactId>

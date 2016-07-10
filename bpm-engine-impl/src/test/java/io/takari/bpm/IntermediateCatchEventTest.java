@@ -10,6 +10,7 @@ import io.takari.bpm.model.ProcessDefinition;
 import io.takari.bpm.model.SequenceFlow;
 import io.takari.bpm.model.ServiceTask;
 import io.takari.bpm.model.StartEvent;
+
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.Arrays;

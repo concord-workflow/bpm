@@ -1,10 +1,5 @@
 package io.takari.bpm;
 
-import io.takari.bpm.event.Event;
-import io.takari.bpm.event.EventDispatcher;
-import io.takari.bpm.event.EventPersistenceManager;
-import io.takari.bpm.event.EventScheduler;
-import io.takari.bpm.event.ExpiredEvent;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.UUID;
@@ -13,6 +8,12 @@ import org.mockito.ArgumentCaptor;
 import static org.mockito.Mockito.*;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+
+import io.takari.bpm.event.Event;
+import io.takari.bpm.event.EventDispatcher;
+import io.takari.bpm.event.EventPersistenceManager;
+import io.takari.bpm.event.EventScheduler;
+import io.takari.bpm.event.ExpiredEvent;
 
 public class EventSchedulerTest {
 

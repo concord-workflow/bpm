@@ -1,5 +1,10 @@
 package io.takari.bpm;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.model.AbstractElement;
 import io.takari.bpm.model.BoundaryEvent;
@@ -12,10 +17,6 @@ import io.takari.bpm.model.ProcessDefinition;
 import io.takari.bpm.model.SequenceFlow;
 import io.takari.bpm.model.StartEvent;
 import io.takari.bpm.model.SubProcess;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
 
 public final class ProcessDefinitionUtils {
 
@@ -224,6 +225,23 @@ public final class ProcessDefinitionUtils {
         }
         
         throw new ExecutionException("Invalid process definition '%s': can't find next parallel gateway after '%s'", pd.getId(), from);
+    }
+
+    public static List<String> toIds(List<? extends AbstractElement> elements) {
+        List<String> result = new ArrayList<>(elements.size());
+        for (AbstractElement e : elements) {
+            result.add(e.getId());
+        }
+        return result;
+    }
+
+    public static List<SequenceFlow> findFlows(ProcessDefinition pd, List<String> ids) throws ExecutionException {
+        List<SequenceFlow> result = new ArrayList<>();
+        for (String id : ids) {
+            SequenceFlow f = (SequenceFlow) findElement(pd, id);
+            result.add(f);
+        }
+        return result;
     }
 
     private ProcessDefinitionUtils() {

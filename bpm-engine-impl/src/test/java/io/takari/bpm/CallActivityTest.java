@@ -23,6 +23,8 @@ import java.util.Set;
 import java.util.UUID;
 import static org.junit.Assert.*;
 import org.junit.Test;
+
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 public class CallActivityTest extends AbstractEngineTest {
@@ -285,13 +287,13 @@ public class CallActivityTest extends AbstractEngineTest {
     }
     
     /**
-     * start --> call                                        -----------------------> t1 --> end
-     *                \                                     /                      /
-     *                 start --> gw1 --> ev1 --> gw2 --> end                      /
-     *                              \                                            /
-     *                               call                                       /
-     *                                   \                                     /
-     *                                    start --> gw1 --> ev2 --> gw2 --> end
+     * start --> call                                               --------------> t1 --> end
+     *                \                                            /                      /
+     *                 start --> gw1 --> ev1 --> gw2 --> t2 --> end                      /
+     *                              \                                                   /
+     *                               call                                              /
+     *                                   \                                            /
+     *                                    start --> gw1 --> ev2 --> gw2 --> t3 --> end
      *                                                 \          /
      *                                                  --> ev3 --
      */
@@ -299,6 +301,10 @@ public class CallActivityTest extends AbstractEngineTest {
     public void testDeeplyNested() throws Exception {
         JavaDelegate t1 = mock(JavaDelegate.class);
         getServiceTaskRegistry().register("t1", t1);
+        JavaDelegate t2 = mock(JavaDelegate.class);
+        getServiceTaskRegistry().register("t2", t2);
+        JavaDelegate t3 = mock(JavaDelegate.class);
+        getServiceTaskRegistry().register("t3", t3);
         
         String outerProcId = "outer";
         String nestedProcId = "nested";
@@ -310,8 +316,8 @@ public class CallActivityTest extends AbstractEngineTest {
                 new CallActivity("call", nestedProcId),
                 new SequenceFlow("f2", "call", "t1"),
                 new ServiceTask("t1", ExpressionType.DELEGATE, "${t1}"),
-                new SequenceFlow("f3", "t1", "end"),
-                new EndEvent("end"))));
+                new SequenceFlow("f3", "t1", "endOuter"),
+                new EndEvent("endOuter"))));
 
         deploy(new ProcessDefinition(nestedProcId, Arrays.asList(
                 new StartEvent("start"),
@@ -326,8 +332,10 @@ public class CallActivityTest extends AbstractEngineTest {
                     new SequenceFlow("f5", "call", "gw2"),
 
                 new InclusiveGateway("gw2"),
-                new SequenceFlow("f6", "gw2", "end"),
-                new EndEvent("end"))));
+                new SequenceFlow("f6", "gw2", "t2"),
+                new ServiceTask("t2", ExpressionType.DELEGATE, "${t2}"),
+                new SequenceFlow("f7", "t2", "endNested"),
+                new EndEvent("endNested"))));
 
         deploy(new ProcessDefinition(deeplyNestedProcId, Arrays.asList(
                 new StartEvent("start"),
@@ -342,19 +350,15 @@ public class CallActivityTest extends AbstractEngineTest {
                     new SequenceFlow("f5", "ev3", "gw2"),
 
                 new InclusiveGateway("gw2"),
-                new SequenceFlow("f6", "gw2", "end"),
-                new EndEvent("end"))));
+                new SequenceFlow("f6", "gw2", "t3"),
+                new ServiceTask("t3", ExpressionType.DELEGATE, "${t3}"),
+                new SequenceFlow("f7", "t3", "endDeep"),
+                new EndEvent("endDeep"))));
 
         // ---
 
         String key = UUID.randomUUID().toString();
         getEngine().start(key, outerProcId, null);
-
-        getEngine().resume(key, "ev1", null);
-        getEngine().resume(key, "ev2", null);
-        getEngine().resume(key, "ev3", null);
-
-        // ---
 
         assertActivations(key, outerProcId,
                 "start",
@@ -377,30 +381,62 @@ public class CallActivityTest extends AbstractEngineTest {
                 "f2",
                 "ev2",
                 "f4",
-                "ev3",
-                "f3",
-                "gw2",
-                "f5",
-                "gw2",
-                "f6",
-                "end");
+                "ev3");
+
+        assertNoMoreActivations();
+
+        // ---
+
+        getEngine().resume(key, "ev1", null);
 
         assertActivations(key, nestedProcId,
                 "f3",
-                "gw2",
+                "gw2");
+
+        assertNoMoreActivations();
+
+        // ---
+
+        getEngine().resume(key, "ev2", null);
+
+        assertActivations(key, deeplyNestedProcId,
+                "f3",
+                "gw2");
+
+        assertNoMoreActivations();
+
+        // ---
+
+        getEngine().resume(key, "ev3", null);
+
+        assertActivations(key, deeplyNestedProcId,
                 "f5",
                 "gw2",
                 "f6",
-                "end");
+                "t3",
+                "f7",
+                "endDeep");
+
+        assertActivations(key, nestedProcId,
+                "f5",
+                "gw2",
+                "f6",
+                "t2",
+                "f7",
+                "endNested");
 
         assertActivations(key, outerProcId,
                 "f2",
                 "t1",
                 "f3",
-                "end");
+                "endOuter");
 
         assertNoMoreActivations();
 
+        // ---
+
         verify(t1, times(1)).execute(any(ExecutionContext.class));
+        verify(t2, times(1)).execute(any(ExecutionContext.class));
+        verify(t3, times(1)).execute(any(ExecutionContext.class));
     }
 }
