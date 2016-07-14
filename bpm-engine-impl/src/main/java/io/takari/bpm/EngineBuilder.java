@@ -20,7 +20,6 @@ public final class EngineBuilder {
     private static final int DEFAULT_CONCURRENCY_LEVEL = 64;
     
     private ProcessDefinitionProvider definitionProvider;
-    private ElementHandler elementHandler;
     private EventPersistenceManager eventManager;
     private PersistenceManager persistenceManager;
     private ServiceTaskRegistry taskRegistry;
@@ -86,7 +85,7 @@ public final class EngineBuilder {
         }
         
         return new EngineImpl(new IndexedProcessDefinitionProvider(definitionProvider),
-                elementHandler, eventManager, persistenceManager, taskRegistry,
+                null, eventManager, persistenceManager, taskRegistry,
                 expressionManager, lockManager, uuidGenerator);
     }
     
