@@ -26,7 +26,7 @@ public class EventSchedulerTest {
             @Override
             public Event answer(InvocationOnMock invocation) throws Throwable {
                 UUID id = (UUID)invocation.getArguments()[0];
-                return new Event(id, null, null, null, null, true, null);
+                return new Event(id, null, null, null, null, null, true, null);
             }
         });
         

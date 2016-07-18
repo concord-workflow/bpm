@@ -8,6 +8,7 @@ import io.takari.bpm.model.CallActivity;
 import io.takari.bpm.model.EndEvent;
 import io.takari.bpm.model.EventBasedGateway;
 import io.takari.bpm.model.ExpressionType;
+import io.takari.bpm.model.InclusiveGateway;
 import io.takari.bpm.model.IntermediateCatchEvent;
 import io.takari.bpm.model.ProcessDefinition;
 import io.takari.bpm.model.SequenceFlow;
@@ -281,5 +282,125 @@ public class CallActivityTest extends AbstractEngineTest {
                 "end");
 
         assertNoMoreActivations();
+    }
+    
+    /**
+     * start --> call                                        -----------------------> t1 --> end
+     *                \                                     /                      /
+     *                 start --> gw1 --> ev1 --> gw2 --> end                      /
+     *                              \                                            /
+     *                               call                                       /
+     *                                   \                                     /
+     *                                    start --> gw1 --> ev2 --> gw2 --> end
+     *                                                 \          /
+     *                                                  --> ev3 --
+     */
+    @Test
+    public void testDeeplyNested() throws Exception {
+        JavaDelegate t1 = mock(JavaDelegate.class);
+        getServiceTaskRegistry().register("t1", t1);
+        
+        String outerProcId = "outer";
+        String nestedProcId = "nested";
+        String deeplyNestedProcId = "deep";
+
+        deploy(new ProcessDefinition(outerProcId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "call"),
+                new CallActivity("call", nestedProcId),
+                new SequenceFlow("f2", "call", "t1"),
+                new ServiceTask("t1", ExpressionType.DELEGATE, "${t1}"),
+                new SequenceFlow("f3", "t1", "end"),
+                new EndEvent("end"))));
+
+        deploy(new ProcessDefinition(nestedProcId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "gw1"),
+                new InclusiveGateway("gw1"),
+                    new SequenceFlow("f2", "gw1", "ev1"),
+                    new IntermediateCatchEvent("ev1", "ev1"),
+                    new SequenceFlow("f3", "ev1", "gw2"),
+
+                    new SequenceFlow("f4", "gw1", "call"),
+                    new CallActivity("call", deeplyNestedProcId),
+                    new SequenceFlow("f5", "call", "gw2"),
+
+                new InclusiveGateway("gw2"),
+                new SequenceFlow("f6", "gw2", "end"),
+                new EndEvent("end"))));
+
+        deploy(new ProcessDefinition(deeplyNestedProcId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "gw1"),
+                new InclusiveGateway("gw1"),
+                    new SequenceFlow("f2", "gw1", "ev2"),
+                    new IntermediateCatchEvent("ev2", "ev2"),
+                    new SequenceFlow("f3", "ev2", "gw2"),
+
+                    new SequenceFlow("f4", "gw1", "ev3"),
+                    new IntermediateCatchEvent("ev3", "ev3"),
+                    new SequenceFlow("f5", "ev3", "gw2"),
+
+                new InclusiveGateway("gw2"),
+                new SequenceFlow("f6", "gw2", "end"),
+                new EndEvent("end"))));
+
+        // ---
+
+        String key = UUID.randomUUID().toString();
+        getEngine().start(key, outerProcId, null);
+
+        getEngine().resume(key, "ev1", null);
+        getEngine().resume(key, "ev2", null);
+        getEngine().resume(key, "ev3", null);
+
+        // ---
+
+        assertActivations(key, outerProcId,
+                "start",
+                "f1",
+                "call");
+
+        assertActivations(key, nestedProcId,
+                "start",
+                "f1",
+                "gw1",
+                "f2",
+                "ev1",
+                "f4",
+                "call");
+
+        assertActivations(key, deeplyNestedProcId,
+                "start",
+                "f1",
+                "gw1",
+                "f2",
+                "ev2",
+                "f4",
+                "ev3",
+                "f3",
+                "gw2",
+                "f5",
+                "gw2",
+                "f6",
+                "end");
+
+        assertActivations(key, nestedProcId,
+                "f3",
+                "gw2",
+                "f5",
+                "gw2",
+                "f6",
+                "end");
+
+        assertActivations(key, outerProcId,
+                "f2",
+                "t1",
+                "f3",
+                "end");
+
+        assertNoMoreActivations();
+
+        verify(t1, times(1)).execute(any(ExecutionContext.class));
     }
 }

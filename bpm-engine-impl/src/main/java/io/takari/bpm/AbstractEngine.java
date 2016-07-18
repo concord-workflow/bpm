@@ -181,9 +181,13 @@ public abstract class AbstractEngine implements Engine {
         // process event-to-command mappings (e.g. add next command of the flow
         // to the stack)
         if (!EventMapHelper.isEmpty(s)) {
-            EventMapHelper.pushCommands(s, e.getId());
+            EventMapHelper.pushCommands(s, e.getDefinitionId(), e.getId());
             if (e.isExclusive()) {
-                EventMapHelper.clearGroup(s, e.getGroupId());
+                // if the event is exclusive for its group, we need to remove the whole group
+                // exlusive events usualy declared by an event based gateway
+                EventMapHelper.clearGroup(s, e.getDefinitionId(), e.getGroupId());
+            } else {
+                EventMapHelper.remove(s, e.getDefinitionId(), e.getId());
             }
         } else if (s.isDone()) {
             throw new ExecutionException("No event mapping found in process '%s' or no commands in execution", eid);

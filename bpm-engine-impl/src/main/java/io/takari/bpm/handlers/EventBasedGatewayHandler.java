@@ -21,7 +21,7 @@ public class EventBasedGatewayHandler extends AbstractElementHandler {
         // add the process suspension command to the stack. It is expected that
         // it will be called when all outgoing sequence flows of this gateway
         // is done.
-        s.push(new ProcessEventMappingCommand());
+        s.push(new ProcessEventMappingCommand(c.getProcessDefinitionId()));
 
         UUID groupId = getEngine().getUuidGenerator().generate();
 

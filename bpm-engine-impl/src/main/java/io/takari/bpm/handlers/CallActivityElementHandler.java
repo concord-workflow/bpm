@@ -2,6 +2,7 @@ package io.takari.bpm.handlers;
 
 import io.takari.bpm.AbstractEngine;
 import io.takari.bpm.DefaultExecution;
+import io.takari.bpm.EventMapHelper;
 import io.takari.bpm.ExecutionContextImpl;
 import io.takari.bpm.IndexedProcessDefinitionProvider;
 import io.takari.bpm.ProcessDefinitionUtils;
@@ -12,6 +13,7 @@ import io.takari.bpm.commands.ProcessElementCommand;
 import io.takari.bpm.model.CallActivity;
 import io.takari.bpm.model.ProcessDefinition;
 import io.takari.bpm.model.VariableMapping;
+import java.util.HashSet;
 import java.util.Set;
 
 public class CallActivityElementHandler extends AbstractCallHandler {
@@ -36,11 +38,23 @@ public class CallActivityElementHandler extends AbstractCallHandler {
 
     @Override
     protected MergeExecutionContextCommand makeMergeCommand(ExecutionContext parent, ExecutionContext child, Set<VariableMapping> outVariables) {
-        return new MergeExecutionContextCommand(parent, outVariables);
+        // we need to pass an updated events map to the parent process (from the
+        // callee back to the caller)
+        Set<VariableMapping> out = new HashSet<>();
+        if (outVariables != null) {
+            out.addAll(outVariables);
+        }
+        EventMapHelper.addOutMapping(out);
+
+        return new MergeExecutionContextCommand(parent, out);
     }
 
     @Override
     protected ExecutionContext makeChildContext(DefaultExecution s) {
-        return new ExecutionContextImpl(null);
+        // we need to pass an events map to the called process
+        ExecutionContext ctx = new ExecutionContextImpl(null);
+        EventMapHelper.link(s.getContext(), ctx);
+
+        return ctx;
     }
 }

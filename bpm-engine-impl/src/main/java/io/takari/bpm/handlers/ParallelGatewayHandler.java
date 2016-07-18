@@ -49,7 +49,7 @@ public class ParallelGatewayHandler extends AbstractElementHandler {
             inactive.removeAll(filtered);
             processInactive(s, c, inactive);
 
-            s.push(new ProcessEventMappingCommand());
+            s.push(new ProcessEventMappingCommand(c.getProcessDefinitionId()));
 
             UUID groupId = getEngine().getUuidGenerator().generate();
 
