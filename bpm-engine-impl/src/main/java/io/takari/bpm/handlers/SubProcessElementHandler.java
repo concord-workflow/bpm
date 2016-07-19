@@ -57,7 +57,7 @@ public class SubProcessElementHandler extends AbstractCallHandler {
     }
 
     @Override
-    protected ExecutionContext makeChildContext(DefaultExecution s) {
+    protected ExecutionContext makeChildContext(DefaultExecution s, ProcessElementCommand c) throws ExecutionException {
         return new ExecutionContextImpl(s.getContext());
     }
 }

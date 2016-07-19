@@ -1,8 +1,9 @@
 package io.takari.bpm.handlers;
 
+import java.util.Set;
+
 import io.takari.bpm.AbstractEngine;
 import io.takari.bpm.DefaultExecution;
-import io.takari.bpm.ExecutionContextHelper;
 import io.takari.bpm.ProcessDefinitionUtils;
 import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.ExecutionException;
@@ -13,7 +14,6 @@ import io.takari.bpm.model.AbstractElement;
 import io.takari.bpm.model.CallActivity;
 import io.takari.bpm.model.ProcessDefinition;
 import io.takari.bpm.model.VariableMapping;
-import java.util.Set;
 
 /**
  * Common logic of the (sub)process calling.
@@ -33,22 +33,17 @@ public abstract class AbstractCallHandler extends AbstractElementHandler {
         // add an error handling command to the stack
         s.push(new HandleRaisedErrorCommand(c));
 
-        Set<VariableMapping> inVariables = null;
+        // TODO move to the subclass
         Set<VariableMapping> outVariables = null;
-        
         ProcessDefinition pd = getProcessDefinition(c);
         AbstractElement e = ProcessDefinitionUtils.findElement(pd, c.getElementId());
         if (e instanceof CallActivity) {
-            inVariables = ((CallActivity)e).getIn();
             outVariables = ((CallActivity)e).getOut();
         }
 
         // create a new child context (variables of the called process)
         ExecutionContext parent = s.getContext();
-        ExecutionContext child = makeChildContext(s);
-
-        // set IN-parameters of the called process
-        ExecutionContextHelper.copyVariables(getEngine().getExpressionManager(), parent, child, inVariables);
+        ExecutionContext child = makeChildContext(s, c);
         
         // make the child context as our current, this will be reverted in the
         // merge command below
@@ -75,5 +70,5 @@ public abstract class AbstractCallHandler extends AbstractElementHandler {
 
     protected abstract String getCalledProcessId(ProcessElementCommand c, ProcessDefinition sub) throws ExecutionException;
     
-    protected abstract ExecutionContext makeChildContext(DefaultExecution s);
+    protected abstract ExecutionContext makeChildContext(DefaultExecution s, ProcessElementCommand c) throws ExecutionException;
 }

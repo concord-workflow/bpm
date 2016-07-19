@@ -403,4 +403,76 @@ public class CallActivityTest extends AbstractEngineTest {
 
         verify(t1, times(1)).execute(any(ExecutionContext.class));
     }
+
+    /**
+     * start --> call                      end
+     *               \                    /
+     *                start --> t1 --> end
+     */
+    @Test
+    public void testCopyAllVariables() throws Exception {
+        final String varKey = "key#" + System.currentTimeMillis();
+        final String varValue = "value#" + System.currentTimeMillis();
+
+        JavaDelegate t1 = spy(new JavaDelegate() {
+
+            @Override
+            public void execute(ExecutionContext ctx) throws Exception {
+                Object v = ctx.getVariable(varKey);
+                assertEquals(varValue, v);
+            }
+        });
+        getServiceTaskRegistry().register("t1", t1);
+
+        // ---
+
+        String aId = "testA";
+        String bId = "testB";
+
+        deploy(new ProcessDefinition(aId, Arrays.<AbstractElement> asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "call"),
+                new CallActivity("call", bId, true),
+                new SequenceFlow("f2", "call", "end"),
+                new EndEvent("end"))));
+
+        deploy(new ProcessDefinition(bId, Arrays.<AbstractElement> asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "t1"),
+                new ServiceTask("t1", ExpressionType.DELEGATE, "${t1}"),
+                new SequenceFlow("f2", "t1", "end"),
+                new EndEvent("end"))));
+
+        // ---
+
+        Map<String, Object> args = new HashMap<>();
+        args.put(varKey, varValue);
+
+        String key = UUID.randomUUID().toString();
+        getEngine().start(key, aId, args);
+
+        // ---
+
+        assertActivations(key, aId,
+                "start",
+                "f1",
+                "call");
+
+        assertActivations(key, bId,
+                "start",
+                "f1",
+                "t1",
+                "f2",
+                "end");
+
+        assertActivations(key, aId,
+                "f2",
+                "end");
+
+        assertNoMoreActivations();
+
+        // ---
+
+        verify(t1, times(1)).execute(any(ExecutionContext.class));
+    }
 }

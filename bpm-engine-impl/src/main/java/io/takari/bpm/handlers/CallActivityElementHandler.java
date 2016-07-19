@@ -3,6 +3,7 @@ package io.takari.bpm.handlers;
 import io.takari.bpm.AbstractEngine;
 import io.takari.bpm.DefaultExecution;
 import io.takari.bpm.EventMapHelper;
+import io.takari.bpm.ExecutionContextHelper;
 import io.takari.bpm.ExecutionContextImpl;
 import io.takari.bpm.IndexedProcessDefinitionProvider;
 import io.takari.bpm.ProcessDefinitionUtils;
@@ -50,11 +51,24 @@ public class CallActivityElementHandler extends AbstractCallHandler {
     }
 
     @Override
-    protected ExecutionContext makeChildContext(DefaultExecution s) {
-        // we need to pass an events map to the called process
-        ExecutionContext ctx = new ExecutionContextImpl(null);
-        EventMapHelper.link(s.getContext(), ctx);
+    protected ExecutionContext makeChildContext(DefaultExecution s, ProcessElementCommand c) throws ExecutionException {
+        ExecutionContext parent = s.getContext();
+        ExecutionContext child = new ExecutionContextImpl(null);
 
-        return ctx;
+        // we need to pass an events map to the called process
+        EventMapHelper.link(parent, child);
+
+        ProcessDefinition pd = getProcessDefinition(c);
+        CallActivity call = (CallActivity) ProcessDefinitionUtils.findElement(pd, c.getElementId());
+
+        if (call.isCopyAllVariables()) {
+            ExecutionContextHelper.copyVariables(parent, child);
+        }
+
+        // set IN-parameters of the called process
+        Set<VariableMapping> inVariables = call.getIn();
+        ExecutionContextHelper.copyVariables(getEngine().getExpressionManager(), parent, child, inVariables);
+
+        return child;
     }
 }
