@@ -16,6 +16,8 @@ public interface ExecutionContext extends Serializable {
      */
     public static final String ERROR_CODE_KEY = "errorCode";
 
+    public static final String PROCESS_BUSINESS_KEY = "__processBusinessKey";
+
     Object getVariable(String key);
     
     Map<String, Object> getVariables();

@@ -1,6 +1,15 @@
 package io.takari.bpm.benchmark;
 
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.iq80.leveldb.DBFactory;
+import org.iq80.leveldb.impl.Iq80DBFactory;
+import org.openjdk.jmh.annotations.TearDown;
+
 import com.google.common.io.Files;
+
 import io.takari.bpm.EngineBuilder;
 import io.takari.bpm.ProcessDefinitionProvider;
 import io.takari.bpm.api.Engine;
@@ -16,16 +25,9 @@ import io.takari.bpm.lock.LockManager;
 import io.takari.bpm.lock.StripedLockManagerImpl;
 import io.takari.bpm.mapdb.MapDbPersistenceManager;
 import io.takari.bpm.model.ProcessDefinition;
-import io.takari.bpm.persistence.MapPersistenceManager;
+import io.takari.bpm.persistence.InMemPersistenceManager;
 import io.takari.bpm.persistence.PersistenceManager;
 import io.takari.bpm.task.ServiceTaskRegistry;
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import org.iq80.leveldb.DBFactory;
-import org.iq80.leveldb.impl.Iq80DBFactory;
-import org.openjdk.jmh.annotations.TearDown;
 
 public abstract class AbstractBenchmarkState {
     
@@ -50,7 +52,7 @@ public abstract class AbstractBenchmarkState {
         
         if (inMem) {
             eventPersistenceManager = new EventPersistenceManagerImpl(new InMemEventStorage());
-            persistenceManager = new MapPersistenceManager(new ConcurrentHashMap<>());
+            persistenceManager = new InMemPersistenceManager();
         } else {
             String baseDir;
             try {

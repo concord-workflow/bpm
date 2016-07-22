@@ -1,14 +1,11 @@
 package io.takari.bpm.leveldb;
 
-import io.takari.bpm.DefaultExecution;
-import io.takari.bpm.ExecutionContextImpl;
-import io.takari.bpm.commands.ProcessElementCommand;
+import static org.junit.Assert.*;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
-import static org.junit.Assert.*;
-import org.junit.Ignore;
+
 import org.junit.Test;
 
 public class KryoSerializerTest {
@@ -23,31 +20,6 @@ public class KryoSerializerTest {
         assertNotNull(bytes);
 
         assertEquals(eventNames, s.fromBytes(bytes));
-    }
-
-    @Test
-    @Ignore
-    public void defaultExecutionSerialize() throws Exception {
-        KryoSerializer s = new KryoSerializer();
-        
-        ExecutionContextImpl c = new ExecutionContextImpl(null);
-        c.setVariable("v1", "v2");
-        c.setVariable("v2", new Service("sid"));
-
-        DefaultExecution e = new DefaultExecution(UUID.randomUUID(), "bus-key", c);
-
-        ProcessElementCommand cmd1 = new ProcessElementCommand("pid", "eid");
-
-        e.push(cmd1);
-
-        byte[] bytes = s.toBytes(e);
-        assertNotNull(bytes);
-
-        DefaultExecution ee = (DefaultExecution) s.fromBytes(bytes);
-        assertEquals(e.getId(), ee.getId());
-        assertEquals(e.getBusinessKey(), ee.getBusinessKey());
-        assertEquals(e.size(), ee.size());
-        assertEquals("sid", ((Service)ee.getContext().getVariable("v2")).sid);
     }
 
     private static class Service {

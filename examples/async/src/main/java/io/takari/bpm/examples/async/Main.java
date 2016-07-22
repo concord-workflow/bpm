@@ -1,7 +1,12 @@
 package io.takari.bpm.examples.async;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
 import io.takari.bpm.EngineBuilder;
-import io.takari.bpm.ExecutionContextHelper;
 import io.takari.bpm.ProcessDefinitionProvider;
 import io.takari.bpm.api.Engine;
 import io.takari.bpm.api.ExecutionContext;
@@ -16,11 +21,6 @@ import io.takari.bpm.model.SequenceFlow;
 import io.takari.bpm.model.ServiceTask;
 import io.takari.bpm.model.StartEvent;
 import io.takari.bpm.task.ServiceTaskRegistry;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 public class Main {
     
@@ -112,7 +112,7 @@ public class Main {
             return new JavaDelegate() {
                 @Override
                 public void execute(final ExecutionContext ctx) throws Exception {
-                    final String processKey = (String) ctx.getVariable(ExecutionContextHelper.PROCESS_BUSINESS_KEY);
+                    final String processKey = (String) ctx.getVariable(ExecutionContext.PROCESS_BUSINESS_KEY);
                     final String eventName = key;
                     
                     executor.submit(key, () -> {

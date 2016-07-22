@@ -1,7 +1,5 @@
 package io.takari.bpm.leveldb;
 
-import io.takari.bpm.DefaultExecution;
-import io.takari.bpm.persistence.PersistenceManager;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -12,9 +10,13 @@ import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
 import java.nio.ByteBuffer;
 import java.util.UUID;
+
 import org.iq80.leveldb.DBFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.takari.bpm.persistence.PersistenceManager;
+import io.takari.bpm.state.ProcessInstance;
 
 public class LevelDbPersistenceManager implements PersistenceManager {
 
@@ -35,14 +37,14 @@ public class LevelDbPersistenceManager implements PersistenceManager {
     }
 
     @Override
-    public void save(DefaultExecution execution) {
+    public void save(ProcessInstance execution) {
         byte[] key = marshallKey(execution.getId());
         db.put(key, marshallValue(execution));
         log.debug("save ['{}'] -> done", execution.getId());
     }
 
     @Override
-    public DefaultExecution get(UUID id) {
+    public ProcessInstance get(UUID id) {
         byte[] key = marshallKey(id);
         byte[] bytes = db.get(key);
 
@@ -50,12 +52,11 @@ public class LevelDbPersistenceManager implements PersistenceManager {
     }
 
     @Override
-    public DefaultExecution remove(UUID id) {
+    public void remove(UUID id) {
         byte[] key = marshallKey(id);
         byte[] bytes = db.get(key);
-        DefaultExecution e = unmarshallValue(bytes);
+        ProcessInstance e = unmarshallValue(bytes);
         db.delete(key);
-        return e;
     }
 
     private static byte[] marshallKey(UUID id) {
@@ -67,7 +68,7 @@ public class LevelDbPersistenceManager implements PersistenceManager {
                 .array();
     }
 
-    private byte[] marshallValue(DefaultExecution execution) {
+    private byte[] marshallValue(ProcessInstance execution) {
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
                 ObjectOutput out = new ObjectOutputStream(bos)) {
             out.writeObject(execution);
@@ -78,7 +79,7 @@ public class LevelDbPersistenceManager implements PersistenceManager {
         }
     }
 
-    private DefaultExecution unmarshallValue(byte[] bytes) {
+    private ProcessInstance unmarshallValue(byte[] bytes) {
         if (bytes == null) {
             return null;
         }
@@ -97,7 +98,7 @@ public class LevelDbPersistenceManager implements PersistenceManager {
                     }
 
                 }) {
-            return (DefaultExecution) in.readObject();
+            return (ProcessInstance) in.readObject();
         } catch (IOException | ClassNotFoundException e) {
             log.error("marshallValue -> error", e);
             return null;
