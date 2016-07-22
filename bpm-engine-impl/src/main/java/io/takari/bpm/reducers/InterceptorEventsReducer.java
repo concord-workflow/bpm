@@ -45,11 +45,7 @@ public class InterceptorEventsReducer implements Reducer {
         return state;
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     private static Map<String, Object> getCurrentVariables(ProcessInstance state) {
-        // this is stupid, but this is how variables are exposed in API
-        Variables vars = state.getVariables();
-        Map m = vars.asMap();
-        return (Map<String, Object>) m;
+        return state.getVariables().asMap();
     }
 }

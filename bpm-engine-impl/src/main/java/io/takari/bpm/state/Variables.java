@@ -15,7 +15,7 @@ public class Variables implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final Variables parent;
-    private final ImMap<String, Serializable> values;
+    private final ImMap<String, Object> values;
 
     public Variables() {
         this(null);
@@ -26,7 +26,7 @@ public class Variables implements Serializable {
         this.values = PersistentHashMap.empty();
     }
 
-    private Variables(Variables parent, ImMap<String, Serializable> values) {
+    private Variables(Variables parent, ImMap<String, Object> values) {
         this.parent = parent;
         this.values = values;
     }
@@ -35,11 +35,11 @@ public class Variables implements Serializable {
         return parent;
     }
 
-    public Variables setVariable(String key, Serializable value) {
+    public Variables setVariable(String key, Object value) {
         return new Variables(parent, values.assoc(key, value));
     }
 
-    public Serializable getVariable(String key) {
+    public Object getVariable(String key) {
         if (values.containsKey(key)) {
             return values.get(key);
         }
@@ -66,7 +66,7 @@ public class Variables implements Serializable {
         return new Variables(parent.removeVariable(key), values);
     }
 
-    public Map<String, Serializable> asMap() {
+    public Map<String, Object> asMap() {
         return values;
     }
 }

@@ -1,6 +1,5 @@
 package io.takari.bpm.state;
 
-import java.io.Serializable;
 import java.util.Set;
 
 import io.takari.bpm.api.ExecutionException;
@@ -29,11 +28,7 @@ public final class VariablesHelper {
                 v = em.eval(ctx, sourceExpression, Object.class);
             }
 
-            if (v != null && !(v instanceof Serializable)) {
-                throw new ExecutionException("Context variables should be serializable. Got: " + v);
-            }
-
-            dst = dst.setVariable(m.getTarget(), (Serializable) v);
+            dst = dst.setVariable(m.getTarget(), v);
         }
 
         return dst;
@@ -42,7 +37,7 @@ public final class VariablesHelper {
     public static Variables copyVariables(Variables src, Variables dst) {
         Set<String> keys = src.getVariableNames();
         for (String k : keys) {
-            Serializable v = src.getVariable(k);
+            Object v = src.getVariable(k);
             dst = dst.setVariable(k, v);
         }
         return dst;

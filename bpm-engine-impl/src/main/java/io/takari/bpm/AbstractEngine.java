@@ -155,7 +155,8 @@ public abstract class AbstractEngine implements Engine {
         // enable the execution
         state = state.setStatus(ProcessStatus.RUNNING);
 
-        // applyVariables(s.getContext(), variables);
+        // apply the external variables
+        state = StateHelper.applyVariables(state, variables);
 
         // fire the interceptors
         // TODO move to the planner?

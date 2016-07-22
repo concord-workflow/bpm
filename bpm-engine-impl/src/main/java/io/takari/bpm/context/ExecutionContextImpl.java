@@ -1,17 +1,12 @@
 package io.takari.bpm.context;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import io.takari.bpm.actions.Action;
 import io.takari.bpm.actions.SetVariableAction;
 import io.takari.bpm.actions.UnsetVariableAction;
 import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.state.Variables;
+
+import java.util.*;
 
 public class ExecutionContextImpl implements ExecutionContext {
 
@@ -30,19 +25,13 @@ public class ExecutionContextImpl implements ExecutionContext {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public Map<String, Object> getVariables() {
-        Map<String, ?> m = source.asMap();
-        return (Map<String, Object>) m;
+        return source.asMap();
     }
 
     @Override
     public void setVariable(String key, Object value) {
-        if (!(value instanceof Serializable)) {
-            throw new IllegalArgumentException("Value must be serializable");
-        }
-
-        changes.put(key, new Change(ChangeType.SET, (Serializable) value));
+        changes.put(key, new Change(ChangeType.SET, value));
     }
 
     @Override
