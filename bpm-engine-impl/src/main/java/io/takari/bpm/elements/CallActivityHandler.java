@@ -40,7 +40,7 @@ public class CallActivityHandler implements ElementHandler {
 
         // set a new variables container (aka child's "ExecutionContext") as our
         // current
-        actions.add(new MakeSubProcessVariablesAction(inVariables));
+        actions.add(new MakeSubProcessVariablesAction(inVariables, a.isCopyAllVariables()));
 
         // copy the events map from the parent process to the child, so the
         // child process can track all external events

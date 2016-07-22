@@ -57,8 +57,14 @@ public class VariablesReducer implements Reducer {
         } else if (action instanceof MakeSubProcessVariablesAction) {
             // TODO move into a separate file
             MakeSubProcessVariablesAction a = (MakeSubProcessVariablesAction) action;
+
             Variables src = state.getVariables();
             Variables dst = new Variables();
+
+            if (a.isCopyAllVariables()) {
+                dst = VariablesHelper.copyVariables(src, dst);
+            }
+
             dst = VariablesHelper.copyVariables(expressionManager, src, dst, a.getInVariables());
             return state.setVariables(dst);
         } else if (action instanceof CopyEventMapAction) {

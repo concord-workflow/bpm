@@ -30,9 +30,10 @@ public class ExecutionContextImpl implements ExecutionContext {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Map<String, Object> getVariables() {
-        // TODO
-        return null;
+        Map<String, ?> m = source.asMap();
+        return (Map<String, Object>) m;
     }
 
     @Override
@@ -61,8 +62,7 @@ public class ExecutionContextImpl implements ExecutionContext {
 
     @Override
     public Set<String> getVariableNames() {
-        // TODO
-        return null;
+        return source.getVariableNames();
     }
 
     private Object currentValue(String key) {

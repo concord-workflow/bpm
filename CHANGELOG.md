@@ -1,5 +1,13 @@
 # Change Log
 
+## [Unreleased]
+### Changes
+- complete rewrite of internal state management. API and semantics weren't changed.
+
+## [0.7.3] - 2016-07-19
+### Added
+- `CallActivity#copyAllVariables` flag now can be used to copy all variables from the parent process to the called.
+
 ## [0.7.2] - 2016-07-18 
 ### Changed
 - a bug was preventing deeply-nested processes from handling events correctly.

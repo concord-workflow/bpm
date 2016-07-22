@@ -39,6 +39,15 @@ public final class VariablesHelper {
         return dst;
     }
 
+    public static Variables copyVariables(Variables src, Variables dst) {
+        Set<String> keys = src.getVariableNames();
+        for (String k : keys) {
+            Serializable v = src.getVariable(k);
+            dst = dst.setVariable(k, v);
+        }
+        return dst;
+    }
+
     private VariablesHelper() {
     }
 }

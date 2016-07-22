@@ -2,6 +2,7 @@ package io.takari.bpm.state;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.Set;
 
 import org.organicdesign.fp.collections.ImMap;
 import org.organicdesign.fp.collections.PersistentHashMap;
@@ -43,6 +44,10 @@ public class Variables implements Serializable {
             return values.get(key);
         }
         return parent != null ? parent.getVariable(key) : null;
+    }
+
+    public Set<String> getVariableNames() {
+        return values.keySet();
     }
 
     public boolean hasVariable(String key) {
