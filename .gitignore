@@ -4,3 +4,6 @@ nohup.out
 .classpath
 .settings
 .bpmn
+.idea
+*.iml
+

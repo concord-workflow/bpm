@@ -195,9 +195,10 @@ public abstract class AbstractEngine implements Engine {
 
         // fire the interceptors
         // TODO move to the planner?
-        if (state.getStatus() == ProcessStatus.SUSPENDED) {
+        ProcessStatus status = state.getStatus();
+        if (status == ProcessStatus.SUSPENDED) {
             state = getExecutor().eval(state, Arrays.asList(new FireOnSuspendInterceptorsAction()));
-        } else if (state.getStatus() == ProcessStatus.FINISHED) {
+        } else if (status == ProcessStatus.FINISHED) {
             state = getExecutor().eval(state, Arrays.asList(new FireOnFinishInterceptorsAction()));
         }
 

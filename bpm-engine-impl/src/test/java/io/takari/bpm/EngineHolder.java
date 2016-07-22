@@ -131,6 +131,12 @@ public class EngineHolder {
     public void deploy(ProcessDefinition pd) {
         processDefinitionProvider.add(pd);
     }
+
+    public void deploy(Map<String, ProcessDefinition> pds) {
+        for (ProcessDefinition p : pds.values()) {
+            processDefinitionProvider.add(p);
+        }
+    }
     
     private void onActivation(String businessKey, String processDefinitionId, String elementId) {
         String k = businessKey + "/" + processDefinitionId;

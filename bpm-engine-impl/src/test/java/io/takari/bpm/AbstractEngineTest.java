@@ -7,6 +7,8 @@ import io.takari.bpm.event.EventPersistenceManager;
 import io.takari.bpm.model.ProcessDefinition;
 import io.takari.bpm.task.ServiceTaskRegistryImpl;
 
+import java.util.Map;
+
 public class AbstractEngineTest {
 
     private EngineHolder engineHolder;
@@ -30,6 +32,10 @@ public class AbstractEngineTest {
     
     protected void deploy(ProcessDefinition pd) {
         engineHolder.deploy(pd);
+    }
+
+    protected void deploy(Map<String, ProcessDefinition> pds) {
+        engineHolder.deploy(pds);
     }
     
     protected void assertActivations(String processBusinessKey, String processDefinitionId, String ... elementIds) {

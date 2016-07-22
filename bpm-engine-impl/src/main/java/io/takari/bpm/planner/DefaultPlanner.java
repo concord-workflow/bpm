@@ -32,7 +32,12 @@ public class DefaultPlanner implements Planner {
         // check if we are done
         if (cmd == null) {
             actions.add(new PopCommandAction());
-            actions.add(new SetStatusAction(ProcessStatus.FINISHED));
+
+            if (EventMapHelper.isEmpty(state)) {
+                actions.add(new SetStatusAction(ProcessStatus.FINISHED));
+            } else {
+                actions.add(new SetStatusAction(ProcessStatus.SUSPENDED));
+            }
 
             if (EventMapHelper.isEmpty(state)) {
                 // no one else needs this execution

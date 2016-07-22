@@ -61,4 +61,8 @@ public class DefaultExpressionManager implements ExpressionManager {
             throw e;
         }
     }
+
+    public static String quote(String s) {
+        return s.replace("'", "\'");
+    }
 }
