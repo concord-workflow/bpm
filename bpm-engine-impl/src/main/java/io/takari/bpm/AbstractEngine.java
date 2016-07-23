@@ -168,8 +168,8 @@ public abstract class AbstractEngine implements Engine {
             state = EventMapHelper.pushCommands(state, e.getDefinitionId(), e.getId());
             if (e.isExclusive()) {
                 // if the event is exclusive for its group, we need to remove
-                // the whole group exlusive events usualy declared by an event
-                // based gateway
+                // the whole group. exclusive events usually declared by
+                // an event based gateway
                 state = EventMapHelper.clearGroup(state, e.getDefinitionId(), e.getGroupId());
             } else {
                 state = EventMapHelper.remove(state, e.getDefinitionId(), e.getId());

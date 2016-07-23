@@ -31,18 +31,11 @@ public class DefaultPlanner implements Planner {
 
         // check if we are done
         if (cmd == null) {
-            actions.add(new PopCommandAction());
-
             if (EventMapHelper.isEmpty(state)) {
+                actions.add(new RemoveInstanceAction(state.getId()));
                 actions.add(new SetStatusAction(ProcessStatus.FINISHED));
             } else {
                 actions.add(new SetStatusAction(ProcessStatus.SUSPENDED));
-            }
-
-            if (EventMapHelper.isEmpty(state)) {
-                // no one else needs this execution
-                // it can be removed
-                actions.add(new RemoveInstanceAction(state.getId()));
             }
 
             return actions;

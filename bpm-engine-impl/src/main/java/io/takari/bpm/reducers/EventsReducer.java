@@ -3,6 +3,8 @@ package io.takari.bpm.reducers;
 import java.util.Date;
 import java.util.UUID;
 
+import io.takari.bpm.actions.*;
+import io.takari.bpm.commands.ClearCommandStackCommand;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
 import org.slf4j.Logger;
@@ -11,13 +13,8 @@ import org.slf4j.LoggerFactory;
 import io.takari.bpm.IndexedProcessDefinition;
 import io.takari.bpm.ProcessDefinitionUtils;
 import io.takari.bpm.UuidGenerator;
-import io.takari.bpm.actions.Action;
-import io.takari.bpm.actions.CreateEventAction;
-import io.takari.bpm.actions.PersistExecutionAction;
-import io.takari.bpm.actions.SuspendAndPersistAction;
 import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.ExecutionException;
-import io.takari.bpm.commands.ClearCommandStackCommand;
 import io.takari.bpm.commands.PerformActionsCommand;
 import io.takari.bpm.commands.ProcessElementCommand;
 import io.takari.bpm.context.ExecutionContextImpl;
@@ -60,13 +57,11 @@ public class EventsReducer implements Reducer {
         if (a.getGroupId() != null) {
             // grouped event
             state = EventMapHelper.put(state, ev,
-                    new ClearCommandStackCommand(a.getDefinitionId()),
+                    new ClearCommandStackCommand(pd.getId()),
                     new PerformActionsCommand(new PersistExecutionAction()),
                     new ProcessElementCommand(pd.getId(), next.getId(), a.getGroupId(), a.isExclusive()));
         } else {
             // standalone event
-
-            // TODO this doesn't look right. Wrong order of commands?
             state = state.setStack(state.getStack()
                     .push(new ProcessElementCommand(pd.getId(), next.getId(), a.getGroupId(), a.isExclusive()))
                     .push(new PerformActionsCommand(new SuspendAndPersistAction())));

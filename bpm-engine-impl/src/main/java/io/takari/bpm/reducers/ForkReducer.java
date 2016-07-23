@@ -17,7 +17,6 @@ import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.commands.CommandStack;
 import io.takari.bpm.commands.PerformActionsCommand;
-import io.takari.bpm.commands.ProcessEventMappingCommand;
 import io.takari.bpm.context.ExecutionContextImpl;
 import io.takari.bpm.el.ExpressionManager;
 import io.takari.bpm.model.SequenceFlow;
@@ -40,11 +39,11 @@ public class ForkReducer implements Reducer {
         if (action instanceof ParallelForkAction) {
             ParallelForkAction a = (ParallelForkAction) action;
 
-            // parallel gateway doen't evaluate the expressions
+            // parallel gateway doesn't evaluate the expressions
             IndexedProcessDefinition pd = state.getDefinition(a.getDefinitionId());
             List<SequenceFlow> out = ProcessDefinitionUtils.findOutgoingFlows(pd, a.getElementId());
 
-            return follow(state, a.getDefinitionId(), a.getElementId(), out);
+            return follow(state, a.getDefinitionId(), a.getElementId(), true, out);
         } else if (action instanceof InclusiveForkAction) {
             InclusiveForkAction a = (InclusiveForkAction) action;
 
@@ -69,20 +68,19 @@ public class ForkReducer implements Reducer {
                 int count = inactive.size();
 
                 // directly activate the unused flows, so they will be visible
-                // for next commands on the stack
+                // for the next commands on the stack
                 Activations acts = state.getActivations();
                 state = state.setActivations(acts.inc(pd.getId(), gwId, count));
             }
 
-            return follow(state, a.getDefinitionId(), a.getElementId(), filtered);
+            return follow(state, a.getDefinitionId(), a.getElementId(), false, filtered);
         }
 
         return state;
     }
 
-    private static ProcessInstance follow(ProcessInstance state, String definitionId, String elementId, List<SequenceFlow> flows) {
+    private static ProcessInstance follow(ProcessInstance state, String definitionId, String elementId, boolean exclusive, List<SequenceFlow> flows) {
         CommandStack stack = state.getStack()
-                .push(new ProcessEventMappingCommand(definitionId))
                 .push(new PerformActionsCommand(
                         new FollowNewGroupAction(definitionId, elementId, false, ProcessDefinitionUtils.toIds(flows))));
 

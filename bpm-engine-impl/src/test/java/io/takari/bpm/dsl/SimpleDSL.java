@@ -1,13 +1,11 @@
-package io.takari.bpm;
+package io.takari.bpm.dsl;
 
 import io.takari.bpm.api.ExecutionContext;
-import io.takari.bpm.dsl.*;
 import io.takari.bpm.el.DefaultExpressionManager;
 import io.takari.bpm.model.*;
 import io.takari.bpm.task.ServiceTaskRegistryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.java2d.pipe.SpanShapeRenderer;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
@@ -108,7 +106,7 @@ public final class SimpleDSL {
         return new CallActivity(stepId, step.getCall());
     }
 
-    private static SubProcess wrapEvents(String subId, String onSuccessId, String onFailureId, AtomicLong counter) {
+    private static AbstractElement wrapEvents(String subId, String onSuccessId, String onFailureId, AtomicLong counter) {
         List<AbstractElement> children = new ArrayList<>();
 
         String startId = "start" + counter.incrementAndGet();
@@ -135,6 +133,7 @@ public final class SimpleDSL {
         children.add(new EndEvent(errorEndId, onFailureId));
 
         return new SubProcess(subId, children);
+//        return new IntermediateCatchEvent(subId, onSuccessId);
     }
 
     private static SubProcess parallel(ParallelStep step, String stepId, AtomicLong counter) {

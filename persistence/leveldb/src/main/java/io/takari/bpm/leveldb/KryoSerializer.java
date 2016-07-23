@@ -13,7 +13,6 @@ import com.esotericsoftware.kryo.pool.KryoPool;
 
 import io.takari.bpm.commands.HandleRaisedErrorCommand;
 import io.takari.bpm.commands.ProcessElementCommand;
-import io.takari.bpm.commands.ProcessEventMappingCommand;
 import io.takari.bpm.context.ExecutionContextImpl;
 import io.takari.bpm.event.Event;
 import io.takari.bpm.event.ExpiredEvent;
@@ -41,7 +40,6 @@ public class KryoSerializer implements Serializer {
 
                 kryo.register(ProcessElementCommand.class);
                 kryo.register(HandleRaisedErrorCommand.class);
-                kryo.register(ProcessEventMappingCommand.class);
 
                 // TODO more classes
 

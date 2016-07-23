@@ -65,10 +65,8 @@ public class InclusiveGatewayTest extends AbstractEngineTest {
      *              \           /
      *               --> ev2 -->
      */
-    @Test
-    public void testDuoEvent() throws Exception {
-        String processId = "test";
-        deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
+    private ProcessDefinition makeDuoEventProcess(String processId) {
+       return new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "gw1"),
                 new InclusiveGateway("gw1"),
@@ -84,7 +82,14 @@ public class InclusiveGatewayTest extends AbstractEngineTest {
                 new InclusiveGateway("gw2"),
                 new SequenceFlow("f6", "gw2", "end"),
                 new EndEvent("end")
-        )));
+        ));
+    }
+
+
+    @Test
+    public void testDuoEvent() throws Exception {
+        String processId = "test";
+        deploy(makeDuoEventProcess(processId));
 
         // ---
 
@@ -127,7 +132,36 @@ public class InclusiveGatewayTest extends AbstractEngineTest {
                 "end");
         assertNoMoreActivations();
     }
-    
+
+    @Test
+    public void testDuoEventReverseOrder() throws Exception {
+        String processId = "test";
+        deploy(makeDuoEventProcess(processId));
+
+        // ---
+
+        String key = UUID.randomUUID().toString();
+        getEngine().start(key, processId, null);
+        getEngine().resume(key, "ev2", null);
+        getEngine().resume(key, "ev1", null);
+
+        assertActivations(key, processId,
+                "start",
+                "f1",
+                "gw1",
+                "f2",
+                "ev1",
+                "f4",
+                "ev2",
+                "f5",
+                "gw2",
+                "f3",
+                "gw2",
+                "f6",
+                "end");
+        assertNoMoreActivations();
+    }
+
     /**
      * start --> gw1 --> t1 --> ev1 --> gw2 --> t3 --> end
      *              \                  /

@@ -1,7 +1,6 @@
 package io.takari.bpm;
 
-import io.takari.bpm.AbstractEngineTest;
-import io.takari.bpm.SimpleDSL;
+import io.takari.bpm.dsl.SimpleDSL;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.api.interceptors.ExecutionInterceptor;
 import io.takari.bpm.api.interceptors.ExecutionInterceptorAdapter;
@@ -14,6 +13,31 @@ import static org.mockito.Mockito.*;
 
 public class SimpleDSLTest extends AbstractEngineTest {
 
+    @Test
+    public void testSimple() throws Exception {
+        SimpleDSL.registerDslTask(getServiceTaskRegistry());
+
+        // ---
+
+        Flow masterFlow = new Flow("master",
+                new ParallelStep(
+                        new TaskStep("shell4"),
+                        new TaskStep("shell5"),
+                        new TaskStep("shell6")));
+
+        deploy(SimpleDSL.from(masterFlow));
+
+        // ---
+
+        String key = "abc";
+        getEngine().start(key, "master", null);
+
+        // shuffle a bit
+
+        getEngine().resume(key, "ok_shell5", null);
+        getEngine().resume(key, "ok_shell4", null);
+        getEngine().resume(key, "ok_shell6", null);
+    }
     @Test
     public void testDeeplyNested() throws Exception {
         SimpleDSL.registerDslTask(getServiceTaskRegistry());
@@ -69,14 +93,18 @@ public class SimpleDSLTest extends AbstractEngineTest {
         getEngine().resume(key, "ok_shell3", null);
         assertOnSuspend(delegate);
 
-        getEngine().resume(key, "ok_shell4", null);
-        assertOnSuspend(delegate);
+        // shuffle a bit
 
         getEngine().resume(key, "ok_shell5", null);
         assertOnSuspend(delegate);
 
+        getEngine().resume(key, "ok_shell4", null);
+        assertOnSuspend(delegate);
+
         getEngine().resume(key, "ok_shell6", null);
         assertOnSuspend(delegate);
+
+        // last one
 
         getEngine().resume(key, "ok_shell7", null);
         assertOnFinish(delegate);

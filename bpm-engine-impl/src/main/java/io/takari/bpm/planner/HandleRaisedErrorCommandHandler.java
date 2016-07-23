@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import io.takari.bpm.state.EventMapHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +33,11 @@ public class HandleRaisedErrorCommandHandler implements CommandHandler<HandleRai
 
         String errorRef = BpmnErrorHelper.getRaisedError(state.getVariables());
         if (errorRef == null) {
+            if (!EventMapHelper.isEmpty(state)) {
+                // there is some events waiting, nothing to do
+                return actions;
+            }
+
             // no errors were raised, will continue the execution
             log.debug("handle ['{}', '{}'] -> no errors, will continue from '{}'", state.getBusinessKey(), cmd.getElementId(),
                     cmd.getElementId());
