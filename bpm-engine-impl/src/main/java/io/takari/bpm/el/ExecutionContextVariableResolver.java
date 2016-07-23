@@ -1,10 +1,12 @@
 package io.takari.bpm.el;
 
-import io.takari.bpm.api.ExecutionContext;
 import java.beans.FeatureDescriptor;
 import java.util.Iterator;
+
 import javax.el.ELContext;
 import javax.el.ELResolver;
+
+import io.takari.bpm.api.ExecutionContext;
 
 public class ExecutionContextVariableResolver extends ELResolver {
 

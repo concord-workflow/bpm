@@ -24,7 +24,7 @@ public class SequenceFlowTest extends AbstractEngineTest {
         getServiceTaskRegistry().register("hello", l);
         
         String processId = "test";
-        deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
+        deploy(new ProcessDefinition(processId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "end", new SequenceFlow.ExecutionListener("taken", ExpressionType.DELEGATE, "${hello}")),
                 new EndEvent("end")
@@ -57,7 +57,7 @@ public class SequenceFlowTest extends AbstractEngineTest {
         getServiceTaskRegistry().register("hello", l);
         
         String processId = "test";
-        deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
+        deploy(new ProcessDefinition(processId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "end", new SequenceFlow.ExecutionListener("taken", ExpressionType.SIMPLE, "${hello.doIt()}")),
                 new EndEvent("end")

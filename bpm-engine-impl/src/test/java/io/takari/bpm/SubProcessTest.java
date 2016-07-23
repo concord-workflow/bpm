@@ -39,10 +39,10 @@ public class SubProcessTest extends AbstractEngineTest {
         // --
 
         String processId = "test";
-        deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
+        deploy(new ProcessDefinition(processId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "sub"),
-                new SubProcess("sub", Arrays.<AbstractElement>asList(
+                new SubProcess("sub", Arrays.asList(
                         new StartEvent("substart"),
                         new SequenceFlow("f2", "substart", "t1"),
                         new ServiceTask("t1", ExpressionType.DELEGATE, "${t1}"),
@@ -117,10 +117,10 @@ public class SubProcessTest extends AbstractEngineTest {
         // ---
 
         String processId = "test";
-        deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
+        deploy(new ProcessDefinition(processId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "sub"),
-                new SubProcess("sub", Arrays.<AbstractElement>asList(
+                new SubProcess("sub", Arrays.asList(
                         new StartEvent("substart"),
                         new SequenceFlow("f2", "substart", "t1"),
                         new ServiceTask("t1", ExpressionType.DELEGATE, "${t1}"),
@@ -134,7 +134,7 @@ public class SubProcessTest extends AbstractEngineTest {
 
                 new SequenceFlow("f6", "sub", "t2"),
                 new ServiceTask("t2", ExpressionType.DELEGATE, "${t2}"),
-                new SequenceFlow("f6", "t2", "end"),
+                new SequenceFlow("f7", "t2", "end"),
                 new EndEvent("end")
         )));
 
@@ -175,10 +175,10 @@ public class SubProcessTest extends AbstractEngineTest {
         final String errorRef = "test#" + System.currentTimeMillis();
         
         String processId = "test";
-        deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
+        deploy(new ProcessDefinition(processId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "sub"),
-                new SubProcess("sub", Arrays.<AbstractElement>asList(
+                new SubProcess("sub", Arrays.asList(
                         new StartEvent("substart"),
                         new SequenceFlow("f2", "substart", "subend"),
                         new EndEvent("subend", errorRef)
@@ -242,10 +242,10 @@ public class SubProcessTest extends AbstractEngineTest {
         // --
 
         String processId = "test";
-        deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
+        deploy(new ProcessDefinition(processId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "sub"),
-                new SubProcess("sub", Arrays.<AbstractElement>asList(
+                new SubProcess("sub", Arrays.asList(
                         new StartEvent("substart"),
                         new SequenceFlow("f2", "substart", "t1"),
                         new ServiceTask("t1", ExpressionType.DELEGATE, "${t1}"),

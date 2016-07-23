@@ -1,83 +1,70 @@
 package io.takari.bpm;
 
-import io.takari.bpm.api.Engine;
-import io.takari.bpm.api.ExecutionContext;
-import io.takari.bpm.api.ExecutionException;
-import io.takari.bpm.api.NoEventFoundException;
-import io.takari.bpm.api.interceptors.ElementEvent;
-import io.takari.bpm.api.interceptors.ExecutionInterceptor;
-import io.takari.bpm.api.interceptors.InterceptorStartEvent;
-import io.takari.bpm.commands.ExecutionCommand;
-import io.takari.bpm.commands.ProcessElementCommand;
-import io.takari.bpm.el.ExpressionManager;
-import io.takari.bpm.event.Event;
-import io.takari.bpm.event.EventPersistenceManager;
-import io.takari.bpm.handlers.ElementHandler;
-import io.takari.bpm.lock.LockManager;
-import io.takari.bpm.model.ProcessDefinition;
-import io.takari.bpm.model.StartEvent;
-import io.takari.bpm.persistence.PersistenceManager;
-import io.takari.bpm.task.ServiceTaskRegistry;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CopyOnWriteArrayList;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.takari.bpm.actions.Action;
+import io.takari.bpm.actions.FireOnFinishInterceptorsAction;
+import io.takari.bpm.actions.FireOnResumeInterceptorsAction;
+import io.takari.bpm.actions.FireOnSuspendInterceptorsAction;
+import io.takari.bpm.api.Engine;
+import io.takari.bpm.api.ExecutionException;
+import io.takari.bpm.api.NoEventFoundException;
+import io.takari.bpm.api.interceptors.ExecutionInterceptor;
+import io.takari.bpm.event.Event;
+import io.takari.bpm.event.EventPersistenceManager;
+import io.takari.bpm.lock.LockManager;
+import io.takari.bpm.persistence.PersistenceManager;
+import io.takari.bpm.planner.Planner;
+import io.takari.bpm.state.EventMapHelper;
+import io.takari.bpm.state.ProcessInstance;
+import io.takari.bpm.state.ProcessStatus;
+import io.takari.bpm.state.StateHelper;
 
 public abstract class AbstractEngine implements Engine {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractEngine.class);
 
-    private final ExecutionInterceptorHolder interceptorHolder = new ExecutionInterceptorHolder();
+    protected abstract IndexedProcessDefinitionProvider getProcessDefinitionProvider();
 
-    public abstract IndexedProcessDefinitionProvider getProcessDefinitionProvider();
+    protected abstract UuidGenerator getUuidGenerator();
 
-    public abstract ElementHandler getElementHandler();
+    protected abstract Planner getPlanner();
 
-    public abstract EventPersistenceManager getEventManager();
+    protected abstract Executor getExecutor();
 
-    public abstract PersistenceManager getPersistenceManager();
+    protected abstract PersistenceManager getPersistenceManager();
 
-    public abstract ServiceTaskRegistry getServiceTaskRegistry();
+    protected abstract ExecutionInterceptorHolder getInterceptorHolder();
 
-    public abstract ExpressionManager getExpressionManager();
+    protected abstract EventPersistenceManager getEventManager();
 
-    public abstract LockManager getLockManager();
+    protected abstract LockManager getLockManager();
 
-    public abstract UuidGenerator getUuidGenerator();
-    
-    @Override
-    public void addInterceptor(ExecutionInterceptor i) {
-        interceptorHolder.addInterceptor(i);
-    }
-    
     @Override
     public void start(String processBusinessKey, String processDefinitionId, Map<String, Object> variables) throws ExecutionException {
         IndexedProcessDefinitionProvider pdp = getProcessDefinitionProvider();
-
-        ProcessDefinition pd = pdp.getById(processDefinitionId);
-        StartEvent start = ProcessDefinitionUtils.findStartEvent(pd);
-
-        ExecutionContext ctx = new ExecutionContextImpl(null);
-        applyVariables(ctx, variables);
+        IndexedProcessDefinition pd = pdp.getById(processDefinitionId);
 
         UuidGenerator idg = getUuidGenerator();
+        UUID instanceId = idg.generate();
 
-        UUID executionId = idg.generate();
-        DefaultExecution s = new DefaultExecution(executionId, processBusinessKey, ctx);
-        ExecutionContextHelper.fillBasicVariables(s, ctx);
-        s.push(new ProcessElementCommand(processDefinitionId, start.getId()));
+        ProcessInstance state = StateHelper.createInitialState(getExecutor(), instanceId, processBusinessKey, pd, variables);
 
         LockManager lm = getLockManager();
         lm.lock(processBusinessKey);
-        
+
         try {
-            interceptorHolder.fireOnStart(processBusinessKey, processDefinitionId, executionId, variables);
-            runLockSafe(s);
+            runLockSafe(state);
         } catch (Exception e) {
-            interceptorHolder.fireOnError(processBusinessKey, e);
+            // TODO move to the executor?
+            getInterceptorHolder().fireOnError(processBusinessKey, e);
             throw e;
         } finally {
             lm.unlock(processBusinessKey);
@@ -88,9 +75,11 @@ public abstract class AbstractEngine implements Engine {
     public void resume(String processBusinessKey, String eventName, Map<String, Object> variables) throws ExecutionException {
         LockManager lm = getLockManager();
         lm.lock(processBusinessKey);
+
         try {
             EventPersistenceManager em = getEventManager();
             Collection<Event> evs = em.find(processBusinessKey, eventName);
+
             if (evs == null || evs.isEmpty()) {
                 throw new NoEventFoundException("No event '%s' found for process '%s'", eventName, processBusinessKey);
             } else if (evs.size() > 1) {
@@ -104,7 +93,8 @@ public abstract class AbstractEngine implements Engine {
             Event e = evs.iterator().next();
             resumeLockSafe(e, variables);
         } catch (Exception e) {
-            interceptorHolder.fireOnError(processBusinessKey, e);
+            // TODO move to the executor?
+            getInterceptorHolder().fireOnError(processBusinessKey, e);
             throw e;
         } finally {
             lm.unlock(processBusinessKey);
@@ -119,172 +109,100 @@ public abstract class AbstractEngine implements Engine {
             throw new NoEventFoundException("No event '%s' found", eventId);
         }
 
-        String processBusinessKey = ev.getProcessBusinessKey();
+        String businessKey = ev.getProcessBusinessKey();
 
         LockManager lm = getLockManager();
-        lm.lock(processBusinessKey);
+        lm.lock(businessKey);
+
         try {
             resumeLockSafe(ev, variables);
-        } catch (ExecutionException e) {
-            interceptorHolder.fireOnError(processBusinessKey, e);
+        } catch (Exception e) {
+            // TODO move to the executor?
+            getInterceptorHolder().fireOnError(businessKey, e);
             throw e;
         } finally {
-            lm.unlock(processBusinessKey);
+            lm.unlock(businessKey);
         }
     }
-    
-    public void resume(Event e, Map<String, Object> variables) throws ExecutionException {
-        String processBusinessKey = e.getProcessBusinessKey();
 
-        LockManager lm = getLockManager();
-        lm.lock(processBusinessKey);        
-        try {
-            resumeLockSafe(e, variables);
-        } catch (Exception ev) {
-            interceptorHolder.fireOnError(processBusinessKey, ev);
-            throw ev;
-        } finally {
-            lm.unlock(processBusinessKey);
-        }
+    @Override
+    public void addInterceptor(ExecutionInterceptor i) {
+        getInterceptorHolder().addInterceptor(i);
     }
 
     private void resumeLockSafe(Event e, Map<String, Object> variables) throws ExecutionException {
-        String processBusinessKey = e.getProcessBusinessKey();
+        String businessKey = e.getProcessBusinessKey();
         String eventName = e.getName();
-        
+
         UUID eid = e.getExecutionId();
-        log.debug("resumeLockSafe ['{}', '{}'] -> got '{}'", processBusinessKey, eventName, eid);
-        
-        interceptorHolder.fireOnResume(processBusinessKey, eid, e.getId(), variables);
+        log.debug("resumeLockSafe ['{}', '{}'] -> got '{}'", businessKey, eventName, eid);
 
         EventPersistenceManager em = getEventManager();
         if (e.isExclusive()) {
             // exclusive event means that only one event from the group of
             // events can happen. The rest of the events must be removed.
-            em.clearGroup(processBusinessKey, e.getGroupId());
+            em.clearGroup(businessKey, e.getGroupId());
         } else {
             em.remove(e.getId());
         }
 
-        // load an execution
         PersistenceManager pm = getPersistenceManager();
-        DefaultExecution s = pm.get(eid);
-        if (s == null) {
-            throw new ExecutionException("No execution '%s' found for process '%s'", eid, processBusinessKey);
+        ProcessInstance state = pm.get(eid);
+        if (state == null) {
+            throw new ExecutionException("No execution '%s' found for the process '%s'", eid, businessKey);
         }
 
         // enable the execution
-        s.setSuspended(false);
+        state = state.setStatus(ProcessStatus.RUNNING);
 
-        applyVariables(s.getContext(), variables);
+        // apply the external variables
+        state = StateHelper.applyVariables(state, variables);
+
+        // fire the interceptors
+        // TODO move to the planner?
+        state = getExecutor().eval(state, Arrays.asList(new FireOnResumeInterceptorsAction()));
 
         // process event-to-command mappings (e.g. add next command of the flow
         // to the stack)
-        if (!EventMapHelper.isEmpty(s)) {
-            EventMapHelper.pushCommands(s, e.getDefinitionId(), e.getId());
+        if (!EventMapHelper.isEmpty(state)) {
+            state = EventMapHelper.pushCommands(state, e.getDefinitionId(), e.getId());
             if (e.isExclusive()) {
-                // if the event is exclusive for its group, we need to remove the whole group
-                // exlusive events usualy declared by an event based gateway
-                EventMapHelper.clearGroup(s, e.getDefinitionId(), e.getGroupId());
+                // if the event is exclusive for its group, we need to remove
+                // the whole group. exclusive events usually declared by
+                // an event based gateway
+                state = EventMapHelper.clearGroup(state, e.getDefinitionId(), e.getGroupId());
             } else {
-                EventMapHelper.remove(s, e.getDefinitionId(), e.getId());
+                state = EventMapHelper.remove(state, e.getDefinitionId(), e.getId());
             }
-        } else if (s.isDone()) {
+        } else if (StateHelper.isDone(state)) {
             throw new ExecutionException("No event mapping found in process '%s' or no commands in execution", eid);
         }
 
-        runLockSafe(s);
+        runLockSafe(state);
     }
 
-    private void applyVariables(ExecutionContext ctx, Map<String, Object> m) {
-        if (m == null) {
-            return;
-        }
+    private void runLockSafe(ProcessInstance state) throws ExecutionException {
+        log.debug("runLockSafe ['{}'] -> started...", state.getBusinessKey());
 
-        for (Map.Entry<String, Object> e : m.entrySet()) {
-            ctx.setVariable(e.getKey(), e.getValue());
-        }
-    }
-
-    private void runLockSafe(DefaultExecution s) throws ExecutionException {
-        PersistenceManager pm = getPersistenceManager();
-
-        while (!s.isSuspended()) {
-            if (s.isDone()) {
-                // check if no more events need this execution
-                if (EventMapHelper.isEmpty(s)) {
-                    pm.remove(s.getId());
-                    log.debug("runLockSafe ['{}'] -> execution removed", s.getId());
-                }
-                
+        while (true) {
+            if (state.getStatus() != ProcessStatus.RUNNING) {
+                log.debug("runLockSafe ['{}'] -> process is not running anymore: {}", state.getBusinessKey(), state.getStatus());
                 break;
             }
 
-            ExecutionCommand c = s.peek();
-            if (c != null) {
-                s = c.exec(this, s);
-            }
-        }
-        
-        if (s.isSuspended()) {
-            // the process is suspended and may continue in the future
-            interceptorHolder.fireOnSuspend();
-        } else if (s.isDone()) {
-            // the process is finished
-            interceptorHolder.fireOnFinish(s.getBusinessKey());
+            List<Action> actions = getPlanner().eval(state);
+            state = getExecutor().eval(state, actions);
         }
 
-        log.debug("runLockSafe ['{}'] -> (done: {}, suspended: {})", s.getId(), s.isDone(), s.isSuspended());
-    }
+        // fire the interceptors
+        // TODO move to the planner?
+        ProcessStatus status = state.getStatus();
+        if (status == ProcessStatus.SUSPENDED) {
+            state = getExecutor().eval(state, Arrays.asList(new FireOnSuspendInterceptorsAction()));
+        } else if (status == ProcessStatus.FINISHED) {
+            state = getExecutor().eval(state, Arrays.asList(new FireOnFinishInterceptorsAction()));
+        }
 
-    public ExecutionInterceptorHolder getInterceptorHolder() {
-        return interceptorHolder;
-    }
-    
-    public static final class ExecutionInterceptorHolder {
-        
-        private final List<ExecutionInterceptor> interceptors = new CopyOnWriteArrayList<>();
-        
-        public void addInterceptor(ExecutionInterceptor i) {
-            interceptors.add(i);
-        }
-        
-        public void fireOnStart(String processBusinessKey, String processDefinitionId, UUID executionId, Map<String, Object> variables) throws ExecutionException {
-            InterceptorStartEvent ev = new InterceptorStartEvent(processBusinessKey, processDefinitionId, executionId, variables);
-            for (ExecutionInterceptor i : interceptors) {
-                i.onStart(ev);
-            }
-        }
-        
-        public void fireOnSuspend() throws ExecutionException {
-            for (ExecutionInterceptor i : interceptors) {
-                i.onSuspend();
-            }
-        }
-        
-        public void fireOnResume(String processBusinessKey, UUID executuonId, UUID eventId, Map<String, Object> variables) throws ExecutionException {
-            for (ExecutionInterceptor i : interceptors) {
-                i.onResume();
-            }
-        }
-        
-        public void fireOnFinish(String processBusinessKey) throws ExecutionException {
-            for (ExecutionInterceptor i : interceptors) {
-                i.onFinish(processBusinessKey);
-            }
-        }
-        
-        public void fireOnElement(String processBusinessKey, String processDefinitionId, UUID executionId, String elementId) throws ExecutionException {
-            ElementEvent ev = new ElementEvent(processBusinessKey, processDefinitionId, executionId, elementId);
-            for (ExecutionInterceptor i : interceptors) {
-                i.onElement(ev);
-            }
-        }
-        
-        public void fireOnError(String processBusinessKey, Throwable cause) throws ExecutionException {
-            for (ExecutionInterceptor i : interceptors) {
-                i.onError(processBusinessKey, cause);
-            }
-        }
+        log.debug("runLockSafe ['{}'] -> done", state.getBusinessKey());
     }
 }

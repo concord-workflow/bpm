@@ -1,25 +1,23 @@
 package io.takari.bpm.leveldb;
 
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
-import com.esotericsoftware.kryo.pool.*;
-import io.takari.bpm.DefaultExecution;
-import io.takari.bpm.EventMapHelper.EventRecord;
-import io.takari.bpm.ExecutionContextImpl;
-import io.takari.bpm.commands.ExecutionCommand;
-import io.takari.bpm.commands.HandleRaisedErrorCommand;
-import io.takari.bpm.commands.MergeExecutionContextCommand;
-import io.takari.bpm.commands.PersistExecutionCommand;
-import io.takari.bpm.commands.ProcessElementCommand;
-import io.takari.bpm.commands.ProcessEventMappingCommand;
-import io.takari.bpm.commands.SuspendExecutionCommand;
-import io.takari.bpm.event.Event;
-import io.takari.bpm.event.ExpiredEvent;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.HashSet;
 import java.util.UUID;
+
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
+import com.esotericsoftware.kryo.pool.KryoFactory;
+import com.esotericsoftware.kryo.pool.KryoPool;
+
+import io.takari.bpm.commands.HandleRaisedErrorCommand;
+import io.takari.bpm.commands.ProcessElementCommand;
+import io.takari.bpm.context.ExecutionContextImpl;
+import io.takari.bpm.event.Event;
+import io.takari.bpm.event.ExpiredEvent;
+import io.takari.bpm.state.EventMapHelper.EventRecord;
+import io.takari.bpm.state.ProcessInstance;
 
 public class KryoSerializer implements Serializer {
 
@@ -36,17 +34,14 @@ public class KryoSerializer implements Serializer {
                 kryo.register(Event.class);
                 kryo.register(ExpiredEvent.class);
                 kryo.register(HashSet.class);
-                kryo.register(DefaultExecution.class);
+                kryo.register(ProcessInstance.class);
                 kryo.register(ExecutionContextImpl.class);
                 kryo.register(EventRecord.class);
 
                 kryo.register(ProcessElementCommand.class);
-                kryo.register(ExecutionCommand.class);
                 kryo.register(HandleRaisedErrorCommand.class);
-                kryo.register(MergeExecutionContextCommand.class);
-                kryo.register(SuspendExecutionCommand.class);
-                kryo.register(ProcessEventMappingCommand.class);
-                kryo.register(PersistExecutionCommand.class);
+
+                // TODO more classes
 
                 kryo.setClassLoader(Thread.currentThread().getContextClassLoader());
 

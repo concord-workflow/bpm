@@ -1,9 +1,11 @@
 package io.takari.bpm.lock;
 
-import com.google.common.util.concurrent.Striped;
 import java.util.concurrent.locks.Lock;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.util.concurrent.Striped;
 
 public class StripedLockManagerImpl implements LockManager {
 

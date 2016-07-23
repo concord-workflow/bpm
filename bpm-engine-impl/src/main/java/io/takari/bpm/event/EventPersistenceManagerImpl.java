@@ -1,11 +1,13 @@
 package io.takari.bpm.event;
 
-import io.takari.bpm.api.ExecutionException;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.takari.bpm.api.ExecutionException;
 
 public class EventPersistenceManagerImpl implements EventPersistenceManager {
 

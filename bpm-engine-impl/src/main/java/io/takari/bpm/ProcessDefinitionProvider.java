@@ -12,5 +12,5 @@ public interface ProcessDefinitionProvider {
      * @return
      * @throws ExecutionException if process definition not found.
      */
-    public ProcessDefinition getById(String id) throws ExecutionException;
+    ProcessDefinition getById(String id) throws ExecutionException;
 }

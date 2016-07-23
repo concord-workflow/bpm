@@ -102,10 +102,7 @@ public final class Event implements Serializable {
         if (this.exclusive != other.exclusive) {
             return false;
         }
-        if (!Objects.equals(this.expiredAt, other.expiredAt)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.expiredAt, other.expiredAt);
     }
 
     @Override

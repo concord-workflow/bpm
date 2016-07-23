@@ -11,20 +11,20 @@ public interface Execution extends Serializable {
     /**
      * The ID of process instance. 
      */
-    public UUID getId();
+    UUID getId();
 
     /**
      * The business key of this process instance.
      */
-    public String getBusinessKey();
+    String getBusinessKey();
 
     /**
      * Indicates when the execution is done (no more process steps to run).
      */
-    public boolean isDone();
+    boolean isDone();
     
     /**
      * Indicates when the execution is suspended (waiting for an event).
      */
-    public boolean isSuspended();
+    boolean isSuspended();
 }

@@ -1,8 +1,20 @@
 package io.takari.bpm;
 
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
+
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+
 import io.takari.bpm.api.NoEventFoundException;
 import io.takari.bpm.event.Event;
-import io.takari.bpm.handlers.IntermediateCatchEventHandler;
 import io.takari.bpm.model.AbstractElement;
 import io.takari.bpm.model.EndEvent;
 import io.takari.bpm.model.EventBasedGateway;
@@ -10,15 +22,7 @@ import io.takari.bpm.model.IntermediateCatchEvent;
 import io.takari.bpm.model.ProcessDefinition;
 import io.takari.bpm.model.SequenceFlow;
 import io.takari.bpm.model.StartEvent;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-import static org.junit.Assert.*;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import static org.mockito.Mockito.*;
+import io.takari.bpm.reducers.EventsReducer;
 
 public class EventBasedGatewayTest extends AbstractEngineTest {
 
@@ -28,7 +32,7 @@ public class EventBasedGatewayTest extends AbstractEngineTest {
     @Test
     public void testSingleEvent() throws Exception {
         String processId = "test";
-        deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
+        deploy(new ProcessDefinition(processId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "gw"),
                 new EventBasedGateway("gw"),
@@ -70,7 +74,7 @@ public class EventBasedGatewayTest extends AbstractEngineTest {
         String processId = "test";
         String eventGroup = "gw#" + System.currentTimeMillis();
 
-        deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
+        deploy(new ProcessDefinition(processId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", eventGroup),
                 new EventBasedGateway(eventGroup),
@@ -112,21 +116,21 @@ public class EventBasedGatewayTest extends AbstractEngineTest {
 
         // ---
 
-        verify(eventManager, times(1)).clearGroup(eq(key), any(UUID.class));
+        verify(getEventManager(), times(1)).clearGroup(eq(key), any(UUID.class));
     }
 
     /**
-     * start --> gw1 --> ev1 --> end1
+     * start --> gw1 --> ev1 -----------------> end1
      *             \
      *              --> ev2 --> gw2 --> ev3 --> end2
      *                            \
-     *                             --> ev4 --> end3
+     *                             ---> ev4 --> end3
      */
     @Test
     public void testNested() throws Exception {
         String processId = "test";
 
-        deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
+        deploy(new ProcessDefinition(processId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "gw1"),
                 new EventBasedGateway("gw1"),
@@ -194,7 +198,7 @@ public class EventBasedGatewayTest extends AbstractEngineTest {
         String dt = "2011-03-11T12:13:14";
 
         String processId = "test";
-        deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
+        deploy(new ProcessDefinition(processId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "gw"),
                 new EventBasedGateway("gw"),
@@ -216,11 +220,11 @@ public class EventBasedGatewayTest extends AbstractEngineTest {
         // ---
 
         ArgumentCaptor<Event> arg = ArgumentCaptor.forClass(Event.class);
-        verify(eventManager, times(1)).add(arg.capture());
+        verify(getEventManager(), times(1)).add(arg.capture());
         Event ev = arg.getValue();
         assertNotNull(ev);
         assertEquals(v1, ev.getExpiredAt());
-        reset(eventManager);
+        reset(getEventManager());
 
         // ---
 
@@ -229,10 +233,10 @@ public class EventBasedGatewayTest extends AbstractEngineTest {
         // ---
 
         arg = ArgumentCaptor.forClass(Event.class);
-        verify(eventManager, times(1)).add(arg.capture());
+        verify(getEventManager(), times(1)).add(arg.capture());
         ev = arg.getValue();
         assertNotNull(ev);
-        Date actualDt = IntermediateCatchEventHandler.parseIso8601(dt);
+        Date actualDt = EventsReducer.parseIso8601(dt);
         assertEquals(actualDt, ev.getExpiredAt());
     }
     
