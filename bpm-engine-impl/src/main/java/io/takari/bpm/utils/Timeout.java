@@ -1,6 +1,8 @@
 package io.takari.bpm.utils;
 
-public class Timeout<T> {
+import java.io.Serializable;
+
+public class Timeout<T> implements Serializable {
 
     private final long duration;
     private final T payload;

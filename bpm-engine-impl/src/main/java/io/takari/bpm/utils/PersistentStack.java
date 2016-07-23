@@ -37,9 +37,6 @@ public class PersistentStack<T extends Serializable> implements Serializable {
 
         Deque<T> n = new ArrayDeque<>(stack);
         T el = n.pop();
-        if (el == null) {
-            return this;
-        }
 
         return new PersistentStack<T>(n);
     }
