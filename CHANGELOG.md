@@ -1,8 +1,9 @@
 # Change Log
 
-## [Unreleased]
+### [0.8.0] - 2016-07-23
 ### Changes
 - complete rewrite of internal state management. API and semantics weren't changed.
+- fixed more bugs related to deep nested process handling.
 
 ## [0.7.3] - 2016-07-19
 ### Added
