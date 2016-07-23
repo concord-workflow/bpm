@@ -21,10 +21,10 @@ public class IndexedProcessDefinitionTest {
 
     @Test
     public void testSubprocess() throws Exception {
-        ProcessDefinition pd = new ProcessDefinition("test", Arrays.<AbstractElement>asList(
+        ProcessDefinition pd = new ProcessDefinition("test", Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "sub"),
-                new SubProcess("sub", Arrays.<AbstractElement>asList(
+                new SubProcess("sub", Arrays.asList(
                         new StartEvent("substart"),
                         new SequenceFlow("f2", "substart", "t1"),
                         new ServiceTask("t1", ExpressionType.DELEGATE, "${t1}"),

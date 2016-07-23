@@ -39,7 +39,7 @@ public class CallActivityTest extends AbstractEngineTest {
         String aId = "testA";
         String bId = "testB";
 
-        deploy(new ProcessDefinition(aId, Arrays.<AbstractElement>asList(
+        deploy(new ProcessDefinition(aId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "call"),
                 new CallActivity("call", bId),
@@ -47,7 +47,7 @@ public class CallActivityTest extends AbstractEngineTest {
                 new EndEvent("end")
         )));
 
-        deploy(new ProcessDefinition(bId, Arrays.<AbstractElement>asList(
+        deploy(new ProcessDefinition(bId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "end"),
                 new EndEvent("end")
@@ -91,7 +91,7 @@ public class CallActivityTest extends AbstractEngineTest {
         String ev1 = "ev1";
         String ev2 = "ev2";
 
-        deploy(new ProcessDefinition(aId, Arrays.<AbstractElement>asList(
+        deploy(new ProcessDefinition(aId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "call"),
                 new CallActivity("call", bId),
@@ -99,7 +99,7 @@ public class CallActivityTest extends AbstractEngineTest {
                 new EndEvent("end")
         )));
 
-        deploy(new ProcessDefinition(bId, Arrays.<AbstractElement>asList(
+        deploy(new ProcessDefinition(bId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "gw"),
                 new EventBasedGateway("gw"),
@@ -168,7 +168,7 @@ public class CallActivityTest extends AbstractEngineTest {
         Set<VariableMapping> outs = new HashSet<>();
         outs.add(new VariableMapping(null, "${" + insideK + "}", outsidek));
 
-        deploy(new ProcessDefinition(aId, Arrays.<AbstractElement>asList(
+        deploy(new ProcessDefinition(aId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "call"),
                 new CallActivity("call", bId, ins, outs),
@@ -178,7 +178,7 @@ public class CallActivityTest extends AbstractEngineTest {
                 new EndEvent("end")
         )));
 
-        deploy(new ProcessDefinition(bId, Arrays.<AbstractElement>asList(
+        deploy(new ProcessDefinition(bId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "end"),
                 new EndEvent("end")
@@ -238,7 +238,7 @@ public class CallActivityTest extends AbstractEngineTest {
         String errorRef = "e" + System.currentTimeMillis();
         String messageRef = "m" + System.currentTimeMillis();
 
-        deploy(new ProcessDefinition(aId, Arrays.<AbstractElement>asList(
+        deploy(new ProcessDefinition(aId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "call"),
                 new CallActivity("call", bId),
@@ -248,7 +248,7 @@ public class CallActivityTest extends AbstractEngineTest {
                 new EndEvent("end")
         )));
 
-        deploy(new ProcessDefinition(bId, Arrays.<AbstractElement>asList(
+        deploy(new ProcessDefinition(bId, Arrays.asList(
                 new StartEvent("bstart"),
                 new SequenceFlow("bf1", "bstart", "bev1"),
                 new IntermediateCatchEvent("bev1", messageRef),
@@ -465,14 +465,14 @@ public class CallActivityTest extends AbstractEngineTest {
         String aId = "testA";
         String bId = "testB";
 
-        deploy(new ProcessDefinition(aId, Arrays.<AbstractElement> asList(
+        deploy(new ProcessDefinition(aId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "call"),
                 new CallActivity("call", bId, true),
                 new SequenceFlow("f2", "call", "end"),
                 new EndEvent("end"))));
 
-        deploy(new ProcessDefinition(bId, Arrays.<AbstractElement> asList(
+        deploy(new ProcessDefinition(bId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "t1"),
                 new ServiceTask("t1", ExpressionType.DELEGATE, "${t1}"),

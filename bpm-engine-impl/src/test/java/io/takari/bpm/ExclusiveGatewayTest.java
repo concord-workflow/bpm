@@ -20,7 +20,7 @@ public class ExclusiveGatewayTest extends AbstractEngineTest {
     @Test
     public void testDefaultFlow() throws Exception {
         String processId = "test";
-        deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
+        deploy(new ProcessDefinition(processId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "gw"),
                 new ExclusiveGateway("gw", "fB"),
@@ -48,7 +48,7 @@ public class ExclusiveGatewayTest extends AbstractEngineTest {
     @Test
     public void testExpressions() throws Exception {
         String processId = "test";
-        deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
+        deploy(new ProcessDefinition(processId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "gw"),
                 new ExclusiveGateway("gw", "fA"),

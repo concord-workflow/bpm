@@ -47,7 +47,7 @@ public class TimerBoundaryEventTest extends AbstractEngineTest {
         // ---
         
         String processId = "test";
-        deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
+        deploy(new ProcessDefinition(processId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "t1"),
                 new ServiceTask("t1", ExpressionType.DELEGATE, "${longTask}"),
@@ -103,7 +103,7 @@ public class TimerBoundaryEventTest extends AbstractEngineTest {
         // ---
         
         String processId = "test";
-        deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
+        deploy(new ProcessDefinition(processId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "t1"),
                 new ServiceTask("t1", ExpressionType.DELEGATE, "${longTask}"),
@@ -148,7 +148,7 @@ public class TimerBoundaryEventTest extends AbstractEngineTest {
         // ---
         
         String processId = "test";
-        deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
+        deploy(new ProcessDefinition(processId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "t1"),
                 new ServiceTask("t1", ExpressionType.SIMPLE, "${bean.doIt()}"),
@@ -202,7 +202,7 @@ public class TimerBoundaryEventTest extends AbstractEngineTest {
         // ---
         
         String processId = "test";
-        deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
+        deploy(new ProcessDefinition(processId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "t1"),
                 new ServiceTask("t1", ExpressionType.DELEGATE, "${failingTask}"),

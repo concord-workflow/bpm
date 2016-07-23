@@ -57,7 +57,7 @@ public class ExpiredEventIndex {
         List<ExpiredEvent> result = new ArrayList<>();
 
         List<byte[]> toDelete = new ArrayList<>();
-        try (DBIterator it = db.iterator();) {
+        try (DBIterator it = db.iterator()) {
             for (it.seekToFirst(); it.hasNext();) {
                 Map.Entry<byte[], byte[]> entry = it.next();
 

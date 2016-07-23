@@ -17,7 +17,7 @@ public class ProcessElementCommandHandler implements CommandHandler<ProcessEleme
 
     @Override
     public List<Action> handle(ProcessInstance state, ProcessElementCommand cmd, List<Action> actions) throws ExecutionException {
-        ProcessElementCommand c = (ProcessElementCommand) cmd;
+        ProcessElementCommand c = cmd;
         actions = elementHandler.handle(state, c, actions);
         actions.add(new ActivateElementAction(c.getDefinitionId(), c.getElementId()));
         actions.add(new FireOnElementInterceptorsAction(c.getDefinitionId(), c.getElementId()));

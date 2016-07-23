@@ -30,7 +30,7 @@ public class IntermediateCatchEventTest extends AbstractEngineTest {
         getServiceTaskRegistry().register("t1", mock(JavaDelegate.class));
         
         String processId = "test";
-        deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
+        deploy(new ProcessDefinition(processId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "ev"),
                 new IntermediateCatchEvent("ev", "ev"),
@@ -78,7 +78,7 @@ public class IntermediateCatchEventTest extends AbstractEngineTest {
      */
     private void testTimerWithDuration(String duration) throws Exception {
         String processId = "test";
-        deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
+        deploy(new ProcessDefinition(processId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "ev"),
                 new IntermediateCatchEvent("ev", "ev", null, duration),

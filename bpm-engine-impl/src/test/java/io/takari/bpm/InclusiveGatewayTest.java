@@ -24,7 +24,7 @@ public class InclusiveGatewayTest extends AbstractEngineTest {
     @Test
     public void testSingleEvent() throws Exception {
         String processId = "test";
-        deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
+        deploy(new ProcessDefinition(processId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "gw1"),
                 new InclusiveGateway("gw1"),
@@ -66,7 +66,7 @@ public class InclusiveGatewayTest extends AbstractEngineTest {
      *               --> ev2 -->
      */
     private ProcessDefinition makeDuoEventProcess(String processId) {
-       return new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
+       return new ProcessDefinition(processId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "gw1"),
                 new InclusiveGateway("gw1"),
@@ -181,7 +181,7 @@ public class InclusiveGatewayTest extends AbstractEngineTest {
         // ---
         
         String processId = "test";
-        deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
+        deploy(new ProcessDefinition(processId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "gw1"),
                 new InclusiveGateway("gw1"),
@@ -229,7 +229,7 @@ public class InclusiveGatewayTest extends AbstractEngineTest {
     @Test
     public void testPartiallyInactive() throws Exception {
         String processId = "test";
-        deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
+        deploy(new ProcessDefinition(processId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "gw1"),
                 new InclusiveGateway("gw1"),

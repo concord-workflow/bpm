@@ -22,7 +22,7 @@ public class ParallelGatewayTest extends AbstractEngineTest {
     @Test
     public void testSingleEvent() throws Exception {
         String processId = "test";
-        deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
+        deploy(new ProcessDefinition(processId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "gw1"),
                 new ParallelGateway("gw1"),
@@ -64,7 +64,7 @@ public class ParallelGatewayTest extends AbstractEngineTest {
     @Test
     public void testWithoutJoin() throws Exception {
         String processId = "test";
-        deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
+        deploy(new ProcessDefinition(processId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "gw1"),
                 new ParallelGateway("gw1"),
@@ -105,7 +105,7 @@ public class ParallelGatewayTest extends AbstractEngineTest {
     @Ignore
     public void testPartialInJoin() throws Exception {
         String processId = "test";
-        deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
+        deploy(new ProcessDefinition(processId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "gw1"),
                 new ExclusiveGateway("gw1"),

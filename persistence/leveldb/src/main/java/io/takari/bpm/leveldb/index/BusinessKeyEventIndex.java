@@ -72,7 +72,7 @@ public class BusinessKeyEventIndex {
         byte[] key = marshallKey(processBusinessKey);
         byte[] idsBytes = levelDb.get(key);
         if(idsBytes == null) {
-            return Collections.<UUID>emptySet();
+            return Collections.emptySet();
         }
         return unmarshallValue(idsBytes);
     }

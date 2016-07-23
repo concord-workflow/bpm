@@ -35,7 +35,7 @@ public class ExecutionInterceptorTest extends AbstractEngineTest {
     @Test
     public void testSingleEvent() throws Exception {
         String processId = "test";
-        deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
+        deploy(new ProcessDefinition(processId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "gw"),
                 new EventBasedGateway("gw"),
@@ -72,7 +72,7 @@ public class ExecutionInterceptorTest extends AbstractEngineTest {
     @Test
     public void testException() throws Exception {
         String processId = "test";
-        deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
+        deploy(new ProcessDefinition(processId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "t1"),
                 new ServiceTask("t1", ExpressionType.DELEGATE, "${t1}"),

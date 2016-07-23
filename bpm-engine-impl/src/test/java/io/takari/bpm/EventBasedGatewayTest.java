@@ -32,7 +32,7 @@ public class EventBasedGatewayTest extends AbstractEngineTest {
     @Test
     public void testSingleEvent() throws Exception {
         String processId = "test";
-        deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
+        deploy(new ProcessDefinition(processId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "gw"),
                 new EventBasedGateway("gw"),
@@ -74,7 +74,7 @@ public class EventBasedGatewayTest extends AbstractEngineTest {
         String processId = "test";
         String eventGroup = "gw#" + System.currentTimeMillis();
 
-        deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
+        deploy(new ProcessDefinition(processId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", eventGroup),
                 new EventBasedGateway(eventGroup),
@@ -130,7 +130,7 @@ public class EventBasedGatewayTest extends AbstractEngineTest {
     public void testNested() throws Exception {
         String processId = "test";
 
-        deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
+        deploy(new ProcessDefinition(processId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "gw1"),
                 new EventBasedGateway("gw1"),
@@ -198,7 +198,7 @@ public class EventBasedGatewayTest extends AbstractEngineTest {
         String dt = "2011-03-11T12:13:14";
 
         String processId = "test";
-        deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
+        deploy(new ProcessDefinition(processId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "gw"),
                 new EventBasedGateway("gw"),

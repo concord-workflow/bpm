@@ -12,7 +12,7 @@ public class PerformActionCommandHandler implements CommandHandler<PerformAction
 
     @Override
     public List<Action> handle(ProcessInstance state, PerformActionsCommand cmd, List<Action> actions) throws ExecutionException {
-        PerformActionsCommand a = (PerformActionsCommand) cmd;
+        PerformActionsCommand a = cmd;
         actions.add(new PopCommandAction());
         actions.addAll(a.getActions());
         return actions;

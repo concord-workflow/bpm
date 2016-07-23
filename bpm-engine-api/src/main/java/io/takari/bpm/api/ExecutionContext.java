@@ -14,9 +14,9 @@ public interface ExecutionContext extends Serializable {
      * event. Can be accessed with
      * {@link #getVariable(ExecutionContext.ERROR_CODE_KEY)}.
      */
-    public static final String ERROR_CODE_KEY = "errorCode";
+    String ERROR_CODE_KEY = "errorCode";
 
-    public static final String PROCESS_BUSINESS_KEY = "__processBusinessKey";
+    String PROCESS_BUSINESS_KEY = "__processBusinessKey";
 
     Object getVariable(String key);
     

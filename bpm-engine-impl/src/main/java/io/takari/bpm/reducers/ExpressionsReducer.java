@@ -71,7 +71,7 @@ public class ExpressionsReducer implements Reducer {
                 throw e;
             }
         } catch (BpmnError e) {
-            state = handleBpmnError(state, a, (BpmnError) e);
+            state = handleBpmnError(state, a, e);
         } catch (ExecutionException e) {
             throw e;
         } catch (Exception e) {
