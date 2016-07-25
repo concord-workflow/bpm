@@ -2,6 +2,7 @@ package io.takari.bpm;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Function;
 
 import io.takari.bpm.api.Engine;
 import io.takari.bpm.el.DefaultExpressionManager;
@@ -33,7 +34,8 @@ public final class EngineBuilder {
     private ProcessDefinitionProvider definitionProvider;
     private ServiceTaskRegistry taskRegistry;
     private UuidGenerator uuidGenerator;
-    
+    private Function<Executor, Executor> executorWrappingFn;
+
     public EngineBuilder withDefinitionProvider(ProcessDefinitionProvider definitionProvider) {
         this.definitionProvider = definitionProvider;
         return this;
@@ -41,6 +43,11 @@ public final class EngineBuilder {
     
     public EngineBuilder withEventManager(EventPersistenceManager eventManager) {
         this.eventManager = eventManager;
+        return this;
+    }
+
+    public EngineBuilder withExpressionManager(ExpressionManager expressionManager) {
+        this.expressionManager = expressionManager;
         return this;
     }
     
@@ -66,6 +73,11 @@ public final class EngineBuilder {
 
     public EngineBuilder withExecutor(Executor executor) {
         this.executor = executor;
+        return this;
+    }
+
+    public EngineBuilder wrapExecutorWith(Function<Executor, Executor> fn) {
+        this.executorWrappingFn = fn;
         return this;
     }
     
@@ -118,6 +130,10 @@ public final class EngineBuilder {
         if (executor == null) {
             executor = new DefaultExecutor(expressionManager, threadPool, interceptors, indexedDefinitionProvider, uuidGenerator,
                     eventManager, persistenceManager);
+        }
+
+        if (executorWrappingFn != null) {
+            executor = executorWrappingFn.apply(executor);
         }
 
         return new EngineImpl(new IndexedProcessDefinitionProvider(definitionProvider),

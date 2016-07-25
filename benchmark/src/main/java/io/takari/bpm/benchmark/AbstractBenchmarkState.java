@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.takari.bpm.el.ScriptingExpressionManager;
+import io.takari.bpm.task.KeyAwareServiceTaskRegistry;
 import org.iq80.leveldb.DBFactory;
 import org.iq80.leveldb.impl.Iq80DBFactory;
 import org.openjdk.jmh.annotations.TearDown;
@@ -37,10 +39,10 @@ public abstract class AbstractBenchmarkState {
     private MapDbPersistenceManager mapDbPersistenceManager;
     
     public AbstractBenchmarkState(ProcessDefinition def) {
-        this(true, def);
+        this(true, false, def);
     }
     
-    public AbstractBenchmarkState(boolean inMem, ProcessDefinition def) {
+    public AbstractBenchmarkState(boolean inMem, boolean nashorn, ProcessDefinition def) {
         this.serviceTaskRegistry = new DummyServiceTaskRegistry();
         
         DummyProcessDefinitionProvider defs = new DummyProcessDefinitionProvider();
@@ -82,14 +84,19 @@ public abstract class AbstractBenchmarkState {
             mapDbPersistenceManager.start();
             persistenceManager = mapDbPersistenceManager;
         }
-        
-        this.engine = new EngineBuilder()
+
+        EngineBuilder builder = new EngineBuilder()
                 .withDefinitionProvider(defs)
                 .withTaskRegistry(serviceTaskRegistry)
                 .withEventManager(eventPersistenceManager)
                 .withPersistenceManager(persistenceManager)
-                .withLockManager(lockManager)
-                .build();
+                .withLockManager(lockManager);
+
+        if (nashorn) {
+            builder.withExpressionManager(new ScriptingExpressionManager("nashorn", serviceTaskRegistry));
+        }
+
+        this.engine = builder.build();
     }
     
     @TearDown
@@ -125,7 +132,7 @@ public abstract class AbstractBenchmarkState {
         }
     }
 
-    public static class DummyServiceTaskRegistry implements ServiceTaskRegistry {
+    public static class DummyServiceTaskRegistry implements KeyAwareServiceTaskRegistry {
 
         private final Map<String, Object> tasks = new HashMap<>();
         
@@ -137,5 +144,10 @@ public abstract class AbstractBenchmarkState {
         public Object getByKey(String key) {
             return tasks.get(key);
         }
-    }    
+
+        @Override
+        public boolean containsKey(String key) {
+            return tasks.containsKey(key);
+        }
+    }
 }

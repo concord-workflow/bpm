@@ -1,6 +1,9 @@
 # Change Log
 
 ### [Unreleased]
+### Added
+- initial support for JSR 223 (scripting for Java) in expressions.
+
 ### Changes
 - improved performance of boundary events lookup and handling.
 About 5% improvement for the most of scenarios.

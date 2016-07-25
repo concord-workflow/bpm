@@ -22,7 +22,7 @@ public class PersistenceBenchmark {
     public static class BenchmarkState extends AbstractBenchmarkState {
 
         public BenchmarkState() {
-            super(false, new ProcessDefinition("test", Arrays.asList(
+            super(false, false, new ProcessDefinition("test", Arrays.asList(
                     new StartEvent("start"),
                     new SequenceFlow("f1", "start", "gw"),
                     new EventBasedGateway("gw"),
