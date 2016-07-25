@@ -1,22 +1,21 @@
 package io.takari.bpm.state;
 
+import com.github.andrewoma.dexx.collection.HashMap;
+
 import java.io.Serializable;
 import java.util.Objects;
-
-import org.organicdesign.fp.collections.ImMap;
-import org.organicdesign.fp.collections.PersistentHashMap;
 
 public class Activations implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final ImMap<ActivationKey, Integer> values;
+    private final HashMap<ActivationKey, Integer> values;
 
     public Activations() {
-        this.values = PersistentHashMap.empty();
+        this.values = HashMap.empty();
     }
 
-    private Activations(ImMap<ActivationKey, Integer> values) {
+    private Activations(HashMap<ActivationKey, Integer> values) {
         this.values = values;
     }
 
@@ -29,7 +28,7 @@ public class Activations implements Serializable {
         }
         i = i + count;
 
-        return new Activations(values.assoc(k, i));
+        return new Activations(values.put(k, i));
     }
     
     public int count(String definitionId, String elementId) {

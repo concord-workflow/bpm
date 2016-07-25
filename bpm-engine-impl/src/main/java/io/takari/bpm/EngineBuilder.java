@@ -58,6 +58,16 @@ public final class EngineBuilder {
         this.lockManager = lockManager;
         return this;
     }
+
+    public EngineBuilder withPlanner(Planner planner) {
+        this.planner = planner;
+        return this;
+    }
+
+    public EngineBuilder withExecutor(Executor executor) {
+        this.executor = executor;
+        return this;
+    }
     
     public Engine build() {
         if (definitionProvider == null) {

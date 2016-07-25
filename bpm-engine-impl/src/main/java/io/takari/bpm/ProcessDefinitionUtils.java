@@ -1,9 +1,6 @@
 package io.takari.bpm;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.model.AbstractElement;
@@ -154,7 +151,8 @@ public final class ProcessDefinitionUtils {
         throw new ExecutionException("Invalid process definition '%s': no start event defined", pd.getId());
     }
     
-    public static List<BoundaryEvent> findOptionalBoundaryEvents(ProcessDefinition pd, String attachedToRef) throws ExecutionException {
+    public static List<BoundaryEvent> findOptionalBoundaryEvents(IndexedProcessDefinition pd, String attachedToRef) throws ExecutionException {
+        /*
         List<BoundaryEvent> l = new ArrayList<>();
         
         ProcessDefinition sub = findElementProcess(pd, attachedToRef);
@@ -168,9 +166,13 @@ public final class ProcessDefinitionUtils {
         }
         
         return l;
+        */
+
+        List<BoundaryEvent> l = pd.findOptionalBoundaryEvents(attachedToRef);
+        return l != null ? l : Collections.emptyList();
     }
 
-    public static BoundaryEvent findBoundaryErrorEvent(ProcessDefinition pd, String attachedToRef, String errorRef) throws ExecutionException {
+    public static BoundaryEvent findBoundaryErrorEvent(IndexedProcessDefinition pd, String attachedToRef, String errorRef) throws ExecutionException {
         List<BoundaryEvent> l = findOptionalBoundaryEvents(pd, attachedToRef);
         for (BoundaryEvent ev : l) {
             if (attachedToRef.equals(ev.getAttachedToRef())) {

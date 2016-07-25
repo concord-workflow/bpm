@@ -1,11 +1,11 @@
 package io.takari.bpm.state;
 
-import java.io.Serializable;
-import java.util.Map;
-import java.util.Set;
+import com.github.andrewoma.dexx.collection.HashMap;
+import com.github.andrewoma.dexx.collection.Map;
 
-import org.organicdesign.fp.collections.ImMap;
-import org.organicdesign.fp.collections.PersistentHashMap;
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Process-level variables.
@@ -15,7 +15,7 @@ public class Variables implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final Variables parent;
-    private final ImMap<String, Object> values;
+    private final Map<String, Object> values;
 
     public Variables() {
         this(null);
@@ -23,10 +23,10 @@ public class Variables implements Serializable {
 
     public Variables(Variables parent) {
         this.parent = parent;
-        this.values = PersistentHashMap.empty();
+        this.values = HashMap.empty();
     }
 
-    private Variables(Variables parent, ImMap<String, Object> values) {
+    private Variables(Variables parent, Map<String, Object> values) {
         this.parent = parent;
         this.values = values;
     }
@@ -36,7 +36,7 @@ public class Variables implements Serializable {
     }
 
     public Variables setVariable(String key, Object value) {
-        return new Variables(parent, values.assoc(key, value));
+        return new Variables(parent, values.put(key, value));
     }
 
     public Object getVariable(String key) {
@@ -47,7 +47,11 @@ public class Variables implements Serializable {
     }
 
     public Set<String> getVariableNames() {
-        return values.keySet();
+        Set<String> result = new HashSet<>();
+        for (String s : values.keys()) {
+            result.add(s);
+        }
+        return result;
     }
 
     public boolean hasVariable(String key) {
@@ -56,7 +60,7 @@ public class Variables implements Serializable {
 
     public Variables removeVariable(String key) {
         if (values.containsKey(key)) {
-            return new Variables(parent, values.without(key));
+            return new Variables(parent, values.remove(key));
         }
 
         if (parent == null) {
@@ -66,7 +70,7 @@ public class Variables implements Serializable {
         return new Variables(parent.removeVariable(key), values);
     }
 
-    public Map<String, Object> asMap() {
-        return values;
+    public java.util.Map<String, Object> asMap() {
+        return values.asMap();
     }
 }

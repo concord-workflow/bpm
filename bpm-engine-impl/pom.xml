@@ -18,9 +18,9 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.organicdesign</groupId>
-            <artifactId>UncleJim</artifactId>
-            <version>1.0.3</version>
+            <groupId>com.github.andrewoma.dexx</groupId>
+            <artifactId>collection</artifactId>
+            <version>0.6</version>
         </dependency>
         <dependency>
             <groupId>de.odysseus.juel</groupId>

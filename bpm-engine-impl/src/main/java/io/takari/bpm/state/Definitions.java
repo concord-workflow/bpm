@@ -1,29 +1,28 @@
 package io.takari.bpm.state;
 
-import java.io.Serializable;
-
-import org.organicdesign.fp.collections.ImMap;
-import org.organicdesign.fp.collections.PersistentHashMap;
-
+import com.github.andrewoma.dexx.collection.HashMap;
+import com.github.andrewoma.dexx.collection.Map;
 import io.takari.bpm.IndexedProcessDefinition;
+
+import java.io.Serializable;
 
 public class Definitions implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final ImMap<String, IndexedProcessDefinition> defs;
+    private final Map<String, IndexedProcessDefinition> defs;
 
     public Definitions(IndexedProcessDefinition initial) {
-        ImMap<String, IndexedProcessDefinition> m = PersistentHashMap.empty();
-        this.defs = m.assoc(initial.getId(), initial);
+        Map<String, IndexedProcessDefinition> m = HashMap.empty();
+        this.defs = m.put(initial.getId(), initial);
     }
 
-    private Definitions(ImMap<String, IndexedProcessDefinition> defs) {
+    private Definitions(Map<String, IndexedProcessDefinition> defs) {
         this.defs = defs;
     }
 
     public Definitions put(IndexedProcessDefinition pd) {
-        return new Definitions(defs.assoc(pd.getId(), pd));
+        return new Definitions(defs.put(pd.getId(), pd));
     }
 
     public IndexedProcessDefinition get(String key) {
