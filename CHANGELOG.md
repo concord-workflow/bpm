@@ -1,5 +1,10 @@
 # Change Log
 
+### [Unreleased]
+### Changes
+- improved performance of boundary events lookup and handling.
+About 5% improvement for the most of scenarios.
+
 ### [0.8.0] - 2016-07-23
 ### Changes
 - complete rewrite of internal state management. API and semantics weren't changed.
@@ -19,7 +24,7 @@
 - `InclusiveGateway` now supports expressions for outgoing flows. Some of outgoing `SequenceFlow` can be "inactive" (have their expressions evaluated to `false`).
 
 ### Breaking
-- `io.takari.bpm.leveldb.LevelDbPersistenceManager` -- a serialized removed from its constructor. It wasn't used in any way, just a relic of the past.
+- `io.takari.bpm.leveldb.LevelDbPersistenceManager` -- a serializer removed from its constructor. It wasn't used in any way, just a relic of the past.
 
 ## [0.7.1] - 2016-07-07
 ### Changed
