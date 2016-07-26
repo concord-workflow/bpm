@@ -1,7 +1,7 @@
 package io.takari.bpm.state;
 
-import com.github.andrewoma.dexx.collection.HashMap;
-import com.github.andrewoma.dexx.collection.Map;
+import org.pcollections.HashTreePMap;
+import org.pcollections.PMap;
 
 import java.io.Serializable;
 import java.util.HashSet;
@@ -15,7 +15,7 @@ public class Variables implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final Variables parent;
-    private final Map<String, Object> values;
+    private final PMap<String, Object> values;
 
     public Variables() {
         this(null);
@@ -23,10 +23,10 @@ public class Variables implements Serializable {
 
     public Variables(Variables parent) {
         this.parent = parent;
-        this.values = HashMap.empty();
+        this.values = HashTreePMap.empty();
     }
 
-    private Variables(Variables parent, Map<String, Object> values) {
+    private Variables(Variables parent, PMap<String, Object> values) {
         this.parent = parent;
         this.values = values;
     }
@@ -36,7 +36,7 @@ public class Variables implements Serializable {
     }
 
     public Variables setVariable(String key, Object value) {
-        return new Variables(parent, values.put(key, value));
+        return new Variables(parent, values.plus(key, value));
     }
 
     public Object getVariable(String key) {
@@ -48,7 +48,7 @@ public class Variables implements Serializable {
 
     public Set<String> getVariableNames() {
         Set<String> result = new HashSet<>();
-        for (String s : values.keys()) {
+        for (String s : values.keySet()) {
             result.add(s);
         }
         return result;
@@ -60,7 +60,7 @@ public class Variables implements Serializable {
 
     public Variables removeVariable(String key) {
         if (values.containsKey(key)) {
-            return new Variables(parent, values.remove(key));
+            return new Variables(parent, values.minus(key));
         }
 
         if (parent == null) {
@@ -71,6 +71,6 @@ public class Variables implements Serializable {
     }
 
     public java.util.Map<String, Object> asMap() {
-        return values.asMap();
+        return values;
     }
 }
