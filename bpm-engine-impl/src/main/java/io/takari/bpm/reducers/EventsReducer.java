@@ -93,7 +93,7 @@ public class EventsReducer implements Reducer {
 
     private static Date parseTimeDate(ProcessInstance state, ExpressionManager em, String definitionId, String elementId, String s)
             throws ExecutionException {
-        ExecutionContextImpl ctx = new ExecutionContextImpl(state.getVariables());
+        ExecutionContextImpl ctx = new ExecutionContextImpl(em, state.getVariables());
         Object v = eval(s, ctx, em, Object.class);
 
         // expression evaluation may have side-effects, but they are ignored
@@ -119,7 +119,7 @@ public class EventsReducer implements Reducer {
 
     private static Date parseExpiredAt(ProcessInstance state, ExpressionManager em, String definitionId, String elementId, String s)
             throws ExecutionException {
-        ExecutionContextImpl ctx = new ExecutionContextImpl(state.getVariables());
+        ExecutionContextImpl ctx = new ExecutionContextImpl(em, state.getVariables());
         Object v = eval(s, ctx, em, Object.class);
 
         // expression evaluation may have side-effects, but they are ignored

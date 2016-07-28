@@ -47,7 +47,7 @@ public class ExpressionsReducer implements Reducer {
         }
 
         final EvalExpressionAction a = (EvalExpressionAction) action;
-        final ExecutionContextImpl ctx = new ExecutionContextImpl(state.getVariables());
+        final ExecutionContextImpl ctx = new ExecutionContextImpl(expressionManager, state.getVariables());
 
         Callable<Command> fn = new DelegateFn(expressionManager, ctx, a.getType(), a.getExpression(), a.getDefaultCommand());
 

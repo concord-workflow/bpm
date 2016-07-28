@@ -52,7 +52,7 @@ public class ForkReducer implements Reducer {
             IndexedProcessDefinition pd = state.getDefinition(a.getDefinitionId());
             List<SequenceFlow> out = ProcessDefinitionUtils.findOutgoingFlows(pd, a.getElementId());
             
-            ExecutionContextImpl ctx = new ExecutionContextImpl(state.getVariables());
+            ExecutionContextImpl ctx = new ExecutionContextImpl(expressionManager, state.getVariables());
             List<SequenceFlow> filtered = filterInactive(expressionManager, ctx, out);
 
             // TODO refactor into an utility fn?

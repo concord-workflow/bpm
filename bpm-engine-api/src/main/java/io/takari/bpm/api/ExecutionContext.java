@@ -1,13 +1,12 @@
 package io.takari.bpm.api;
 
-import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
 
 /**
  * The execution context. Provides access to the process variables.
  */
-public interface ExecutionContext extends Serializable {
+public interface ExecutionContext {
     
     /**
      * Key of latest handled error, contains "errorRef" of a boundary error
@@ -29,4 +28,6 @@ public interface ExecutionContext extends Serializable {
     void removeVariable(String key);
 
     Set<String> getVariableNames();
+
+    <T> T eval(String expr, Class<T> type);
 }

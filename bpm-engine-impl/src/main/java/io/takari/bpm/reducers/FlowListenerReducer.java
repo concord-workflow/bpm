@@ -38,7 +38,7 @@ public class FlowListenerReducer implements Reducer {
         IndexedProcessDefinition pd = state.getDefinition(a.getDefinitionId());
         SequenceFlow f = (SequenceFlow) ProcessDefinitionUtils.findElement(pd, a.getElementId());
         
-        ExecutionContextImpl ctx = new ExecutionContextImpl(state.getVariables());
+        ExecutionContextImpl ctx = new ExecutionContextImpl(expressionManager, state.getVariables());
         processListeners(expressionManager, ctx, f);
         
         // expression evaluation may have side-effects, but they are ignored

@@ -24,7 +24,7 @@ public final class VariablesHelper {
             if (source != null) {
                 v = src.getVariable(source);
             } else if (sourceExpression != null) {
-                ExecutionContextImpl ctx = new ExecutionContextImpl(src);
+                ExecutionContextImpl ctx = new ExecutionContextImpl(em, src);
                 v = em.eval(ctx, sourceExpression, Object.class);
             }
 
