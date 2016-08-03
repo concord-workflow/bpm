@@ -145,25 +145,8 @@ public final class SimpleDSL {
 
         List<AbstractElement> parallel = new ArrayList<>();
         for (Step s : step.getSteps()) {
-            if (s instanceof TaskStep) {
-                TaskStep inner = (TaskStep) s;
-
-                String fId = "f" + counter.incrementAndGet();
-                String tId = "t" + counter.incrementAndGet();
-                String onSuccessId = "ok_" + inner.getTask();
-                String onFailureId = "fail_" + inner.getTask();
-
-                children.add(new SequenceFlow(fId, lastId, tId));
-                children.add(makeTask(inner, tId, onSuccessId, onFailureId));
-
-                String subId = "sub" + counter.incrementAndGet();
-                parallel.add(wrapEvents(subId, onSuccessId, onFailureId, counter));
-
-                lastId = tId;
-            } else {
-                String sId = "step" + counter.incrementAndGet();
-                parallel.add(convert(s, sId, counter));
-            }
+            String sId = "step" + counter.incrementAndGet();
+            parallel.add(convert(s, sId, counter));
         }
 
         String gw1Id = "gw" + counter.incrementAndGet();
