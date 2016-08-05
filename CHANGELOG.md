@@ -1,8 +1,13 @@
 # Change Log
 
-### [Unreleased]
+### [0.8.2] - 2016-08-05
+### Added
+- `BpmnError#getCause` and the corresponding constructor are added.
+
+### [0.8.1] - 2016-07-28
 ### Added
 - initial support for JSR 223 (scripting for Java) in expressions.
+- new method `ExecutionContext#eval` allows evaluation of expressions in `JavaDelegate` tasks.
 
 ### Changes
 - improved performance of boundary events lookup and handling.
