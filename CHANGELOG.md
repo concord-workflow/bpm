@@ -1,10 +1,14 @@
 # Change Log
 
-### [0.8.2] - 2016-08-05
+## [Unreleased]
+### Breaking
+- `bpmnjs-compat` module moved to [Orchestra](https://github.com/takari/orchestra) as the default BPMN parser.
+
+## [0.8.2] - 2016-08-05
 ### Added
 - `BpmnError#getCause` and the corresponding constructor are added.
 
-### [0.8.1] - 2016-07-28
+## [0.8.1] - 2016-07-28
 ### Added
 - initial support for JSR 223 (scripting for Java) in expressions.
 - new method `ExecutionContext#eval` allows evaluation of expressions in `JavaDelegate` tasks.
@@ -13,7 +17,7 @@
 - improved performance of boundary events lookup and handling.
 About 5% improvement for the most of scenarios.
 
-### [0.8.0] - 2016-07-23
+## [0.8.0] - 2016-07-23
 ### Changes
 - complete rewrite of internal state management. API and semantics weren't changed.
 - fixed more bugs related to deep nested process handling.
