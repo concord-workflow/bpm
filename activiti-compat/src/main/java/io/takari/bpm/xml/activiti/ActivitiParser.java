@@ -176,6 +176,12 @@ public class ActivitiParser implements Parser {
                     String simple = attributes.getValue("expression");
                     String delegate = attributes.getValue("delegateExpression");
 
+                    // fallback to activiti's namespace
+                    if (simple == null && delegate == null) {
+                        simple = attributes.getValue("activiti:expression");
+                        delegate = attributes.getValue("activiti:delegateExpression");
+                    }
+
                     ExpressionType type = ExpressionType.NONE;
                     String expr = null;
 

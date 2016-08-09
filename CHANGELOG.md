@@ -1,6 +1,9 @@
 # Change Log
 
 ## [Unreleased]
+### Added
+- fallback to the activiti's XML namespace when parsing a `ServiceTask` declaration. This change is to ensure
+compatibility with the latest version of Activiti's BPMN editor.
 ### Breaking
 - `bpmnjs-compat` module moved to [Orchestra](https://github.com/takari/orchestra) as the default BPMN parser.
 
