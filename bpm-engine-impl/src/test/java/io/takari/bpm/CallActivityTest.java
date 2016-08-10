@@ -1,29 +1,14 @@
 package io.takari.bpm;
 
+import io.takari.bpm.api.BpmnError;
 import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.JavaDelegate;
-import io.takari.bpm.model.AbstractElement;
-import io.takari.bpm.model.BoundaryEvent;
-import io.takari.bpm.model.CallActivity;
-import io.takari.bpm.model.EndEvent;
-import io.takari.bpm.model.EventBasedGateway;
-import io.takari.bpm.model.ExpressionType;
-import io.takari.bpm.model.InclusiveGateway;
-import io.takari.bpm.model.IntermediateCatchEvent;
-import io.takari.bpm.model.ProcessDefinition;
-import io.takari.bpm.model.SequenceFlow;
-import io.takari.bpm.model.ServiceTask;
-import io.takari.bpm.model.StartEvent;
-import io.takari.bpm.model.VariableMapping;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import static org.junit.Assert.*;
+import io.takari.bpm.model.*;
 import org.junit.Test;
 
+import java.util.*;
+
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
@@ -285,7 +270,66 @@ public class CallActivityTest extends AbstractEngineTest {
 
         assertNoMoreActivations();
     }
-    
+
+    /**
+     * start --> call                      end
+     *               \                    /
+     *                start --> t1 --> end
+     */
+    @Test
+    public void testDefaultError() throws Exception {
+        String aId = "testA";
+        String bId = "testB";
+        String errorRef = "e1-" + System.currentTimeMillis();
+
+        JavaDelegate t = mock(JavaDelegate.class);
+        doThrow(BpmnError.class).when(t).execute(any(ExecutionContext.class));
+
+        getServiceTaskRegistry().register("t", t);
+
+        deploy(new ProcessDefinition(aId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "call"),
+                new CallActivity("call", bId),
+                new BoundaryEvent("be1", "call", errorRef),
+                new BoundaryEvent("be2", "call", null),
+                new SequenceFlow("f2", "call", "end"),
+                new SequenceFlow("f3", "be1", "end"),
+                new SequenceFlow("f4", "be2", "end"),
+                new EndEvent("end")
+        )));
+
+        deploy(new ProcessDefinition(bId, Arrays.asList(
+                new StartEvent("bstart"),
+                new SequenceFlow("bf1", "bstart", "t1"),
+                new ServiceTask("t1", ExpressionType.DELEGATE, "${t}"),
+                new SequenceFlow("bf2", "t1", "bend"),
+                new EndEvent("bend")
+        )));
+
+        // ---
+
+        String key = UUID.randomUUID().toString();
+        getEngine().start(key, aId, null);
+
+        // ---
+
+        assertActivations(key, aId,
+                "start",
+                "f1",
+                "call");
+
+        assertActivations(key, bId,
+                "bstart",
+                "bf1",
+                "t1");
+
+        assertActivations(key, aId,
+                "f4",
+                "end");
+
+        assertNoMoreActivations();
+    }
     /**
      * start --> call                                               --------------> t1 --> end
      *                \                                            /                      /

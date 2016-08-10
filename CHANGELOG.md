@@ -6,6 +6,8 @@
 compatibility with the latest version of Activiti's BPMN editor.
 ### Breaking
 - `bpmnjs-compat` module moved to [Orchestra](https://github.com/takari/orchestra) as the default BPMN parser.
+### Changed
+- fix for boundary error events handling: when no suitable error references are found, a default one is used.
 
 ## [0.8.2] - 2016-08-05
 ### Added
