@@ -1,6 +1,6 @@
 # Change Log
 
-## [Unreleased]
+## [0.8.4] - 2016-08-29
 
 ### Added
 - new interceptor's method `ExecutionInterceptor#onFailure(businessKey, errorRef)`, called for unhandled BPM
