@@ -3,16 +3,9 @@ package io.takari.bpm.reducers;
 import java.util.Map;
 
 import io.takari.bpm.ExecutionInterceptorHolder;
-import io.takari.bpm.actions.Action;
-import io.takari.bpm.actions.FireOnElementInterceptorsAction;
-import io.takari.bpm.actions.FireOnErrorInterceptorsAction;
-import io.takari.bpm.actions.FireOnFinishInterceptorsAction;
-import io.takari.bpm.actions.FireOnResumeInterceptorsAction;
-import io.takari.bpm.actions.FireOnStartInterceptorsAction;
-import io.takari.bpm.actions.FireOnSuspendInterceptorsAction;
+import io.takari.bpm.actions.*;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.state.ProcessInstance;
-import io.takari.bpm.state.Variables;
 
 @Impure
 public class InterceptorEventsReducer implements Reducer {
@@ -40,6 +33,9 @@ public class InterceptorEventsReducer implements Reducer {
         } else if (action instanceof FireOnErrorInterceptorsAction) {
             FireOnErrorInterceptorsAction a = (FireOnErrorInterceptorsAction) action;
             interceptors.fireOnError(state.getBusinessKey(), a.getCause());
+        } else if (action instanceof FireOnFailureInterceptorsAction) {
+            FireOnFailureInterceptorsAction a = (FireOnFailureInterceptorsAction) action;
+            interceptors.fireOnFailure(state.getBusinessKey(), a.getErrorRef());
         }
 
         return state;

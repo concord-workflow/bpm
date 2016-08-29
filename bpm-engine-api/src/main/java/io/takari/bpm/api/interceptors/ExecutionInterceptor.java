@@ -14,8 +14,10 @@ public interface ExecutionInterceptor {
     void onResume() throws ExecutionException;
     
     void onFinish(String processBusinessKey) throws ExecutionException;
+
+    void onFailure(String processBusinessKey, String errorRef) throws ExecutionException;
     
-    void onElement(ElementEvent ev) throws ExecutionException;
+    void onElement(InterceptorElementEvent ev) throws ExecutionException;
     
     void onError(String processBusinessKey, Throwable cause) throws ExecutionException;
 }

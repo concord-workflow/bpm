@@ -6,13 +6,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import io.takari.bpm.actions.*;
+import io.takari.bpm.state.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.takari.bpm.actions.Action;
-import io.takari.bpm.actions.FireOnFinishInterceptorsAction;
-import io.takari.bpm.actions.FireOnResumeInterceptorsAction;
-import io.takari.bpm.actions.FireOnSuspendInterceptorsAction;
 import io.takari.bpm.api.Engine;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.api.NoEventFoundException;
@@ -22,10 +20,6 @@ import io.takari.bpm.event.EventPersistenceManager;
 import io.takari.bpm.lock.LockManager;
 import io.takari.bpm.persistence.PersistenceManager;
 import io.takari.bpm.planner.Planner;
-import io.takari.bpm.state.EventMapHelper;
-import io.takari.bpm.state.ProcessInstance;
-import io.takari.bpm.state.ProcessStatus;
-import io.takari.bpm.state.StateHelper;
 
 public abstract class AbstractEngine implements Engine {
 
@@ -184,25 +178,27 @@ public abstract class AbstractEngine implements Engine {
     private void runLockSafe(ProcessInstance state) throws ExecutionException {
         log.debug("runLockSafe ['{}'] -> started...", state.getBusinessKey());
 
-        while (true) {
-            if (state.getStatus() != ProcessStatus.RUNNING) {
-                log.debug("runLockSafe ['{}'] -> process is not running anymore: {}", state.getBusinessKey(), state.getStatus());
-                break;
-            }
+        while (state.getStatus() == ProcessStatus.RUNNING) {
 
             List<Action> actions = getPlanner().eval(state);
             state = getExecutor().eval(state, actions);
         }
 
         // fire the interceptors
+
         // TODO move to the planner?
         ProcessStatus status = state.getStatus();
-        if (status == ProcessStatus.SUSPENDED) {
+        String raisedError = BpmnErrorHelper.getRaisedError(state.getVariables());
+
+        if (raisedError != null) {
+            state = getExecutor().eval(state, Arrays.asList(new FireOnFailureInterceptorsAction(raisedError)));
+            log.debug("runLockSafe ['{}'] -> failed", state.getBusinessKey());
+        } else if (status == ProcessStatus.SUSPENDED) {
             state = getExecutor().eval(state, Arrays.asList(new FireOnSuspendInterceptorsAction()));
+            log.debug("runLockSafe ['{}'] -> suspended", state.getBusinessKey());
         } else if (status == ProcessStatus.FINISHED) {
             state = getExecutor().eval(state, Arrays.asList(new FireOnFinishInterceptorsAction()));
+            log.debug("runLockSafe ['{}'] -> done", state.getBusinessKey());
         }
-
-        log.debug("runLockSafe ['{}'] -> done", state.getBusinessKey());
     }
 }

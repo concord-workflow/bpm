@@ -6,7 +6,7 @@ import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import io.takari.bpm.api.ExecutionException;
-import io.takari.bpm.api.interceptors.ElementEvent;
+import io.takari.bpm.api.interceptors.InterceptorElementEvent;
 import io.takari.bpm.api.interceptors.ExecutionInterceptor;
 import io.takari.bpm.api.interceptors.InterceptorStartEvent;
 
@@ -45,6 +45,12 @@ public class ExecutionInterceptorHolder {
         }
     }
 
+    public void fireOnFailure(String processBusinessKey, String errorRef) throws ExecutionException {
+        for (ExecutionInterceptor i : interceptors) {
+            i.onFailure(processBusinessKey, errorRef);
+        }
+    }
+
     public void fireOnError(String processBusinessKey, Throwable cause) throws ExecutionException {
         for (ExecutionInterceptor i : interceptors) {
             i.onError(processBusinessKey, cause);
@@ -54,7 +60,7 @@ public class ExecutionInterceptorHolder {
     public void fireOnElement(String processBusinessKey, String processDefinitionId, UUID executionId, String elementId)
             throws ExecutionException {
 
-        ElementEvent ev = new ElementEvent(processBusinessKey, processDefinitionId, executionId, elementId);
+        InterceptorElementEvent ev = new InterceptorElementEvent(processBusinessKey, processDefinitionId, executionId, elementId);
         for (ExecutionInterceptor i : interceptors) {
             i.onElement(ev);
         }

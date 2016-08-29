@@ -3,7 +3,7 @@ package io.takari.bpm.api.interceptors;
 import java.io.Serializable;
 import java.util.UUID;
 
-public class ElementEvent implements Serializable {
+public class InterceptorElementEvent implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -12,7 +12,7 @@ public class ElementEvent implements Serializable {
     private final UUID executionId;
     private final String elementId;
 
-    public ElementEvent(String processBusinessKey, String processDefinitionId, UUID executionId, String elementId) {
+    public InterceptorElementEvent(String processBusinessKey, String processDefinitionId, UUID executionId, String elementId) {
         this.processBusinessKey = processBusinessKey;
         this.processDefinitionId = processDefinitionId;
         this.executionId = executionId;

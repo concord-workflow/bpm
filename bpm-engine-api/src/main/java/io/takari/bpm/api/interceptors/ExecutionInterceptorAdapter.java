@@ -21,7 +21,11 @@ public abstract class ExecutionInterceptorAdapter implements ExecutionIntercepto
     }
 
     @Override
-    public void onElement(ElementEvent ev) throws ExecutionException {
+    public void onFailure(String processBusinessKey, String errorRef) throws ExecutionException {
+    }
+
+    @Override
+    public void onElement(InterceptorElementEvent ev) throws ExecutionException {
     }
 
     @Override

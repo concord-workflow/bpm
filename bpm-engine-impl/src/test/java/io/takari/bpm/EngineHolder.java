@@ -9,15 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 
-import io.takari.bpm.AbstractEngine;
-import io.takari.bpm.DefaultExecutor;
-import io.takari.bpm.ExecutionInterceptorHolder;
-import io.takari.bpm.Executor;
-import io.takari.bpm.IndexedProcessDefinitionProvider;
-import io.takari.bpm.RandomUuidGenerator;
-import io.takari.bpm.UuidGenerator;
 import io.takari.bpm.api.ExecutionException;
-import io.takari.bpm.api.interceptors.ElementEvent;
+import io.takari.bpm.api.interceptors.InterceptorElementEvent;
 import io.takari.bpm.api.interceptors.ExecutionInterceptorAdapter;
 import io.takari.bpm.el.DefaultExpressionManager;
 import io.takari.bpm.el.ExpressionManager;
@@ -176,7 +169,7 @@ public class EngineHolder {
     private final class Interceptor extends ExecutionInterceptorAdapter {
 
         @Override
-        public void onElement(ElementEvent ev) throws ExecutionException {
+        public void onElement(InterceptorElementEvent ev) throws ExecutionException {
             onActivation(ev.getProcessBusinessKey(), ev.getProcessDefinitionId(), ev.getElementId());
         }
     }
