@@ -9,8 +9,8 @@ public interface ProcessDefinitionProvider {
      * Returns a process definition object by its ID. Result must be the
      * same for each call of this method (idempotency).
      * @param id
-     * @return
-     * @throws ExecutionException if process definition not found.
+     * @return process definition or {@code null}
+     * @throws ExecutionException
      */
     ProcessDefinition getById(String id) throws ExecutionException;
 }

@@ -1,5 +1,11 @@
 # Change Log
 
+## [Unreleased]
+
+### Changed
+- clarify the javadoc on the `ProcessDefinitionProvider#getById` method: it returns `null` if process not found instead
+of throwing an exception.
+
 ## [0.8.4] - 2016-08-29
 
 ### Added
