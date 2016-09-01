@@ -1,19 +1,27 @@
 package io.takari.bpm.model;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 public class ProcessDefinition extends AbstractElement {
-	
-	private static final long serialVersionUID = 1L;
+
+    private static final long serialVersionUID = 1L;
+
+    public static final String SOURCE_TYPE_ATTRIBUTE = "sourceType";
 
     private String name;
-    
+
     private final Map<String, AbstractElement> entities;
+    private final Map<String, String> attributes;
+
+    public ProcessDefinition(ProcessDefinition source, Map<String, String> attributes) {
+        this(source.getId(), source.getChildren(), attributes);
+    }
 
     public ProcessDefinition(String id, Collection<AbstractElement> children) {
+        this(id, children, Collections.emptyMap());
+    }
+
+    public ProcessDefinition(String id, Collection<AbstractElement> children, Map<String, String> attributes) {
         super(id);
 
         Map<String, AbstractElement> m = new LinkedHashMap<>();
@@ -24,6 +32,7 @@ public class ProcessDefinition extends AbstractElement {
         }
 
         this.entities = Collections.unmodifiableMap(m);
+        this.attributes = Collections.unmodifiableMap(new HashMap<>(attributes));
     }
 
     public AbstractElement getChild(String id) {
@@ -44,5 +53,13 @@ public class ProcessDefinition extends AbstractElement {
 
     public String getName() {
         return name;
+    }
+
+    public String getAttribute(String key) {
+        return attributes.get(key);
+    }
+
+    public Map<String, String> getAttributes() {
+        return attributes;
     }
 }

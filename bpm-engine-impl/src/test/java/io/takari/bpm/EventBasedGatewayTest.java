@@ -65,6 +65,50 @@ public class EventBasedGatewayTest extends AbstractEngineTest {
     }
 
     /**
+     * start --> gw --> ev --> end
+     */
+    @Test
+    public void testResumeById() throws Exception {
+        String processId = "test";
+        deploy(new ProcessDefinition(processId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "gw"),
+                new EventBasedGateway("gw"),
+                new SequenceFlow("f2", "gw", "ev"),
+                new IntermediateCatchEvent("ev", "ev"),
+                new SequenceFlow("f3", "ev", "end"),
+                new EndEvent("end")
+        )));
+
+        // ---
+
+        String key = UUID.randomUUID().toString();
+        getEngine().start(key, processId, null);
+
+        // ---
+
+        ArgumentCaptor<Event> args = ArgumentCaptor.forClass(Event.class);
+        verify(getEventManager(), times(1)).add(args.capture());
+        assertNotNull(args.getValue());
+        assertNotNull(args.getValue().getId());
+
+        // ---
+
+        getEngine().resume(args.getValue().getId(), null);
+
+        // ---
+
+        assertActivations(key, processId,
+                "start",
+                "f1",
+                "gw",
+                "f2",
+                "ev",
+                "f3",
+                "end");
+        assertNoMoreActivations();
+    }
+    /**
      * start --> gw --> ev1 --> end1
      *             \
      *              --> ev2 --> end2

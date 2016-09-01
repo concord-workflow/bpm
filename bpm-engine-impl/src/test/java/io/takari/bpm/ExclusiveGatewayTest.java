@@ -44,6 +44,39 @@ public class ExclusiveGatewayTest extends AbstractEngineTest {
                 "end");
         assertNoMoreActivations();
     }
+
+    /**
+     * start --> gw --fA--> end
+     *             \       /
+     *              --fB-->
+     */
+    @Test
+    public void testNoDefaultFlow() throws Exception {
+        String processId = "test";
+        deploy(new ProcessDefinition(processId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "gw"),
+                new ExclusiveGateway("gw"),
+                new SequenceFlow("fA", "gw", "end"),
+                new SequenceFlow("fB", "gw", "end"),
+                new EndEvent("end")
+        )));
+
+        // ---
+
+        String key = UUID.randomUUID().toString();
+        getEngine().start(key, processId, null);
+
+        // ---
+
+        assertActivations(key, processId,
+                "start",
+                "f1",
+                "gw",
+                "fA",
+                "end");
+        assertNoMoreActivations();
+    }
     
     @Test
     public void testExpressions() throws Exception {

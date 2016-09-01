@@ -21,11 +21,7 @@ import io.takari.bpm.xml.Parser;
 import io.takari.bpm.xml.ParserException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -37,6 +33,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 public class ActivitiParser implements Parser {
 
+    public static final String TYPE = "activiti/bpmn";
     private static final Logger log = LoggerFactory.getLogger(ActivitiParser.class);
 
     @Override
@@ -283,7 +280,8 @@ public class ActivitiParser implements Parser {
 
             switch (localName) {
                 case "process":
-                    process = new ProcessDefinition(processId, children);
+                    process = new ProcessDefinition(processId, children,
+                            Collections.singletonMap(ProcessDefinition.SOURCE_TYPE_ATTRIBUTE, TYPE));
                     process.setName(processName);
                     
                     children = null;

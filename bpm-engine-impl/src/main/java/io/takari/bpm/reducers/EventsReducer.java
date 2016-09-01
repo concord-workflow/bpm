@@ -57,7 +57,7 @@ public class EventsReducer implements Reducer {
         if (a.getGroupId() != null) {
             // grouped event
             state = EventMapHelper.put(state, ev,
-                    new ClearCommandStackCommand(pd.getId()),
+                    new ClearCommandStackCommand(),
                     new PerformActionsCommand(new PersistExecutionAction()),
                     new ProcessElementCommand(pd.getId(), next.getId(), a.getGroupId(), a.isExclusive()));
         } else {
