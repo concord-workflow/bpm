@@ -382,4 +382,9 @@ public class ActivitiParser implements Parser {
         
         return s;
     }
+
+    @Override
+    public String toString() {
+        return "Legacy Activiti's XML Parser";
+    }
 }

@@ -192,7 +192,7 @@ public abstract class AbstractEngine implements Engine {
 
         if (raisedError != null) {
             state = getExecutor().eval(state, Arrays.asList(new FireOnFailureInterceptorsAction(raisedError)));
-            log.debug("runLockSafe ['{}'] -> failed", state.getBusinessKey());
+            log.debug("runLockSafe ['{}'] -> failed with '{}'", state.getBusinessKey(), raisedError);
         } else if (status == ProcessStatus.SUSPENDED) {
             state = getExecutor().eval(state, Arrays.asList(new FireOnSuspendInterceptorsAction()));
             log.debug("runLockSafe ['{}'] -> suspended", state.getBusinessKey());

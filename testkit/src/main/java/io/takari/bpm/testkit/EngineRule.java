@@ -16,6 +16,8 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.UUID;
+
+import io.takari.bpm.xml.ParserException;
 import org.iq80.leveldb.DBFactory;
 import org.iq80.leveldb.impl.Iq80DBFactory;
 import org.junit.rules.TestRule;
@@ -24,14 +26,22 @@ import org.junit.runners.model.Statement;
 
 public class EngineRule implements TestRule {
 
-    private final Parser parser;
+    private final DeploymentProcessor deploymentProcessor;
 
     private TestProcessDefinitionProvider processDefinitionProvider;
     private EventPersistenceManager eventManager;
     private Engine engine;
 
+    public EngineRule(DeploymentProcessor deploymentProcessor) {
+        this.deploymentProcessor = deploymentProcessor;
+    }
+
     public EngineRule(Parser parser) {
-        this.parser = parser;
+        this.deploymentProcessor = (in, provider) -> {
+            ProcessDefinition pd = parser.parse(in);
+            IndexedProcessDefinition ipd = new IndexedProcessDefinition(pd);
+            provider.add(ipd);
+        };
     }
 
     @Override
@@ -76,9 +86,7 @@ public class EngineRule implements TestRule {
                 if (d != null) {
                     for (String s : d.resources()) {
                         InputStream in = ClassLoader.getSystemResourceAsStream(s);
-                        ProcessDefinition pd = parser.parse(in);
-                        IndexedProcessDefinition ipd = new IndexedProcessDefinition(pd);
-                        processDefinitionProvider.add(ipd);
+                        deploymentProcessor.handle(in, processDefinitionProvider);
                     }
                 }
             }
@@ -109,5 +117,9 @@ public class EngineRule implements TestRule {
 
     public EventPersistenceManager getEventManager() {
         return eventManager;
+    }
+
+    public Engine getEngine() {
+        return engine;
     }
 }
