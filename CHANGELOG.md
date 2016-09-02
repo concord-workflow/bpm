@@ -1,6 +1,6 @@
 # Change Log
 
-## [Unreleased]
+## [0.8.5] - 2016-09-02
 
 ### Added
 - more fine-grained control over process deployment in `EngineRule`.
@@ -8,7 +8,7 @@
 - `ProcessDefinition` can now contain additional attributes (e.g. parser's metadata).
 
 ### Changed
-- clarify the javadoc on the `ProcessDefinitionProvider#getById` method: it returns `null` if process not found instead
+- clarify the javadoc on the `ProcessDefinitionProvider#getById` method: it returns `null` if process is not found instead
 of throwing an exception.
 
 
