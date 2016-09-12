@@ -1,5 +1,13 @@
 # Change Log
 
+## [Unreleased]
+
+### Added
+- a new constructor in the `DefaultExpressionManager` class allows customization of EL resolvers.
+- process definition's attributes now accessible as `ExecutionContext` variables.
+
+
+
 ## [0.8.5] - 2016-09-02
 
 ### Added

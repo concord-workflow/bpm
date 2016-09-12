@@ -1,9 +1,6 @@
 package io.takari.bpm;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -21,7 +18,7 @@ public class IndexedProcessDefinition extends ProcessDefinition {
     private final Map<String, List<BoundaryEvent>> boundaryEvents;
 
     public IndexedProcessDefinition(ProcessDefinition pd) {
-        super(pd.getId(), pd.getChildren());
+        super(pd.getId(), pd.getChildren(), pd.getAttributes() != null ? pd.getAttributes() : Collections.emptyMap());
         setName(pd.getName());
         this.outgoingFlows = indexOutgoingFlows();
         this.boundaryEvents = indexBoundaryEvents();

@@ -7,6 +7,7 @@ public class ProcessDefinition extends AbstractElement {
     private static final long serialVersionUID = 1L;
 
     public static final String SOURCE_TYPE_ATTRIBUTE = "sourceType";
+    public static final String ATTRIBUTE_KEY_PREFIX = "__attr_";
 
     private String name;
 

@@ -1,22 +1,14 @@
 package io.takari.bpm.el;
 
-import javax.el.ArrayELResolver;
-import javax.el.BeanELResolver;
-import javax.el.CompositeELResolver;
-import javax.el.ELResolver;
-import javax.el.ExpressionFactory;
-import javax.el.ListELResolver;
-import javax.el.MapELResolver;
-import javax.el.ValueExpression;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import de.odysseus.el.ExpressionFactoryImpl;
 import de.odysseus.el.util.SimpleContext;
 import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.task.ServiceTaskRegistry;
 import io.takari.bpm.task.ServiceTaskResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.el.*;
 
 public class DefaultExpressionManager implements ExpressionManager {
 
@@ -26,13 +18,17 @@ public class DefaultExpressionManager implements ExpressionManager {
     private final ELResolver[] resolvers;
 
     public DefaultExpressionManager(ServiceTaskRegistry serviceTaskRegistry) {
-        resolvers = new ELResolver[] {
+        this.resolvers = new ELResolver[]{
                 new ArrayELResolver(),
                 new ListELResolver(),
                 new MapELResolver(),
                 new BeanELResolver(),
                 new ServiceTaskResolver(serviceTaskRegistry)
         };
+    }
+
+    public DefaultExpressionManager(ELResolver... resolvers) {
+        this.resolvers = resolvers;
     }
 
     private ELResolver createResolver(ExecutionContext ctx) {
