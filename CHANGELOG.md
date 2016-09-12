@@ -1,6 +1,6 @@
 # Change Log
 
-## [Unreleased]
+## [0.8.6] - 2016-09-11
 
 ### Added
 - a new constructor in the `DefaultExpressionManager` class allows customization of EL resolvers.
