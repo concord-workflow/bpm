@@ -1,5 +1,15 @@
 # Change Log
 
+## [Unreleased]
+
+### Added
+
+- Additional behaviour tweaks now can be configured via `EngineBuilder#withConfiguration`.
+- Introduced `Configuration#throwExceptionOnErrorEnd`. When enabled, the engine will throw an `ExecutionException` if
+process ends with an unhandled error end event.
+
+
+
 ## [0.8.6] - 2016-09-11
 
 ### Added

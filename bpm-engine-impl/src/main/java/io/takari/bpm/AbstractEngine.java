@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import io.takari.bpm.actions.*;
+import io.takari.bpm.api.BpmnError;
 import io.takari.bpm.state.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +41,8 @@ public abstract class AbstractEngine implements Engine {
     protected abstract EventPersistenceManager getEventManager();
 
     protected abstract LockManager getLockManager();
+
+    protected abstract Configuration getConfiguration();
 
     @Override
     public void start(String processBusinessKey, String processDefinitionId, Map<String, Object> variables) throws ExecutionException {
@@ -193,6 +196,11 @@ public abstract class AbstractEngine implements Engine {
         if (raisedError != null) {
             state = getExecutor().eval(state, Arrays.asList(new FireOnFailureInterceptorsAction(raisedError)));
             log.debug("runLockSafe ['{}'] -> failed with '{}'", state.getBusinessKey(), raisedError);
+
+            Configuration cfg = getConfiguration();
+            if (cfg.isThrowExceptionOnErrorEnd()) {
+                throw new ExecutionException("Process finished with an error end event: " + raisedError);
+            }
         } else if (status == ProcessStatus.SUSPENDED) {
             state = getExecutor().eval(state, Arrays.asList(new FireOnSuspendInterceptorsAction()));
             log.debug("runLockSafe ['{}'] -> suspended", state.getBusinessKey());

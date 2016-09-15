@@ -35,6 +35,7 @@ public final class EngineBuilder {
     private ServiceTaskRegistry taskRegistry;
     private UuidGenerator uuidGenerator;
     private Function<Executor, Executor> executorWrappingFn;
+    private Configuration configuration;
 
     public EngineBuilder withDefinitionProvider(ProcessDefinitionProvider definitionProvider) {
         this.definitionProvider = definitionProvider;
@@ -78,6 +79,11 @@ public final class EngineBuilder {
 
     public EngineBuilder wrapExecutorWith(Function<Executor, Executor> fn) {
         this.executorWrappingFn = fn;
+        return this;
+    }
+
+    public EngineBuilder withConfiguration(Configuration configuration) {
+        this.configuration = configuration;
         return this;
     }
     
@@ -136,8 +142,12 @@ public final class EngineBuilder {
             executor = executorWrappingFn.apply(executor);
         }
 
+        if (configuration == null) {
+            configuration = new Configuration();
+        }
+
         return new EngineImpl(new IndexedProcessDefinitionProvider(definitionProvider),
-                eventManager, persistenceManager, lockManager, uuidGenerator, executor, planner, interceptors);
+                eventManager, persistenceManager, lockManager, uuidGenerator, executor, planner, configuration, interceptors);
     }
     
     public static final class EngineImpl extends AbstractEngine {
@@ -149,6 +159,7 @@ public final class EngineBuilder {
         private final UuidGenerator uuidGenerator;
         private final Executor executor;
         private final Planner planner;
+        private final Configuration configuration;
         private final ExecutionInterceptorHolder interceptors;
 
         public EngineImpl(
@@ -159,6 +170,7 @@ public final class EngineBuilder {
                 UuidGenerator uuidGenerator,
                 Executor executor,
                 Planner planner,
+                Configuration configuration,
                 ExecutionInterceptorHolder interceptors) {
             
             this.definitionProvider = definitionProvider;
@@ -169,6 +181,8 @@ public final class EngineBuilder {
 
             this.executor = executor;
             this.planner = planner;
+            this.configuration = configuration;
+
             this.interceptors = interceptors;
         }
         
@@ -210,6 +224,11 @@ public final class EngineBuilder {
         @Override
         protected Executor getExecutor() {
             return executor;
+        }
+
+        @Override
+        public Configuration getConfiguration() {
+            return configuration;
         }
     }
 }

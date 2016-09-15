@@ -17,6 +17,10 @@ public class AbstractEngineTest {
     public void init() throws Exception {
         this.engineHolder = new EngineHolder();
     }
+
+    protected Configuration getConfiguration() {
+        return engineHolder.getConfiguration();
+    }
     
     protected Engine getEngine() {
         return engineHolder.getEngine();

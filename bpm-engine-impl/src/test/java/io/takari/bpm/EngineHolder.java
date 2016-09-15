@@ -40,6 +40,7 @@ public class EngineHolder {
     private final ExecutionInterceptorHolder interceptorHolder = new ExecutionInterceptorHolder();
     private final UuidGenerator uuidGenerator;
     private final LockManager lockManager;
+    private final Configuration configuration;
     
     public EngineHolder() throws Exception {
         serviceTaskRegistry = new ServiceTaskRegistryImpl();
@@ -51,6 +52,7 @@ public class EngineHolder {
         uuidGenerator = new RandomUuidGenerator();
         executor = wrap(new DefaultExecutor(expressionManager, Executors.newCachedThreadPool(), interceptorHolder, indexedProcessDefinitionProvider, uuidGenerator, eventManager, persistenceManager));
         lockManager = new SingleLockManagerImpl();
+        configuration = new Configuration();
         
         engine = new AbstractEngine() {
             
@@ -95,6 +97,11 @@ public class EngineHolder {
             protected Executor getExecutor() {
                 return executor;
             }
+
+            @Override
+            protected Configuration getConfiguration() {
+                return configuration;
+            }
         };
         
         activations = new HashMap<>();
@@ -108,7 +115,11 @@ public class EngineHolder {
     public AbstractEngine getEngine() {
         return engine;
     }
-    
+
+    public Configuration getConfiguration() {
+        return configuration;
+    }
+
     public ServiceTaskRegistryImpl getServiceTaskRegistry() {
         return serviceTaskRegistry;
     }
