@@ -76,6 +76,11 @@ public final class EngineBuilder {
         this.executor = executor;
         return this;
     }
+    
+    public EngineBuilder withThreadPool(ExecutorService threadPool) {
+      this.threadPool = threadPool;
+      return this;
+    }
 
     public EngineBuilder wrapExecutorWith(Function<Executor, Executor> fn) {
         this.executorWrappingFn = fn;
