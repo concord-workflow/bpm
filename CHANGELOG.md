@@ -1,12 +1,14 @@
 # Change Log
 
-## [Unreleased]
+## [0.8.7] - 2016-09-19
 
 ### Added
 
-- Additional behaviour tweaks now can be configured via `EngineBuilder#withConfiguration`.
-- Introduced `Configuration#throwExceptionOnErrorEnd`. When enabled, the engine will throw an `ExecutionException` if
+- additional behaviour tweaks now can be configured via `EngineBuilder#withConfiguration`.
+- introduced `Configuration#throwExceptionOnErrorEnd`. When enabled, the engine will throw an `ExecutionException` if
 process ends with an unhandled error end event.
+- now it is possible to override a thread pool used by boundary timer events with the
+`EngineBuilder#withThreadPool` method.
 
 
 
