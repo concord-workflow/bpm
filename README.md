@@ -2,27 +2,25 @@
 [![Coverage Status](https://coveralls.io/repos/github/takari/bpm/badge.svg?branch=master)](https://coveralls.io/github/takari/bpm?branch=master)
 [![Maven Central](https://img.shields.io/maven-central/v/io.takari.bpm/parent.svg?maxAge=28800)]()
 
-BPM Engine
-==
+# BPM Engine
 
-A simple implementation of an BPM engine, designed to mimic Activiti's behaviour. Optimized for high performance (rather than for the strict following of the BPMN specification).
+A simple implementation of an BPM engine, designed to mimic Activiti's behaviour. Optimized for high performance
+(rather than strict following of the BPMN specification).
 
 It is based on the original implementation at [ibodrov/bpm](https://github.com/ibodrov/bpm).
 Original contributors:
 - Ivan Bodrov <ibodrov@gmail.com>
 - Yuri Brigadirenko <ybrigo@gmail.com>
 
-Main features
---
-- an lightweight BPM engine, inspired by Activiti BPM engine;
+## Main features
+- a lightweight BPM engine, inspired by Activiti BPM engine;
 - high-performance on-disk persistence;
 - event scheduling (e.g. "timers");
 - supports Activiti's XML format (both process and visual elements);
 - supports JUEL in flow expressions, task delegates, etc;
 - JUnit support (and easy unit testing in general).
 
-Supported elements:
---
+## Supported elements:
 - boundary event (errors and timers);
 - call activity;
 - end event;
@@ -36,7 +34,6 @@ Supported elements:
 - start event;
 - subprocess.
 
-Limitations
---
-- tasks with TimerBoundaryEvents executed in the separate thread inside of an unbounded Executor
+## Limitations
+- tasks with TimerBoundaryEvents executed in a separate thread inside of an unbounded Executor
  
