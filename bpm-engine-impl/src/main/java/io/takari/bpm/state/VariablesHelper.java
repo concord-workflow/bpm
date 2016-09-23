@@ -19,9 +19,12 @@ public final class VariablesHelper {
         for (VariableMapping m : mapping) {
             String source = m.getSource();
             String sourceExpression = m.getSourceExpression();
+            Object sourceValue = m.getSourceValue();
 
             Object v = null;
-            if (source != null) {
+            if (sourceValue != null) {
+                v = sourceValue;
+            } else if (source != null) {
                 v = src.getVariable(source);
             } else if (sourceExpression != null) {
                 ExecutionContextImpl ctx = new ExecutionContextImpl(em, src);

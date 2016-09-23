@@ -132,7 +132,7 @@ public class CallActivityTest extends AbstractEngineTest {
 
         assertNoMoreActivations();
     }
-    
+
     /**
      * start --> call               t1 --> end
      *               \             /
@@ -146,10 +146,10 @@ public class CallActivityTest extends AbstractEngineTest {
         final String insideK = "insideK" + System.currentTimeMillis();
         final String outsidek = "outsideK" + System.currentTimeMillis();
         final Object v = "v" + System.currentTimeMillis();
-        
+
         Set<VariableMapping> ins = new HashSet<>();
         ins.add(new VariableMapping(null, "${" + beforeK + "}", insideK));
-        
+
         Set<VariableMapping> outs = new HashSet<>();
         outs.add(new VariableMapping(null, "${" + insideK + "}", outsidek));
 
@@ -168,7 +168,7 @@ public class CallActivityTest extends AbstractEngineTest {
                 new SequenceFlow("f1", "start", "end"),
                 new EndEvent("end")
         )));
-        
+
         JavaDelegate t1Task = spy(new JavaDelegate() {
 
             @Override
@@ -205,12 +205,12 @@ public class CallActivityTest extends AbstractEngineTest {
                 "end");
 
         assertNoMoreActivations();
-        
+
         // ---
-        
+
         verify(t1Task, times(1)).execute(any(ExecutionContext.class));
     }
-    
+
     /**
      * start --> call                       end
      *               \                     /
@@ -257,13 +257,13 @@ public class CallActivityTest extends AbstractEngineTest {
                 "bstart",
                 "bf1",
                 "bev1");
-        
+
         getEngine().resume(key, messageRef, null);
 
         assertActivations(key, bId,
                 "bf2",
                 "bend");
-        
+
         assertActivations(key, aId,
                 "f3",
                 "end");
@@ -349,7 +349,7 @@ public class CallActivityTest extends AbstractEngineTest {
         getServiceTaskRegistry().register("t2", t2);
         JavaDelegate t3 = mock(JavaDelegate.class);
         getServiceTaskRegistry().register("t3", t3);
-        
+
         String outerProcId = "outer";
         String nestedProcId = "nested";
         String deeplyNestedProcId = "deep";
@@ -550,6 +550,58 @@ public class CallActivityTest extends AbstractEngineTest {
                 "end");
 
         assertNoMoreActivations();
+
+        // ---
+
+        verify(t1, times(1)).execute(any(ExecutionContext.class));
+    }
+
+    /**
+     * start --> call                      end
+     *               \                    /
+     *                start --> t1 --> end
+     */
+    @Test
+    public void testInVariableValues() throws Exception {
+        final String varKey = "key#" + System.currentTimeMillis();
+        final Object varValue = new Double(3.1415);
+
+        JavaDelegate t1 = spy(new JavaDelegate() {
+
+            @Override
+            public void execute(ExecutionContext ctx) throws Exception {
+                Object v = ctx.getVariable(varKey);
+                assertEquals(varValue, v);
+            }
+        });
+        getServiceTaskRegistry().register("t1", t1);
+
+        // ---
+
+        String aId = "testA";
+        String bId = "testB";
+
+        Set<VariableMapping> inVars = new HashSet<>();
+        inVars.add(new VariableMapping(null, null, varValue, varKey));
+
+        deploy(new ProcessDefinition(aId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "call"),
+                new CallActivity("call", bId, inVars, null),
+                new SequenceFlow("f2", "call", "end"),
+                new EndEvent("end"))));
+
+        deploy(new ProcessDefinition(bId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "t1"),
+                new ServiceTask("t1", ExpressionType.DELEGATE, "${t1}"),
+                new SequenceFlow("f2", "t1", "end"),
+                new EndEvent("end"))));
+
+        // ---
+
+        String key = UUID.randomUUID().toString();
+        getEngine().start(key, aId, null);
 
         // ---
 

@@ -1,5 +1,13 @@
 # Change Log
 
+## [Unreleased]
+
+### Added
+
+- `VariableMapping` now accepts a `sourceValue` in case if one needs to pass a raw value into a subprocess.
+
+
+
 ## [0.8.7] - 2016-09-19
 
 ### Added
