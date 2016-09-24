@@ -1,5 +1,13 @@
 # Change Log
 
+## [Unreleased]
+
+### Added
+
+- a convenience constructor: `Edge#(id, elementId, label, waypoints)`.
+
+
+
 ## [0.8.8] - 2016-09-23
 
 ### Added

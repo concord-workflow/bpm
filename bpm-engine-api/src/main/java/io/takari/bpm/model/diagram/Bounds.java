@@ -3,8 +3,8 @@ package io.takari.bpm.model.diagram;
 import java.io.Serializable;
 
 public class Bounds implements Serializable {
-	
-	private static final long serialVersionUID = 1L;
+
+    private static final long serialVersionUID = 1L;
 
     private final double x;
     private final double y;

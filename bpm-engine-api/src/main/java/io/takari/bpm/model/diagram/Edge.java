@@ -4,14 +4,14 @@ import java.io.Serializable;
 import java.util.List;
 
 public class Edge implements Serializable {
-	
-	private static final long serialVersionUID = 1L;
+
+    private static final long serialVersionUID = 1L;
 
     private final String id;
     private final String elementId;
     private final Label label;
     private final List<Waypoint> waypoints;
-    
+
     public Edge(String id, String elementId, Label label, List<Waypoint> waypoints) {
         this.id = id;
         this.elementId = elementId;
