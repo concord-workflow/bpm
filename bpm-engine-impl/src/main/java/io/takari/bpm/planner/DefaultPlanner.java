@@ -3,11 +3,11 @@ package io.takari.bpm.planner;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.takari.bpm.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.takari.bpm.actions.Action;
-import io.takari.bpm.actions.PopCommandAction;
 import io.takari.bpm.actions.RemoveInstanceAction;
 import io.takari.bpm.actions.SetStatusAction;
 import io.takari.bpm.api.ExecutionException;
@@ -20,7 +20,11 @@ public class DefaultPlanner implements Planner {
 
     private static final Logger log = LoggerFactory.getLogger(DefaultPlanner.class);
 
-    private final DelegatingCommandHandler commandHandler = new DelegatingCommandHandler();
+    private final DelegatingCommandHandler commandHandler;
+
+    public DefaultPlanner(Configuration cfg) {
+        this.commandHandler = new DelegatingCommandHandler(cfg);
+    }
 
     @Override
     public List<Action> eval(ProcessInstance state) throws ExecutionException {

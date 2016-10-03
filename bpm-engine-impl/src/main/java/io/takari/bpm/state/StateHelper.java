@@ -14,7 +14,6 @@ import io.takari.bpm.model.StartEvent;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Function;
 
 public final class StateHelper {
 

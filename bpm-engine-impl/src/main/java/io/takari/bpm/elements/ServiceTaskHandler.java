@@ -22,7 +22,6 @@ import io.takari.bpm.commands.Command;
 import io.takari.bpm.commands.ProcessElementCommand;
 import io.takari.bpm.model.BoundaryEvent;
 import io.takari.bpm.model.ExpressionType;
-import io.takari.bpm.model.ProcessDefinition;
 import io.takari.bpm.model.SequenceFlow;
 import io.takari.bpm.model.ServiceTask;
 import io.takari.bpm.state.ProcessInstance;

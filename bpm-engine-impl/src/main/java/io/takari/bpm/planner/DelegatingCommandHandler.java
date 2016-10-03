@@ -2,6 +2,7 @@ package io.takari.bpm.planner;
 
 import java.util.List;
 
+import io.takari.bpm.Configuration;
 import io.takari.bpm.actions.Action;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.commands.*;
@@ -9,11 +10,19 @@ import io.takari.bpm.state.ProcessInstance;
 
 public class DelegatingCommandHandler implements CommandHandler<Command> {
 
-    private final ProcessElementCommandHandler processElementCommandHandler = new ProcessElementCommandHandler();
-    private final PerformActionCommandHandler performActionCommandHandler = new PerformActionCommandHandler();
-    private final HandleRaisedErrorCommandHandler handleRaisedErrorCommandHandler = new HandleRaisedErrorCommandHandler();
-    private final MergeVariablesCommandHandler mergeVariablesCommandHandler = new MergeVariablesCommandHandler();
-    private final ClearCommandStartCommandHandler clearCommandStartCommandHandler = new ClearCommandStartCommandHandler();
+    private final ProcessElementCommandHandler processElementCommandHandler;
+    private final PerformActionCommandHandler performActionCommandHandler;
+    private final HandleRaisedErrorCommandHandler handleRaisedErrorCommandHandler;
+    private final MergeVariablesCommandHandler mergeVariablesCommandHandler;
+    private final ClearCommandStartCommandHandler clearCommandStartCommandHandler;
+
+    public DelegatingCommandHandler(Configuration cfg) {
+        this.processElementCommandHandler = new ProcessElementCommandHandler();
+        this.performActionCommandHandler = new PerformActionCommandHandler();
+        this.handleRaisedErrorCommandHandler = new HandleRaisedErrorCommandHandler(cfg);
+        this.mergeVariablesCommandHandler = new MergeVariablesCommandHandler();
+        this.clearCommandStartCommandHandler = new ClearCommandStartCommandHandler();
+    }
 
     @Override
     public List<Action> handle(ProcessInstance state, Command cmd, List<Action> actions) throws ExecutionException {

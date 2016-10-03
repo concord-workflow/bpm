@@ -1,6 +1,5 @@
 package io.takari.bpm;
 
-import io.takari.bpm.model.AbstractElement;
 import io.takari.bpm.model.EndEvent;
 import io.takari.bpm.model.ExclusiveGateway;
 import io.takari.bpm.model.ProcessDefinition;

@@ -1,7 +1,5 @@
 package io.takari.bpm.actions;
 
-import java.io.Serializable;
-
 public class SetVariableAction implements Action {
 
     private static final long serialVersionUID = 1L;

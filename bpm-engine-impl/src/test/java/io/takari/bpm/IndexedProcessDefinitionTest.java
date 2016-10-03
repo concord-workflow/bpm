@@ -7,7 +7,6 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import io.takari.bpm.IndexedProcessDefinition;
-import io.takari.bpm.model.AbstractElement;
 import io.takari.bpm.model.BoundaryEvent;
 import io.takari.bpm.model.EndEvent;
 import io.takari.bpm.model.ExpressionType;

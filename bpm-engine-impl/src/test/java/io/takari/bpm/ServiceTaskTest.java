@@ -4,7 +4,6 @@ import io.takari.bpm.api.BpmnError;
 import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.api.JavaDelegate;
-import io.takari.bpm.model.AbstractElement;
 import io.takari.bpm.model.BoundaryEvent;
 import io.takari.bpm.model.EndEvent;
 import io.takari.bpm.model.ExpressionType;

@@ -56,7 +56,7 @@ public class EngineHolder {
         
         engine = new AbstractEngine() {
             
-            private final Planner planner = new DefaultPlanner();
+            private final Planner planner = new DefaultPlanner(configuration);
             
             @Override
             protected UuidGenerator getUuidGenerator() {

@@ -93,6 +93,10 @@ public final class EngineBuilder {
     }
     
     public Engine build() {
+        if (configuration == null) {
+            configuration = new Configuration();
+        }
+
         if (definitionProvider == null) {
             throw new IllegalStateException("Process definition provider is required. "
                     + "Use the method `builder.withDefinitionProvider(...)` to specify your own implementation.");
@@ -125,7 +129,7 @@ public final class EngineBuilder {
         }
         
         if (planner == null) {
-            planner = new DefaultPlanner();
+            planner = new DefaultPlanner(configuration);
         }
 
         if (interceptors == null) {
@@ -145,10 +149,6 @@ public final class EngineBuilder {
 
         if (executorWrappingFn != null) {
             executor = executorWrappingFn.apply(executor);
-        }
-
-        if (configuration == null) {
-            configuration = new Configuration();
         }
 
         return new EngineImpl(new IndexedProcessDefinitionProvider(definitionProvider),

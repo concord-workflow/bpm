@@ -4,7 +4,6 @@ import org.pcollections.PVector;
 import org.pcollections.TreePVector;
 
 import java.io.Serializable;
-import java.util.Objects;
 
 public class Activations implements Serializable {
 

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import io.takari.bpm.Configuration;
 import io.takari.bpm.state.EventMapHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +27,12 @@ import io.takari.bpm.state.ProcessInstance;
 public class HandleRaisedErrorCommandHandler implements CommandHandler<HandleRaisedErrorCommand> {
 
     private static final Logger log = LoggerFactory.getLogger(HandleRaisedErrorCommandHandler.class);
+
+    private final Configuration cfg;
+
+    public HandleRaisedErrorCommandHandler(Configuration cfg) {
+        this.cfg = cfg;
+    }
 
     @Override
     public List<Action> handle(ProcessInstance state, HandleRaisedErrorCommand cmd, List<Action> actions) throws ExecutionException {
@@ -55,7 +62,10 @@ public class HandleRaisedErrorCommandHandler implements CommandHandler<HandleRai
         }
 
         if (ev == null) {
-            // TODO should we allow this?
+            if (cfg.isThrowExceptionOnUnhandledBpmnError()) {
+                throw new ExecutionException("Unhandled BPMN error: " + errorRef);
+            }
+            log.warn("handle ['{}', '{}'] -> unhandled BPMN error '{}'", state.getBusinessKey(), cmd.getElementId(), errorRef);
             return actions;
         }
 

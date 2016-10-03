@@ -1,11 +1,14 @@
 # Change Log
 
-## [Unreleased]
+## [0.8.9] - 2016-10-02
 
 ### Added
 
 - a convenience constructor: `Edge#(id, elementId, label, waypoints)`.
-
+- an optional ability to discard all changes to variables made in a subprocess with the
+`Subprocess#isUseSeparateContext` flag.
+- if the `Configuration#throwExceptionOnUnhandledBpmnError` flag is set then any unhandled (e.g. without a boundary
+error event) `BpmnError` will throw an `ExecutionException`.
 
 
 ## [0.8.8] - 2016-09-23

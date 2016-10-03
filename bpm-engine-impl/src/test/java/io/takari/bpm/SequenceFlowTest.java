@@ -2,7 +2,6 @@ package io.takari.bpm;
 
 import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.ExecutionListener;
-import io.takari.bpm.model.AbstractElement;
 import io.takari.bpm.model.EndEvent;
 import io.takari.bpm.model.ExpressionType;
 import io.takari.bpm.model.ProcessDefinition;

@@ -11,6 +11,10 @@ public class MakeSubProcessVariablesAction implements Action {
     private final Set<VariableMapping> inVariables;
     private final boolean copyAllVariables;
 
+    public MakeSubProcessVariablesAction(boolean copyAllVariables) {
+        this(null, copyAllVariables);
+    }
+
     public MakeSubProcessVariablesAction(Set<VariableMapping> inVariables, boolean copyAllVariables) {
         this.inVariables = inVariables;
         this.copyAllVariables = copyAllVariables;

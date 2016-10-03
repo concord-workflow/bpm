@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import io.takari.bpm.actions.*;
-import io.takari.bpm.api.BpmnError;
 import io.takari.bpm.state.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

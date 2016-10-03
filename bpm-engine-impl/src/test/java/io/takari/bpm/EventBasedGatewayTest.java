@@ -1,7 +1,6 @@
 package io.takari.bpm;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
 import java.util.Arrays;
@@ -15,7 +14,6 @@ import org.mockito.ArgumentCaptor;
 
 import io.takari.bpm.api.NoEventFoundException;
 import io.takari.bpm.event.Event;
-import io.takari.bpm.model.AbstractElement;
 import io.takari.bpm.model.EndEvent;
 import io.takari.bpm.model.EventBasedGateway;
 import io.takari.bpm.model.IntermediateCatchEvent;

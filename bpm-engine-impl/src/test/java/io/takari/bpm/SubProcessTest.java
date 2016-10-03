@@ -4,21 +4,13 @@ import io.takari.bpm.api.BpmnError;
 import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.api.JavaDelegate;
-import io.takari.bpm.model.AbstractElement;
-import io.takari.bpm.model.BoundaryEvent;
-import io.takari.bpm.model.EndEvent;
-import io.takari.bpm.model.ExpressionType;
-import io.takari.bpm.model.ProcessDefinition;
-import io.takari.bpm.model.SequenceFlow;
-import io.takari.bpm.model.ServiceTask;
-import io.takari.bpm.model.StartEvent;
-import io.takari.bpm.model.SubProcess;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-import org.junit.Assert;
+import io.takari.bpm.model.*;
 import org.junit.Test;
+
+import java.util.*;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
 public class SubProcessTest extends AbstractEngineTest {
@@ -109,7 +101,7 @@ public class SubProcessTest extends AbstractEngineTest {
             @Override
             public void execute(ExecutionContext ctx) throws Exception {
                 Object v = ctx.getVariable(ExecutionContext.ERROR_CODE_KEY);
-                Assert.assertEquals(errorRef, v);
+                assertEquals(errorRef, v);
             }
         });
         getServiceTaskRegistry().register("t3", t3);
@@ -144,7 +136,7 @@ public class SubProcessTest extends AbstractEngineTest {
         getEngine().start(key, processId, null);
 
         // ---
-        
+
         assertActivations(key, processId,
                 "start",
                 "f1",
@@ -164,7 +156,7 @@ public class SubProcessTest extends AbstractEngineTest {
         verifyZeroInteractions(t2);
         verify(t3, times(1)).execute(any(ExecutionContext.class));
     }
-    
+
     /**
      * start --> sub                                -----------> end
      *              \                              /            /
@@ -173,7 +165,7 @@ public class SubProcessTest extends AbstractEngineTest {
     @Test
     public void testErrorEnd() throws Exception {
         final String errorRef = "test#" + System.currentTimeMillis();
-        
+
         String processId = "test";
         deploy(new ProcessDefinition(processId, Arrays.asList(
                 new StartEvent("start"),
@@ -196,7 +188,7 @@ public class SubProcessTest extends AbstractEngineTest {
         getEngine().start(key, processId, null);
 
         // ---
-        
+
         assertActivations(key, processId,
                 "start",
                 "f1",
@@ -208,7 +200,7 @@ public class SubProcessTest extends AbstractEngineTest {
                 "end");
         assertNoMoreActivations();
     }
-    
+
     /**
      * start --> sub                            t2 --> end
      *              \                          /
@@ -219,9 +211,8 @@ public class SubProcessTest extends AbstractEngineTest {
         final String k = "k" + System.currentTimeMillis();
         final String v = "v" + System.currentTimeMillis();
         final String shadowV = "s" + System.currentTimeMillis();
-        
-        JavaDelegate t1 = spy(new JavaDelegate() {
 
+        JavaDelegate t1 = spy(new JavaDelegate() {
             @Override
             public void execute(ExecutionContext ctx) throws Exception {
                 ctx.setVariable(k, v);
@@ -230,11 +221,10 @@ public class SubProcessTest extends AbstractEngineTest {
         getServiceTaskRegistry().register("t1", t1);
 
         JavaDelegate t2 = spy(new JavaDelegate() {
-
             @Override
             public void execute(ExecutionContext ctx) throws Exception {
                 Object v2 = ctx.getVariable(k);
-                Assert.assertEquals(v, v2);
+                assertEquals(v, v2);
             }
         });
         getServiceTaskRegistry().register("t2", t2);
@@ -269,5 +259,114 @@ public class SubProcessTest extends AbstractEngineTest {
 
         verify(t1, times(1)).execute(any(ExecutionContext.class));
         verify(t2, times(1)).execute(any(ExecutionContext.class));
+    }
+
+
+    /**
+     * start --> sub                            t2 --> end
+     *              \                          /
+     *               substart --> t1 --> subend
+     */
+    @Test
+    public void testSeparateContext() throws Exception {
+        String varKey = "var#" + System.currentTimeMillis();
+        String varVal = "val#" + System.currentTimeMillis();
+
+        JavaDelegate t1 = spy(new JavaDelegate() {
+            @Override
+            public void execute(ExecutionContext ctx) throws Exception {
+                assertEquals(varVal, ctx.getVariable(varKey));
+                ctx.setVariable(varKey, "something#" + System.currentTimeMillis());
+            }
+        });
+        getServiceTaskRegistry().register("t1", t1);
+
+        JavaDelegate t2 = spy(new JavaDelegate() {
+            @Override
+            public void execute(ExecutionContext ctx) throws Exception {
+                assertEquals(varVal, ctx.getVariable(varKey));
+            }
+        });
+        getServiceTaskRegistry().register("t2", t2);
+
+        // --
+
+        String processId = "test";
+        deploy(new ProcessDefinition(processId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "sub"),
+                new SubProcess("sub", true, Arrays.asList(
+                        new StartEvent("substart"),
+                        new SequenceFlow("f2", "substart", "t1"),
+                        new ServiceTask("t1", ExpressionType.DELEGATE, "${t1}"),
+                        new SequenceFlow("f3", "t1", "subend"),
+                        new EndEvent("subend")
+                )),
+                new SequenceFlow("f4", "sub", "t2"),
+                new ServiceTask("t2", ExpressionType.DELEGATE, "${t2}"),
+                new SequenceFlow("f5", "t2", "end"),
+                new EndEvent("end")
+        )));
+
+        // ---
+
+        String key = UUID.randomUUID().toString();
+        Map<String, Object> args = Collections.singletonMap(varKey, varVal);
+        getEngine().start(key, processId, args);
+
+        // ---
+
+        verify(t1, times(1)).execute(any(ExecutionContext.class));
+        verify(t2, times(1)).execute(any(ExecutionContext.class));
+    }
+
+    /**
+     * start --> sub                            --> end
+     *              \                          /
+     *               substart --> t1 --> subend
+     */
+    @Test
+    public void testSeparateContextErrorPropagation() throws Exception {
+        getConfiguration().setThrowExceptionOnErrorEnd(true);
+
+        // --
+
+        JavaDelegate t1 = spy(new JavaDelegate() {
+            @Override
+            public void execute(ExecutionContext ctx) throws Exception {
+                throw new BpmnError("kaboom!");
+            }
+        });
+        getServiceTaskRegistry().register("t1", t1);
+
+        // --
+
+        String processId = "test";
+        deploy(new ProcessDefinition(processId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "sub"),
+                new SubProcess("sub", true, Arrays.asList(
+                        new StartEvent("substart"),
+                        new SequenceFlow("f2", "substart", "t1"),
+                        new ServiceTask("t1", ExpressionType.DELEGATE, "${t1}"),
+                        new SequenceFlow("f3", "t1", "subend"),
+                        new EndEvent("subend")
+                )),
+                new SequenceFlow("f4", "sub", "end"),
+                new EndEvent("end")
+        )));
+
+        // ---
+
+        String key = UUID.randomUUID().toString();
+        try {
+            getEngine().start(key, processId, null);
+            fail("should throw an exception");
+        } catch (ExecutionException e) {
+        }
+
+        // ---
+
+        verify(t1, times(1)).execute(any(ExecutionContext.class));
     }
 }

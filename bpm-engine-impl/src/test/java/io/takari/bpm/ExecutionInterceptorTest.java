@@ -2,7 +2,6 @@ package io.takari.bpm;
 
 import io.takari.bpm.api.BpmnError;
 import io.takari.bpm.api.ExecutionContext;
-import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.api.JavaDelegate;
 import io.takari.bpm.api.interceptors.ExecutionInterceptor;
 import io.takari.bpm.api.interceptors.InterceptorStartEvent;
