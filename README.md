@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/takari/bpm.svg?branch=master)](https://travis-ci.org/takari/bpm)
 [![Coverage Status](https://coveralls.io/repos/github/takari/bpm/badge.svg?branch=master)](https://coveralls.io/github/takari/bpm?branch=master)
-[![Maven Central](https://img.shields.io/maven-central/v/io.takari.bpm/parent.svg?maxAge=28800)]()
+[![Maven Central](https://img.shields.io/maven-central/v/io.takari.bpm/parent.svg?maxAge=28800)](http://central.maven.org/maven2/io/takari/bpm/)
 
 # BPM Engine
 
