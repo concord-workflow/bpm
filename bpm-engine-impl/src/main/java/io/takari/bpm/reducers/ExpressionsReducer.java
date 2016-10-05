@@ -1,16 +1,5 @@
 package io.takari.bpm.reducers;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-
-import javax.el.ELException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.takari.bpm.actions.Action;
 import io.takari.bpm.actions.EvalExpressionAction;
 import io.takari.bpm.actions.SetVariableAction;
@@ -28,6 +17,14 @@ import io.takari.bpm.state.BpmnErrorHelper;
 import io.takari.bpm.state.ProcessInstance;
 import io.takari.bpm.utils.Timeout;
 import io.takari.bpm.utils.TimeoutCallable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.el.ELException;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 
 public class ExpressionsReducer implements Reducer {
 
@@ -121,10 +118,7 @@ public class ExpressionsReducer implements Reducer {
             // will follow its flow
 
             CommandStack stack = state.getStack()
-                    .push(new PerformActionsCommand(Arrays.asList(
-                        new SetVariableAction(ExecutionContext.ERROR_CODE_KEY, errorRef),
-                        new SetVariableAction(ExecutionContext.ERROR_CAUSE_KEY, e.getCause())
-                     )))
+                    .push(new PerformActionsCommand(new SetVariableAction(ExecutionContext.LAST_ERROR_KEY, e)))
                     .push(nextCmd);
             state = state.setStack(stack);
             log.debug("handleBpmnError ['{}', '{}'] -> next command is '{}'", state.getBusinessKey(), a.getElementId(), nextCmd);
@@ -142,7 +136,7 @@ public class ExpressionsReducer implements Reducer {
         private final Command defaultCommand;
 
         public DelegateFn(ExpressionManager expressionManager, ExecutionContext ctx, ExpressionType type, String expression,
-                Command defaultCommand) {
+                          Command defaultCommand) {
             this.expressionManager = expressionManager;
             this.ctx = ctx;
             this.type = type;

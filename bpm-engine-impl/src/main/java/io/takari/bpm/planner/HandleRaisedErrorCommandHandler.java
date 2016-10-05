@@ -1,21 +1,9 @@
 package io.takari.bpm.planner;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import io.takari.bpm.Configuration;
-import io.takari.bpm.state.EventMapHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.takari.bpm.IndexedProcessDefinition;
 import io.takari.bpm.ProcessDefinitionUtils;
-import io.takari.bpm.actions.Action;
-import io.takari.bpm.actions.ActivateFlowsAction;
-import io.takari.bpm.actions.FollowFlowsAction;
-import io.takari.bpm.actions.PopCommandAction;
-import io.takari.bpm.actions.SetVariableAction;
+import io.takari.bpm.actions.*;
 import io.takari.bpm.api.BpmnError;
 import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.ExecutionException;
@@ -23,7 +11,14 @@ import io.takari.bpm.commands.HandleRaisedErrorCommand;
 import io.takari.bpm.model.BoundaryEvent;
 import io.takari.bpm.model.SequenceFlow;
 import io.takari.bpm.state.BpmnErrorHelper;
+import io.takari.bpm.state.EventMapHelper;
 import io.takari.bpm.state.ProcessInstance;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public class HandleRaisedErrorCommandHandler implements CommandHandler<HandleRaisedErrorCommand> {
 
@@ -75,9 +70,8 @@ public class HandleRaisedErrorCommandHandler implements CommandHandler<HandleRai
         // the error is handled
         actions.add(BpmnErrorHelper.clear());
 
-        // save errorRef for later
-        actions.add(new SetVariableAction(ExecutionContext.ERROR_CODE_KEY, error.getErrorRef()));
-        actions.add(new SetVariableAction(ExecutionContext.ERROR_CAUSE_KEY, error.getCause()));
+        // save the error for later
+        actions.add(new SetVariableAction(ExecutionContext.LAST_ERROR_KEY, error));
 
         // follow the outbound flow
         actions.add(new FollowFlowsAction(cmd.getDefinitionId(), ev.getId(), cmd.getGroupId(), cmd.isExclusive()));
@@ -88,7 +82,7 @@ public class HandleRaisedErrorCommandHandler implements CommandHandler<HandleRai
 
         // process the inactive boundary events
         List<BoundaryEvent> evs = new ArrayList<>(ProcessDefinitionUtils.findOptionalBoundaryEvents(pd, cmd.getElementId()));
-        for (Iterator<BoundaryEvent> i = evs.iterator(); i.hasNext();) {
+        for (Iterator<BoundaryEvent> i = evs.iterator(); i.hasNext(); ) {
             BoundaryEvent e = i.next();
             if (e.getId().equals(ev.getId())) {
                 i.remove();

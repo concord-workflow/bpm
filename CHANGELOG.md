@@ -6,6 +6,13 @@
 
 - `ExecutionContext` now can be accessed from the `ScriptingExpressionManager` (just like in the
 `DefaultExpressionManager`).
+- `EndEvent` now can collect the cause of an error with an expression. Such expressions must return an instance of
+`Throwable`.
+
+### Breaking
+
+- `ExecutionContext#ERROR_CODE_KEY` removed in favor of `#LAST_ERROR_KEY`. The new key is used to retrieve latest
+handled `BpmnError`.
 
 
 

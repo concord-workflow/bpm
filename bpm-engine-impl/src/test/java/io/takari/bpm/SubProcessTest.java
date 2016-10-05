@@ -10,6 +10,7 @@ import org.junit.Test;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
@@ -100,8 +101,9 @@ public class SubProcessTest extends AbstractEngineTest {
 
             @Override
             public void execute(ExecutionContext ctx) throws Exception {
-                Object v = ctx.getVariable(ExecutionContext.ERROR_CODE_KEY);
-                assertEquals(errorRef, v);
+                BpmnError e = (BpmnError) ctx.getVariable(ExecutionContext.LAST_ERROR_KEY);
+                assertNotNull(e);
+                assertEquals(errorRef, e.getErrorRef());
             }
         });
         getServiceTaskRegistry().register("t3", t3);

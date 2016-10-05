@@ -9,18 +9,9 @@ import java.util.Set;
 public interface ExecutionContext {
     
     /**
-     * Key of latest handled error, contains "errorRef" of a boundary error
-     * event. Can be accessed with
-     * {@link #getVariable(ExecutionContext.ERROR_CODE_KEY)}.
+     * Key of latest handled @{BpmnError}. Can be accessed with @{code #getVariable(LAST_ERROR_KEY}.
      */
-    String ERROR_CODE_KEY = "errorCode";
-    
-    /**
-     * Key of latest handled error's cause, contains the cause, if any, of a boundary error
-     * event. Can be accessed with
-     * {@link #getVariable(ExecutionContext.ERROR_CAUSE_KEY)}.
-     */
-    String ERROR_CAUSE_KEY = "errorCause";
+    String LAST_ERROR_KEY = "lastError";
 
     String PROCESS_BUSINESS_KEY = "__processBusinessKey";
 
