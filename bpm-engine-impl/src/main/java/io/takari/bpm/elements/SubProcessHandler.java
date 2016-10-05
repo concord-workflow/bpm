@@ -14,10 +14,12 @@ import io.takari.bpm.commands.ProcessElementCommand;
 import io.takari.bpm.model.ProcessDefinition;
 import io.takari.bpm.model.StartEvent;
 import io.takari.bpm.model.SubProcess;
+import io.takari.bpm.model.VariableMapping;
 import io.takari.bpm.state.ProcessInstance;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 public class SubProcessHandler implements ElementHandler {
 
@@ -37,8 +39,13 @@ public class SubProcessHandler implements ElementHandler {
             // set a new variables container (aka child's "ExecutionContext") as our current
             actions.add(new MakeSubProcessVariablesAction(true));
 
+            Set<VariableMapping> outVariables = s.getOutVariables();
+            if (outVariables == null) {
+                outVariables = Collections.emptySet();
+            }
+
             // restore the original variables
-            actions.add(new PushCommandAction(new MergeVariablesCommand(state.getVariables(), Collections.emptySet())));
+            actions.add(new PushCommandAction(new MergeVariablesCommand(state.getVariables(), outVariables)));
         }
 
         // find an start event of the subprocess
