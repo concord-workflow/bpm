@@ -369,4 +369,74 @@ public class SubProcessTest extends AbstractEngineTest {
 
         verify(t1, times(1)).execute(any(ExecutionContext.class));
     }
+    
+    /**
+     * start --> sub                     t1 --> end
+     *              \                   /
+     *               substart --> subend
+     */
+    @Test
+    public void testSeparateContextOutVariables() throws Exception {
+      final String beforeSub = "beforeSub" + System.currentTimeMillis();
+      final String afterSub = "afterSub" + System.currentTimeMillis();
+      final Object v = "v" + System.currentTimeMillis();
+
+      Set<VariableMapping> outs = new HashSet<>();
+      outs.add(new VariableMapping(null, "${" + beforeSub + "}", afterSub));
+
+      String processId = "test";
+      deploy(new ProcessDefinition(processId, Arrays.asList(
+              new StartEvent("start"),
+              new SequenceFlow("f1", "start", "sub"),
+              new SubProcess("sub", true, outs, Arrays.asList(
+                      new StartEvent("substart"),
+                      new SequenceFlow("f2", "substart", "subend"),
+                      new EndEvent("subend")
+              )),
+              new SequenceFlow("f3", "sub", "t1"),
+              new ServiceTask("t1", ExpressionType.DELEGATE, "${t1}"),
+              new SequenceFlow("f4", "t1", "end"),
+              new EndEvent("end")
+     )));
+
+      JavaDelegate t1Task = spy(new JavaDelegate() {
+          @Override
+          public void execute(ExecutionContext ctx) throws Exception {
+              Object o = ctx.getVariable(afterSub);
+              assertEquals(v, o);
+          }
+      });
+      getServiceTaskRegistry().register("t1", t1Task);
+
+      // ---
+
+      String key = UUID.randomUUID().toString();
+      Map<String, Object> input = new HashMap<>();
+      input.put(beforeSub, v);
+      getEngine().start(key, processId, input);
+
+      // ---
+
+      assertActivations(key, processId,
+              "start",
+              "f1",
+              "sub");
+
+      assertActivations(key, processId,
+              "substart",
+              "f2",
+              "subend");
+
+      assertActivations(key, processId,
+              "f3",
+              "t1",
+              "f4",
+              "end");
+
+      assertNoMoreActivations();
+
+      // ---
+
+      verify(t1Task, times(1)).execute(any(ExecutionContext.class));
+    }
 }
