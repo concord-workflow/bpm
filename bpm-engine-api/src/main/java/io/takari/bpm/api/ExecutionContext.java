@@ -14,6 +14,13 @@ public interface ExecutionContext {
      * {@link #getVariable(ExecutionContext.ERROR_CODE_KEY)}.
      */
     String ERROR_CODE_KEY = "errorCode";
+    
+    /**
+     * Key of latest handled error's cause, contains the cause, if any, of a boundary error
+     * event. Can be accessed with
+     * {@link #getVariable(ExecutionContext.ERROR_CAUSE_KEY)}.
+     */
+    String ERROR_CAUSE_KEY = "errorCause";
 
     String PROCESS_BUSINESS_KEY = "__processBusinessKey";
 

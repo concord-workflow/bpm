@@ -16,6 +16,7 @@ import io.takari.bpm.actions.ActivateFlowsAction;
 import io.takari.bpm.actions.FollowFlowsAction;
 import io.takari.bpm.actions.PopCommandAction;
 import io.takari.bpm.actions.SetVariableAction;
+import io.takari.bpm.api.BpmnError;
 import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.commands.HandleRaisedErrorCommand;
@@ -38,8 +39,8 @@ public class HandleRaisedErrorCommandHandler implements CommandHandler<HandleRai
     public List<Action> handle(ProcessInstance state, HandleRaisedErrorCommand cmd, List<Action> actions) throws ExecutionException {
         actions.add(new PopCommandAction());
 
-        String errorRef = BpmnErrorHelper.getRaisedError(state.getVariables());
-        if (errorRef == null) {
+        BpmnError error = BpmnErrorHelper.getRaisedError(state.getVariables());
+        if (error == null) {
             if (!EventMapHelper.isEmpty(state)) {
                 // there is some events waiting, nothing to do
                 return actions;
@@ -54,7 +55,7 @@ public class HandleRaisedErrorCommandHandler implements CommandHandler<HandleRai
 
         IndexedProcessDefinition pd = state.getDefinition(cmd.getDefinitionId());
 
-        BoundaryEvent ev = ProcessDefinitionUtils.findBoundaryErrorEvent(pd, cmd.getElementId(), errorRef);
+        BoundaryEvent ev = ProcessDefinitionUtils.findBoundaryErrorEvent(pd, cmd.getElementId(), error.getErrorRef());
         if (ev == null) {
             // trying to find a boundary event without the specified error
             // reference
@@ -63,19 +64,20 @@ public class HandleRaisedErrorCommandHandler implements CommandHandler<HandleRai
 
         if (ev == null) {
             if (cfg.isThrowExceptionOnUnhandledBpmnError()) {
-                throw new ExecutionException("Unhandled BPMN error: " + errorRef);
+                throw new ExecutionException("Unhandled BPMN error: " + error.getErrorRef(), error.getCause());
             }
-            log.warn("handle ['{}', '{}'] -> unhandled BPMN error '{}'", state.getBusinessKey(), cmd.getElementId(), errorRef);
+            log.warn("handle ['{}', '{}'] -> unhandled BPMN error '{}'", state.getBusinessKey(), cmd.getElementId(), error.getErrorRef());
             return actions;
         }
 
-        log.debug("handle ['{}', '{}'] -> handling boundary error '{}'", state.getBusinessKey(), cmd.getElementId(), errorRef);
+        log.debug("handle ['{}', '{}'] -> handling boundary error '{}'", state.getBusinessKey(), cmd.getElementId(), error.getErrorRef());
 
         // the error is handled
         actions.add(BpmnErrorHelper.clear());
 
         // save errorRef for later
-        actions.add(new SetVariableAction(ExecutionContext.ERROR_CODE_KEY, errorRef));
+        actions.add(new SetVariableAction(ExecutionContext.ERROR_CODE_KEY, error.getErrorRef()));
+        actions.add(new SetVariableAction(ExecutionContext.ERROR_CAUSE_KEY, error.getCause()));
 
         // follow the outbound flow
         actions.add(new FollowFlowsAction(cmd.getDefinitionId(), ev.getId(), cmd.getGroupId(), cmd.isExclusive()));

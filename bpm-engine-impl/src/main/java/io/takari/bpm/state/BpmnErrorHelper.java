@@ -3,6 +3,8 @@ package io.takari.bpm.state;
 import io.takari.bpm.actions.Action;
 import io.takari.bpm.actions.SetVariableAction;
 import io.takari.bpm.actions.UnsetVariableAction;
+import io.takari.bpm.api.BpmnError;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,17 +15,21 @@ public final class BpmnErrorHelper {
     private static final String KEY = "__bpmn_raised_error";
     private static final String DEFAULT_ERROR_REF = "__default_error_ref";
 
-    public static String getRaisedError(Variables vars) {
-        return (String) vars.getVariable(KEY);
+    public static BpmnError getRaisedError(Variables vars) {
+        return (BpmnError) vars.getVariable(KEY);
     }
 
-    public static Action raiseError(String errorRef) {
+    public static Action raiseError(String errorRef, Throwable cause) {
         String e = errorRef;
         if (e == null) {
             log.warn("raiseError ['{}'] -> empty error reference will be replaced with a default value", errorRef);
             e = DEFAULT_ERROR_REF;
         }
-        return new SetVariableAction(KEY, e);
+        return raiseError(new BpmnError(e, cause));
+    }
+    
+    public static Action raiseError(BpmnError error) {
+        return new SetVariableAction(KEY, error);
     }
 
     public static Action clear() {

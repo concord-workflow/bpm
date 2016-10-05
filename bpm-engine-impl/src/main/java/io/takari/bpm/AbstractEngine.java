@@ -11,6 +11,7 @@ import io.takari.bpm.state.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.takari.bpm.api.BpmnError;
 import io.takari.bpm.api.Engine;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.api.NoEventFoundException;
@@ -190,15 +191,16 @@ public abstract class AbstractEngine implements Engine {
 
         // TODO move to the planner?
         ProcessStatus status = state.getStatus();
-        String raisedError = BpmnErrorHelper.getRaisedError(state.getVariables());
+        BpmnError raisedError = BpmnErrorHelper.getRaisedError(state.getVariables());
 
         if (raisedError != null) {
-            state = getExecutor().eval(state, Arrays.asList(new FireOnFailureInterceptorsAction(raisedError)));
-            log.debug("runLockSafe ['{}'] -> failed with '{}'", state.getBusinessKey(), raisedError);
+            state = getExecutor().eval(state, Arrays.asList(new FireOnFailureInterceptorsAction(raisedError.getErrorRef())));
+
+            log.debug("runLockSafe ['{}'] -> failed with '{}'", state.getBusinessKey(), raisedError.getErrorRef(), raisedError.getCause());
 
             Configuration cfg = getConfiguration();
             if (cfg.isThrowExceptionOnErrorEnd()) {
-                throw new ExecutionException("Process finished with an error end event: " + raisedError);
+                throw new ExecutionException("Process finished with an error end event: " + raisedError.getErrorRef(), raisedError.getCause());
             }
         } else if (status == ProcessStatus.SUSPENDED) {
             state = getExecutor().eval(state, Arrays.asList(new FireOnSuspendInterceptorsAction()));

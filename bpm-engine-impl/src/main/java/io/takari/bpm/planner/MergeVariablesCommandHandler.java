@@ -6,6 +6,7 @@ import io.takari.bpm.actions.Action;
 import io.takari.bpm.actions.MergeVariablesAndEventMapAction;
 import io.takari.bpm.actions.PopCommandAction;
 import io.takari.bpm.actions.SetVariablesAction;
+import io.takari.bpm.api.BpmnError;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.commands.MergeVariablesCommand;
 import io.takari.bpm.state.BpmnErrorHelper;
@@ -33,9 +34,9 @@ public class MergeVariablesCommandHandler implements CommandHandler<MergeVariabl
         actions.add(new MergeVariablesAndEventMapAction(source, cmd.getOutVariables()));
 
         // handle an raised error (see also EndEventHandler)
-        String errorRef = BpmnErrorHelper.getRaisedError(source);
-        if (errorRef != null) {
-            actions.add(BpmnErrorHelper.raiseError(errorRef));
+        BpmnError error = BpmnErrorHelper.getRaisedError(source);
+        if (error != null) {
+            actions.add(BpmnErrorHelper.raiseError(error));
         }
 
         return actions;

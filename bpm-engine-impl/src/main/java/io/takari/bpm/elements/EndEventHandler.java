@@ -20,8 +20,18 @@ public class EndEventHandler implements ElementHandler {
 
         IndexedProcessDefinition pd = state.getDefinition(cmd.getDefinitionId());
         EndEvent ev = (EndEvent) ProcessDefinitionUtils.findElement(pd, cmd.getElementId());
-        if (ev.getErrorRef() != null) {
-            actions.add(BpmnErrorHelper.raiseError(ev.getErrorRef()));
+        String errorRef = ev.getErrorRef();
+        String causeVariable = ev.getCauseVariable();
+        if (errorRef != null) {
+
+            Throwable cause;
+            if (causeVariable != null) {
+                cause = (Throwable) state.getVariables().getVariable(causeVariable);
+            } else {
+                cause = null;
+            }
+
+            actions.add(BpmnErrorHelper.raiseError(errorRef, cause));
         }
 
         return actions;

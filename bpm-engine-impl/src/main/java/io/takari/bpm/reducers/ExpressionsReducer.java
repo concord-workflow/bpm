@@ -1,5 +1,6 @@
 package io.takari.bpm.reducers;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -112,7 +113,7 @@ public class ExpressionsReducer implements Reducer {
             // the parent execution
 
             CommandStack stack = state.getStack()
-                    .push(new PerformActionsCommand(BpmnErrorHelper.raiseError(errorRef)));
+                    .push(new PerformActionsCommand(BpmnErrorHelper.raiseError(errorRef, e.getCause())));
             state = state.setStack(stack);
             log.debug("handleBpmnError ['{}', '{}'] -> error will be raised", state.getBusinessKey(), a.getElementId());
         } else {
@@ -120,7 +121,10 @@ public class ExpressionsReducer implements Reducer {
             // will follow its flow
 
             CommandStack stack = state.getStack()
-                    .push(new PerformActionsCommand(new SetVariableAction(ExecutionContext.ERROR_CODE_KEY, errorRef)))
+                    .push(new PerformActionsCommand(Arrays.asList(
+                        new SetVariableAction(ExecutionContext.ERROR_CODE_KEY, errorRef),
+                        new SetVariableAction(ExecutionContext.ERROR_CAUSE_KEY, e.getCause())
+                     )))
                     .push(nextCmd);
             state = state.setStack(stack);
             log.debug("handleBpmnError ['{}', '{}'] -> next command is '{}'", state.getBusinessKey(), a.getElementId(), nextCmd);
