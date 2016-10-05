@@ -45,9 +45,11 @@ public class ScriptingExpressionManager implements ExpressionManager {
         private static final String CONTEXT_KEY = "execution";
 
         private final KeyAwareServiceTaskRegistry taskRegistry;
+        private final ExecutionContext ctx;
 
         public CustomBindings(KeyAwareServiceTaskRegistry taskRegistry, ExecutionContext ctx) {
             this.taskRegistry = taskRegistry;
+            this.ctx = ctx;
             put(CONTEXT_KEY, ctx);
         }
 
@@ -56,13 +58,18 @@ public class ScriptingExpressionManager implements ExpressionManager {
             if (super.containsKey(key)) {
                 return super.get(key);
             }
-
+            
+            Object res = ctx.getVariable((String) key);
+            if(res != null) {
+              return res;
+            }
+            
             return taskRegistry.getByKey((String) key);
         }
 
         @Override
         public boolean containsKey(Object key) {
-            return super.containsKey(key) || taskRegistry.containsKey((String) key);
+            return super.containsKey(key) || ctx.hasVariable((String) key) || taskRegistry.containsKey((String) key);
         }
     }
 }
