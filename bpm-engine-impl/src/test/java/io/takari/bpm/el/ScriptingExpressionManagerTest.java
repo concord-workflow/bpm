@@ -35,9 +35,6 @@ public class ScriptingExpressionManagerTest {
     
     @Test
     public void testNashornParameters() throws Exception {
-        String taskKey = "t";
-        String taskArg = "arg#" + System.currentTimeMillis();
-
         KeyAwareServiceTaskRegistry taskRegistry = mock(KeyAwareServiceTaskRegistry.class);
 
         // ---

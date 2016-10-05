@@ -1,5 +1,14 @@
 # Change Log
 
+## [Unreleased]
+
+### Added
+
+- `ExecutionContext` now can be accessed from the `ScriptingExpressionManager` (just like in the
+`DefaultExpressionManager`).
+
+
+
 ## [0.8.9] - 2016-10-02
 
 ### Added
@@ -9,6 +18,7 @@
 `Subprocess#isUseSeparateContext` flag.
 - if the `Configuration#throwExceptionOnUnhandledBpmnError` flag is set then any unhandled (e.g. without a boundary
 error event) `BpmnError` will throw an `ExecutionException`.
+
 
 
 ## [0.8.8] - 2016-09-23
