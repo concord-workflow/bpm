@@ -32,6 +32,27 @@ public class ScriptingExpressionManagerTest {
 
         verify(testBean, times(1)).doIt(eq(taskArg));
     }
+    
+    @Test
+    public void testNashornParameters() throws Exception {
+        String taskKey = "t";
+        String taskArg = "arg#" + System.currentTimeMillis();
+
+        KeyAwareServiceTaskRegistry taskRegistry = mock(KeyAwareServiceTaskRegistry.class);
+
+        // ---
+
+        ExpressionManager em = new ScriptingExpressionManager("nashorn", taskRegistry);
+
+        ExecutionContext ctx = mock(ExecutionContext.class);
+        when(ctx.hasVariable(eq("test"))).thenReturn(true);
+        when(ctx.getVariable(eq("test"))).thenReturn("hello");
+        Object result = em.eval(ctx, "test", Object.class);
+
+        // ---
+
+        assertEquals("hello", result);
+    }
 
     @Test
     public void testNashornDelegate() throws Exception {
