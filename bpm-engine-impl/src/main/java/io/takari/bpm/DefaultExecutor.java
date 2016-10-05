@@ -21,6 +21,7 @@ import io.takari.bpm.reducers.FlowsReducer;
 import io.takari.bpm.reducers.ForkReducer;
 import io.takari.bpm.reducers.InterceptorEventsReducer;
 import io.takari.bpm.reducers.PersistenceReducer;
+import io.takari.bpm.reducers.RaiseErrorReducer;
 import io.takari.bpm.reducers.Reducer;
 import io.takari.bpm.reducers.StatusReducer;
 import io.takari.bpm.reducers.VariablesReducer;
@@ -41,6 +42,7 @@ public class DefaultExecutor implements Executor {
                 new StatusReducer(),
                 new FlowsReducer(),
                 new VariablesReducer(expressionManager),
+                new RaiseErrorReducer(expressionManager),
                 new ExpressionsReducer(expressionManager, executor),
                 new InterceptorEventsReducer(interceptors),
                 new CallActivityReducer(definitionProvider),

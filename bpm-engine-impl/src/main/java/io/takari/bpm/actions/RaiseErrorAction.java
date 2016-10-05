@@ -1,22 +1,13 @@
-package io.takari.bpm.model;
+package io.takari.bpm.actions;
 
-public class EndEvent extends AbstractElement {
+public class RaiseErrorAction implements Action {
 
     private static final long serialVersionUID = 1L;
 
     private final String errorRef;
     private final String causeExpression;
 
-    public EndEvent(String id) {
-        this(id, null);
-    }
-
-    public EndEvent(String id, String errorRef) {
-        this(id, errorRef, null);
-    }
-
-    public EndEvent(String id, String errorRef, String causeExpression) {
-        super(id);
+    public RaiseErrorAction(String errorRef, String causeExpression) {
         this.errorRef = errorRef;
         this.causeExpression = causeExpression;
     }
@@ -28,4 +19,10 @@ public class EndEvent extends AbstractElement {
     public String getCauseExpression() {
         return causeExpression;
     }
+
+    @Override
+    public String toString() {
+        return "RaiseErrorAction [errorRef=" + errorRef + ", causeExpression=" + causeExpression + "]";
+    }
+
 }

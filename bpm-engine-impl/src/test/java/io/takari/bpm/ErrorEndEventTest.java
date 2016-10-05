@@ -64,7 +64,7 @@ public class ErrorEndEventTest extends AbstractEngineTest {
                 new SequenceFlow("f1", "start", "t1"),
                 new ServiceTask("t1", ExpressionType.DELEGATE, "${t1}"),
                 new SequenceFlow("f2", "t1", "end"),
-                new EndEvent("end", "error!", "ex")
+                new EndEvent("end", "error!", "${ex}")
         )));
 
         // ---

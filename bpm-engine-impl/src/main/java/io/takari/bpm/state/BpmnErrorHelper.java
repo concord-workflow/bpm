@@ -1,6 +1,7 @@
 package io.takari.bpm.state;
 
 import io.takari.bpm.actions.Action;
+import io.takari.bpm.actions.RaiseErrorAction;
 import io.takari.bpm.actions.SetVariableAction;
 import io.takari.bpm.actions.UnsetVariableAction;
 import io.takari.bpm.api.BpmnError;
@@ -27,7 +28,14 @@ public final class BpmnErrorHelper {
         }
         return raiseError(new BpmnError(e, cause));
     }
-    
+
+    public static Action raiseErrorDeferred(String errorRef, String causeExpression) {
+        if (causeExpression == null) {
+            return raiseError(errorRef, (Throwable) null);
+        }
+        return new RaiseErrorAction(errorRef, causeExpression);
+    }
+
     public static Action raiseError(BpmnError error) {
         return new SetVariableAction(KEY, error);
     }
@@ -36,6 +44,5 @@ public final class BpmnErrorHelper {
         return new UnsetVariableAction(KEY);
     }
 
-    private BpmnErrorHelper() {
-    }
+    private BpmnErrorHelper() {}
 }
