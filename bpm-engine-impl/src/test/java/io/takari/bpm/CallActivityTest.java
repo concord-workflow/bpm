@@ -209,7 +209,67 @@ public class CallActivityTest extends AbstractEngineTest {
 
         verify(t1Task, times(1)).execute(any(ExecutionContext.class));
     }
+/**
+     * start --> call                             t1 --> end
+     *               \                           /
+     *                start --> gw --> ev --> end
+     */
+    @Test
+    public void testEventAndOutVariables() throws Exception {
+        String aId = "testA";
+        String bId = "testB";
 
+        String varKey = "key_" + System.currentTimeMillis();
+        Object varVal = "val_" + System.currentTimeMillis();
+
+        Set<VariableMapping> outs = new HashSet<>();
+        outs.add(new VariableMapping(varKey, null, varKey));
+
+        deploy(new ProcessDefinition(aId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "call"),
+                new CallActivity("call", bId, null, outs),
+                new SequenceFlow("f2", "call", "t1"),
+                new ServiceTask("t1", ExpressionType.DELEGATE, "${t1}"),
+                new SequenceFlow("f3", "t1", "end"),
+                new EndEvent("end")
+        )));
+
+        deploy(new ProcessDefinition(bId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "gw"),
+                new EventBasedGateway("gw"),
+                new SequenceFlow("f2", "gw", "ev"),
+                new IntermediateCatchEvent("ev", "ev"),
+                new SequenceFlow("f3", "ev", "end"),
+                new EndEvent("end")
+        )));
+
+        JavaDelegate t1Task = spy(new JavaDelegate() {
+
+            @Override
+            public void execute(ExecutionContext ctx) throws Exception {
+                Object o = ctx.getVariable(varKey);
+                assertEquals(varVal, o);
+            }
+        });
+        getServiceTaskRegistry().register("t1", t1Task);
+
+        // ---
+
+        String key = UUID.randomUUID().toString();
+        getEngine().start(key, aId, null);
+
+        // ---
+
+        Map<String, Object> args = new HashMap<>();
+        args.put(varKey, varVal);
+        getEngine().resume(key, "ev", args);
+
+        // ---
+
+        verify(t1Task, times(1)).execute(any(ExecutionContext.class));
+    }
     /**
      * start --> call                       end
      *               \                     /
@@ -605,5 +665,37 @@ public class CallActivityTest extends AbstractEngineTest {
         // ---
 
         verify(t1, times(1)).execute(any(ExecutionContext.class));
+    }
+
+    /**
+     * start --> call               call               end
+     *               \             /    \             /
+     *                start --> end      start --> end
+     */
+    @Test
+    public void testScopeNesting() throws Exception {
+        String aId = "testA";
+        String bId = "testB";
+
+        deploy(new ProcessDefinition(aId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "call1"),
+                new CallActivity("call1", bId),
+                new SequenceFlow("f2", "call1", "call2"),
+                new CallActivity("call2", bId),
+                new SequenceFlow("f3", "call2", "end"),
+                new EndEvent("end")
+        )));
+
+        deploy(new ProcessDefinition(bId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "end"),
+                new EndEvent("end")
+        )));
+
+        // ---
+
+        String key = UUID.randomUUID().toString();
+        getEngine().start(key, aId, null);
     }
 }

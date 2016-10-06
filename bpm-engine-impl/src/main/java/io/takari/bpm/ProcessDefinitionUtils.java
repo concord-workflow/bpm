@@ -1,30 +1,23 @@
 package io.takari.bpm;
 
-import java.util.*;
-
 import io.takari.bpm.api.ExecutionException;
-import io.takari.bpm.model.AbstractElement;
-import io.takari.bpm.model.BoundaryEvent;
-import io.takari.bpm.model.EndEvent;
-import io.takari.bpm.model.EventBasedGateway;
-import io.takari.bpm.model.ExclusiveGateway;
-import io.takari.bpm.model.InclusiveGateway;
-import io.takari.bpm.model.ParallelGateway;
-import io.takari.bpm.model.ProcessDefinition;
-import io.takari.bpm.model.SequenceFlow;
-import io.takari.bpm.model.StartEvent;
-import io.takari.bpm.model.SubProcess;
+import io.takari.bpm.model.*;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public final class ProcessDefinitionUtils {
 
     /**
      * Finds a (sub)process definition by its element ID.
+     *
      * @param pd a parent process definition.
      * @param id a (sub)process element ID.
      * @return the process definition, which contains an element with the
      * specified ID.
      * @throws ExecutionException if the element is not found in the parent
-     * process or any of its subprocesses.
+     *                            process or any of its subprocesses.
      */
     public static ProcessDefinition findElementProcess(ProcessDefinition pd, String id) throws ExecutionException {
         ProcessDefinition sub = findElementProcess0(pd, id);
@@ -53,6 +46,7 @@ public final class ProcessDefinitionUtils {
 
     /**
      * Finds an element of (sub)process by its ID;
+     *
      * @param pd
      * @param id
      * @throws ExecutionException if the element is not found.
@@ -64,6 +58,7 @@ public final class ProcessDefinitionUtils {
 
     /**
      * Finds a subprocess by its ID.
+     *
      * @param pd
      * @param id
      * @throws ExecutionException if the subprocess is not found.
@@ -76,13 +71,14 @@ public final class ProcessDefinitionUtils {
             throw new ExecutionException("Invalid process definition '%s': element '%s' is not a subprocess element", pd.getId(), id);
         }
     }
-    
+
     public static List<SequenceFlow> findOptionalOutgoingFlows(IndexedProcessDefinition pd, String from) throws ExecutionException {
         return pd.findOptionalOutgoingFlows(from);
     }
 
     /**
      * Finds all outgoing flows for the specified element.
+     *
      * @param pd
      * @param from
      * @throws ExecutionException if the element has no outgoing flows..
@@ -96,7 +92,7 @@ public final class ProcessDefinitionUtils {
 
         return result;
     }
-    
+
     public static SequenceFlow findOutgoingFlow(IndexedProcessDefinition pd, String from) throws ExecutionException {
         List<SequenceFlow> l = findOutgoingFlows(pd, from);
         if (l.size() != 1) {
@@ -104,7 +100,7 @@ public final class ProcessDefinitionUtils {
         }
         return l.get(0);
     }
-    
+
     public static SequenceFlow findAnyOutgoingFlow(IndexedProcessDefinition pd, String from) throws ExecutionException {
         List<SequenceFlow> l = findOutgoingFlows(pd, from);
         return l.get(0);
@@ -112,6 +108,7 @@ public final class ProcessDefinitionUtils {
 
     /**
      * Finds all incoming flows for the specified element.
+     *
      * @param pd
      * @param to
      * @throws ExecutionException if the element has no incoming flows..
@@ -138,6 +135,7 @@ public final class ProcessDefinitionUtils {
 
     /**
      * Finds a (first) start event of the process.
+     *
      * @param pd
      * @throws ExecutionException if process has no start events.
      */
@@ -150,7 +148,7 @@ public final class ProcessDefinitionUtils {
 
         throw new ExecutionException("Invalid process definition '%s': no start event defined", pd.getId());
     }
-    
+
     public static List<BoundaryEvent> findOptionalBoundaryEvents(IndexedProcessDefinition pd, String attachedToRef) throws ExecutionException {
         /*
         List<BoundaryEvent> l = new ArrayList<>();
@@ -187,32 +185,13 @@ public final class ProcessDefinitionUtils {
         }
         return null;
     }
-    
-    public static Collection<SequenceFlow> filterOutgoingFlows(IndexedProcessDefinition pd, String from, String ... filtered) throws ExecutionException {
-        List<SequenceFlow> l = findOutgoingFlows(pd, from);
-        
-        if (filtered != null && filtered.length > 0) {
-            l = new ArrayList<>(l);
 
-            for (Iterator<SequenceFlow> i = l.iterator(); i.hasNext();) {
-                SequenceFlow f = i.next();
-                for (String id : filtered) {
-                    if (id.equals(f.getId())) {
-                        i.remove();
-                    }
-                }
-            }
-        }
-        
-        return l;
-    }
-    
     public static String findNextGatewayId(IndexedProcessDefinition pd, String from) throws ExecutionException {
         AbstractElement e = findElement(pd, from);
         if (!(e instanceof SequenceFlow)) {
             e = findAnyOutgoingFlow(pd, from);
         }
-        
+
         while (e != null) {
             if (e instanceof SequenceFlow) {
                 SequenceFlow f = (SequenceFlow) e;
@@ -225,7 +204,7 @@ public final class ProcessDefinitionUtils {
                 e = findOutgoingFlow(pd, e.getId());
             }
         }
-        
+
         throw new ExecutionException("Invalid process definition '%s': can't find next parallel gateway after '%s'", pd.getId(), from);
     }
 

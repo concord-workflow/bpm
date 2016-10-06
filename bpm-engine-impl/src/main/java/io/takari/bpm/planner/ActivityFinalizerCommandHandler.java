@@ -1,54 +1,55 @@
 package io.takari.bpm.planner;
 
+import io.takari.bpm.Configuration;
+import io.takari.bpm.IndexedProcessDefinition;
+import io.takari.bpm.ProcessDefinitionUtils;
+import io.takari.bpm.actions.*;
+import io.takari.bpm.api.ExecutionContext;
+import io.takari.bpm.api.ExecutionException;
+import io.takari.bpm.commands.ActivityFinalizerCommand;
+import io.takari.bpm.commands.PerformActionsCommand;
+import io.takari.bpm.model.BoundaryEvent;
+import io.takari.bpm.model.SequenceFlow;
+import io.takari.bpm.state.BpmnErrorHelper;
+import io.takari.bpm.state.Events;
+import io.takari.bpm.state.ProcessInstance;
+import io.takari.bpm.state.Scopes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import io.takari.bpm.Configuration;
-import io.takari.bpm.state.EventMapHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+public class ActivityFinalizerCommandHandler implements CommandHandler<ActivityFinalizerCommand> {
 
-import io.takari.bpm.IndexedProcessDefinition;
-import io.takari.bpm.ProcessDefinitionUtils;
-import io.takari.bpm.actions.Action;
-import io.takari.bpm.actions.ActivateFlowsAction;
-import io.takari.bpm.actions.FollowFlowsAction;
-import io.takari.bpm.actions.PopCommandAction;
-import io.takari.bpm.actions.SetVariableAction;
-import io.takari.bpm.api.ExecutionContext;
-import io.takari.bpm.api.ExecutionException;
-import io.takari.bpm.commands.HandleRaisedErrorCommand;
-import io.takari.bpm.model.BoundaryEvent;
-import io.takari.bpm.model.SequenceFlow;
-import io.takari.bpm.state.BpmnErrorHelper;
-import io.takari.bpm.state.ProcessInstance;
-
-public class HandleRaisedErrorCommandHandler implements CommandHandler<HandleRaisedErrorCommand> {
-
-    private static final Logger log = LoggerFactory.getLogger(HandleRaisedErrorCommandHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(ActivityFinalizerCommandHandler.class);
 
     private final Configuration cfg;
 
-    public HandleRaisedErrorCommandHandler(Configuration cfg) {
+    public ActivityFinalizerCommandHandler(Configuration cfg) {
         this.cfg = cfg;
     }
 
     @Override
-    public List<Action> handle(ProcessInstance state, HandleRaisedErrorCommand cmd, List<Action> actions) throws ExecutionException {
+    public List<Action> handle(ProcessInstance state, ActivityFinalizerCommand cmd, List<Action> actions) throws ExecutionException {
         actions.add(new PopCommandAction());
+
+        Scopes scopes = state.getScopes();
+        Events events = state.getEvents();
+        if (!events.isEmpty(scopes, scopes.getCurrentId())) {
+            // we have some events waiting in the current scope or its children
+            actions.add(new PushCommandAction(new PerformActionsCommand(new PopScopeAction())));
+            return actions;
+        }
 
         String errorRef = BpmnErrorHelper.getRaisedError(state.getVariables());
         if (errorRef == null) {
-            if (!EventMapHelper.isEmpty(state)) {
-                // there is some events waiting, nothing to do
-                return actions;
-            }
-
             // no errors were raised, will continue the execution
             log.debug("handle ['{}', '{}'] -> no errors, will continue from '{}'", state.getBusinessKey(), cmd.getElementId(),
                     cmd.getElementId());
-            actions.add(new FollowFlowsAction(cmd.getDefinitionId(), cmd.getElementId(), cmd.getGroupId(), cmd.isExclusive()));
+            actions.add(new FollowFlowsAction(cmd.getDefinitionId(), cmd.getElementId()/*, cmd.getScopeId(), cmd.isExclusive()*/));
+            actions.add(new PushCommandAction(new PerformActionsCommand(new PopScopeAction())));
             return actions;
         }
 
@@ -78,7 +79,7 @@ public class HandleRaisedErrorCommandHandler implements CommandHandler<HandleRai
         actions.add(new SetVariableAction(ExecutionContext.ERROR_CODE_KEY, errorRef));
 
         // follow the outbound flow
-        actions.add(new FollowFlowsAction(cmd.getDefinitionId(), ev.getId(), cmd.getGroupId(), cmd.isExclusive()));
+        actions.add(new FollowFlowsAction(cmd.getDefinitionId(), ev.getId()));
 
         // process the inactive flows
         List<SequenceFlow> flows = ProcessDefinitionUtils.findOptionalOutgoingFlows(pd, cmd.getElementId());
@@ -86,13 +87,15 @@ public class HandleRaisedErrorCommandHandler implements CommandHandler<HandleRai
 
         // process the inactive boundary events
         List<BoundaryEvent> evs = new ArrayList<>(ProcessDefinitionUtils.findOptionalBoundaryEvents(pd, cmd.getElementId()));
-        for (Iterator<BoundaryEvent> i = evs.iterator(); i.hasNext();) {
+        for (Iterator<BoundaryEvent> i = evs.iterator(); i.hasNext(); ) {
             BoundaryEvent e = i.next();
             if (e.getId().equals(ev.getId())) {
                 i.remove();
             }
         }
         actions.add(new ActivateFlowsAction(cmd.getDefinitionId(), ProcessDefinitionUtils.toIds(evs)));
+
+        actions.add(new PushCommandAction(new PerformActionsCommand(new PopScopeAction())));
 
         return actions;
     }

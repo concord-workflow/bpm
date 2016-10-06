@@ -16,6 +16,8 @@ public class FindAndCallActivityAction implements Action {
 
     @Override
     public String toString() {
-        return "FindAndCallActivityAction [calledElement=" + calledElement + "]";
+        return "FindAndCallActivityAction[" +
+                "calledElement='" + calledElement + '\'' +
+                ']';
     }
 }

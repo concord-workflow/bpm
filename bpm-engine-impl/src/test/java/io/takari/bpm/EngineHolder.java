@@ -19,14 +19,19 @@ import io.takari.bpm.event.EventPersistenceManagerImpl;
 import io.takari.bpm.event.InMemEventStorage;
 import io.takari.bpm.lock.LockManager;
 import io.takari.bpm.lock.SingleLockManagerImpl;
+import io.takari.bpm.model.AbstractElement;
 import io.takari.bpm.model.ProcessDefinition;
 import io.takari.bpm.persistence.InMemPersistenceManager;
 import io.takari.bpm.persistence.PersistenceManager;
 import io.takari.bpm.planner.DefaultPlanner;
 import io.takari.bpm.planner.Planner;
 import io.takari.bpm.task.ServiceTaskRegistryImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class EngineHolder {
+
+    private static final Logger log = LoggerFactory.getLogger(EngineHolder.class);
 
     private final ServiceTaskRegistryImpl serviceTaskRegistry;
     private final TestProcessDefinitionProvider processDefinitionProvider;
@@ -49,7 +54,7 @@ public class EngineHolder {
         eventManager = spy(new EventPersistenceManagerImpl(new InMemEventStorage()));
         persistenceManager = new InMemPersistenceManager();
         expressionManager = new DefaultExpressionManager(serviceTaskRegistry);
-        uuidGenerator = new RandomUuidGenerator();
+        uuidGenerator = new TestUuidGenerator();
         executor = wrap(new DefaultExecutor(expressionManager, Executors.newCachedThreadPool(), interceptorHolder, indexedProcessDefinitionProvider, uuidGenerator, eventManager, persistenceManager));
         lockManager = new SingleLockManagerImpl();
         configuration = new Configuration();
@@ -131,14 +136,43 @@ public class EngineHolder {
     public Executor getExecutor() {
         return executor;
     }
-    
+
+    public UuidGenerator getUuidGenerator() {
+        return uuidGenerator;
+    }
+
     public void deploy(ProcessDefinition pd) {
+        if (log.isDebugEnabled()) {
+            log.debug("deploy ->\n{}", dump(pd));
+        }
         processDefinitionProvider.add(pd);
     }
 
     public void deploy(Map<String, ProcessDefinition> pds) {
         for (ProcessDefinition p : pds.values()) {
+            if (log.isDebugEnabled()) {
+                log.debug("deploy ->\n{}", dump(p));
+            }
             processDefinitionProvider.add(p);
+        }
+    }
+
+    private static String dump(ProcessDefinition pd) {
+        StringBuilder b = new StringBuilder();
+        b.append("===================================\n").append("\tID: ").append(pd.getId()).append("\n");
+        dump(b, pd, 2);
+        return b.toString();
+    }
+
+    private static void dump(StringBuilder b, ProcessDefinition pd, int level) {
+        for (AbstractElement e : pd.getChildren()) {
+            for (int i = 0; i < level; i++) {
+                b.append("\t");
+            }
+            b.append(e.getClass().getSimpleName()).append(" // ").append(e.getId()).append("\n");
+            if (e instanceof ProcessDefinition) {
+                dump(b, (ProcessDefinition) e, level + 1);
+            }
         }
     }
     
@@ -174,9 +208,20 @@ public class EngineHolder {
         for (List<String> l : activations.values()) {
             s += l.size();
         }
-        assertTrue("We have " + s + " more activations", s == 0);
+        assertTrue("We have " + s + " more activations: " + activations, s == 0);
     }
-    
+
+    public void dumpActivations() {
+        StringBuilder b = new StringBuilder();
+        for (Map.Entry<String, List<String>> e : activations.entrySet()) {
+            b.append(e.getKey()).append(":\n");
+            for (String a : e.getValue()) {
+                b.append("\t").append(a).append("\n");
+            }
+        }
+        log.debug("dumpActivations ->\n{}", b);
+    }
+
     private final class Interceptor extends ExecutionInterceptorAdapter {
 
         @Override

@@ -22,7 +22,7 @@ public class SequenceFlowHandler implements ElementHandler {
         SequenceFlow f = (SequenceFlow) ProcessDefinitionUtils.findElement(pd, cmd.getElementId());
 
         actions.add(new PopCommandAction());
-        actions.add(new PushCommandAction(new ProcessElementCommand(pd.getId(), f.getTo(), cmd.getGroupId(), cmd.isExclusive())));
+        actions.add(new PushCommandAction(new ProcessElementCommand(pd.getId(), f.getTo()/*, cmd.getScopeId(), cmd.isExclusive()*/)));
         actions.add(new ProcessFlowListenersAction(cmd.getDefinitionId(), cmd.getElementId()));
 
         return actions;

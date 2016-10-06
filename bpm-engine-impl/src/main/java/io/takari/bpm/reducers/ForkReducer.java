@@ -1,16 +1,9 @@
 package io.takari.bpm.reducers;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.takari.bpm.IndexedProcessDefinition;
 import io.takari.bpm.ProcessDefinitionUtils;
 import io.takari.bpm.actions.Action;
-import io.takari.bpm.actions.FollowNewGroupAction;
+import io.takari.bpm.actions.FollowFlowsAction;
 import io.takari.bpm.actions.InclusiveForkAction;
 import io.takari.bpm.actions.ParallelForkAction;
 import io.takari.bpm.api.ExecutionContext;
@@ -22,6 +15,12 @@ import io.takari.bpm.el.ExpressionManager;
 import io.takari.bpm.model.SequenceFlow;
 import io.takari.bpm.state.Activations;
 import io.takari.bpm.state.ProcessInstance;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 @Impure
 public class ForkReducer implements Reducer {
@@ -29,7 +28,7 @@ public class ForkReducer implements Reducer {
     private static final Logger log = LoggerFactory.getLogger(ForkReducer.class);
 
     private final ExpressionManager expressionManager;
-    
+
     public ForkReducer(ExpressionManager expressionManager) {
         this.expressionManager = expressionManager;
     }
@@ -43,7 +42,7 @@ public class ForkReducer implements Reducer {
             IndexedProcessDefinition pd = state.getDefinition(a.getDefinitionId());
             List<SequenceFlow> out = ProcessDefinitionUtils.findOutgoingFlows(pd, a.getElementId());
 
-            return follow(state, a.getDefinitionId(), a.getElementId(), true, out);
+            return follow(state, a.getDefinitionId(), a.getElementId(), /*scopeId, true,*/ out);
         } else if (action instanceof InclusiveForkAction) {
             InclusiveForkAction a = (InclusiveForkAction) action;
 
@@ -51,7 +50,7 @@ public class ForkReducer implements Reducer {
             // those, which was evaluated into 'false'
             IndexedProcessDefinition pd = state.getDefinition(a.getDefinitionId());
             List<SequenceFlow> out = ProcessDefinitionUtils.findOutgoingFlows(pd, a.getElementId());
-            
+
             ExecutionContextImpl ctx = new ExecutionContextImpl(expressionManager, state.getVariables());
             List<SequenceFlow> filtered = filterInactive(expressionManager, ctx, out);
 
@@ -73,24 +72,24 @@ public class ForkReducer implements Reducer {
                 state = state.setActivations(acts.inc(pd.getId(), gwId, count));
             }
 
-            return follow(state, a.getDefinitionId(), a.getElementId(), false, filtered);
+            return follow(state, a.getDefinitionId(), a.getElementId(), filtered);
         }
 
         return state;
     }
 
-    private static ProcessInstance follow(ProcessInstance state, String definitionId, String elementId, boolean exclusive, List<SequenceFlow> flows) {
+    private static ProcessInstance follow(ProcessInstance state, String definitionId, String elementId, List<SequenceFlow> flows) {
         CommandStack stack = state.getStack()
                 .push(new PerformActionsCommand(
-                        new FollowNewGroupAction(definitionId, elementId, false, ProcessDefinitionUtils.toIds(flows))));
+                        new FollowFlowsAction(definitionId, elementId, ProcessDefinitionUtils.toIds(flows))));
 
         return state.setStack(stack);
     }
-    
+
     private static List<SequenceFlow> filterInactive(ExpressionManager em, ExecutionContext ctx, List<SequenceFlow> flows) {
         List<SequenceFlow> result = new ArrayList<SequenceFlow>(flows);
 
-        for (Iterator<SequenceFlow> i = result.iterator(); i.hasNext();) {
+        for (Iterator<SequenceFlow> i = result.iterator(); i.hasNext(); ) {
             SequenceFlow f = i.next();
             if (f.getExpression() != null) {
                 String expr = f.getExpression();

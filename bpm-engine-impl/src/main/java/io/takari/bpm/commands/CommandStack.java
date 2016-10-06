@@ -1,8 +1,9 @@
 package io.takari.bpm.commands;
 
-import java.io.Serializable;
-
 import io.takari.bpm.utils.PersistentStack;
+
+import java.io.Serializable;
+import java.util.Collection;
 
 public class CommandStack implements Serializable {
 
@@ -30,7 +31,7 @@ public class CommandStack implements Serializable {
         return new CommandStack(stack.pop());
     }
 
-    public boolean isEmpty() {
-        return stack.isEmpty();
+    public Collection<Command> values() {
+        return stack.values();
     }
 }

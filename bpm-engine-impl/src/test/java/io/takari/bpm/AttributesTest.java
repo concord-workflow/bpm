@@ -42,7 +42,7 @@ public class AttributesTest extends AbstractEngineTest {
         // ---
 
 
-        String key = UUID.randomUUID().toString();
+        String key = randomUuid().toString();
         getEngine().start(key, processId, null);
 
         // ---

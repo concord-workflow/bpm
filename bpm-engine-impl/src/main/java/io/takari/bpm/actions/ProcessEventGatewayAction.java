@@ -1,13 +1,11 @@
 package io.takari.bpm.actions;
 
-public class CreateEventAction implements Action {
-
-    private static final long serialVersionUID = 1L;
+public class ProcessEventGatewayAction implements Action {
 
     private final String definitionId;
     private final String elementId;
 
-    public CreateEventAction(String definitionId, String elementId) {
+    public ProcessEventGatewayAction(String definitionId, String elementId) {
         this.definitionId = definitionId;
         this.elementId = elementId;
     }
@@ -22,7 +20,7 @@ public class CreateEventAction implements Action {
 
     @Override
     public String toString() {
-        return "CreateEventAction[" +
+        return "ProcessEventGatewayAction[" +
                 "definitionId='" + definitionId + '\'' +
                 ", elementId='" + elementId + '\'' +
                 ']';

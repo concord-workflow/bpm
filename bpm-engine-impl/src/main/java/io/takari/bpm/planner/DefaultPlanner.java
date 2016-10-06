@@ -1,20 +1,20 @@
 package io.takari.bpm.planner;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import io.takari.bpm.Configuration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.takari.bpm.actions.Action;
 import io.takari.bpm.actions.RemoveInstanceAction;
 import io.takari.bpm.actions.SetStatusAction;
+import io.takari.bpm.actions.SuspendAndPersistAction;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.commands.Command;
-import io.takari.bpm.state.EventMapHelper;
+import io.takari.bpm.state.Events;
 import io.takari.bpm.state.ProcessInstance;
 import io.takari.bpm.state.ProcessStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class DefaultPlanner implements Planner {
 
@@ -33,13 +33,16 @@ public class DefaultPlanner implements Planner {
         Command cmd = state.getStack().peek();
         log.debug("eval ['{}'] -> got '{}'", state.getBusinessKey(), cmd);
 
-        // check if we are done
         if (cmd == null) {
-            if (EventMapHelper.isEmpty(state)) {
+            // end of the stack
+            Events events = state.getEvents();
+            if (events.isEmpty()) {
+                // no events waiting, we are done
                 actions.add(new RemoveInstanceAction(state.getId()));
                 actions.add(new SetStatusAction(ProcessStatus.FINISHED));
             } else {
-                actions.add(new SetStatusAction(ProcessStatus.SUSPENDED));
+                // there are some events waiting
+                actions.add(new SuspendAndPersistAction());
             }
 
             return actions;

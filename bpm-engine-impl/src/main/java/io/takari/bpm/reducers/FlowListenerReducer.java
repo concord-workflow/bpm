@@ -42,7 +42,6 @@ public class FlowListenerReducer implements Reducer {
         processListeners(expressionManager, ctx, f);
         
         // expression evaluation may have side-effects, but they are ignored
-        // there
         if (!ctx.toActions().isEmpty()) {
             log.warn("reduce ['{}', '{}'] -> variables changes in the execution context will be ignored",
                     state.getBusinessKey(), a.getElementId());
@@ -51,8 +50,6 @@ public class FlowListenerReducer implements Reducer {
         return state;
     }
     
-
-
     /**
      * Handle process flow listeners. Listener reference can be specified with
      * EL expression.

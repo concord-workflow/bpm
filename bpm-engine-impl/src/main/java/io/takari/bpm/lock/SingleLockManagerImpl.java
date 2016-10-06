@@ -13,10 +13,10 @@ public class SingleLockManagerImpl implements LockManager {
     private final Lock lock = new ReentrantLock();
 
     @Override
-    public void lock(String processBusinnessKey) {
-        log.debug("lock ['{}'] -> locking...", processBusinnessKey);
+    public void lock(String processBusinessKey) {
+        log.debug("lock ['{}'] -> locking...", processBusinessKey);
         lock.lock();
-        log.debug("lock ['{}'] -> locked", processBusinnessKey);
+        log.debug("lock ['{}'] -> locked", processBusinessKey);
     }
 
     @Override

@@ -17,10 +17,12 @@ public class ProcessElementCommandHandler implements CommandHandler<ProcessEleme
 
     @Override
     public List<Action> handle(ProcessInstance state, ProcessElementCommand cmd, List<Action> actions) throws ExecutionException {
-        ProcessElementCommand c = cmd;
-        actions = elementHandler.handle(state, c, actions);
-        actions.add(new ActivateElementAction(c.getDefinitionId(), c.getElementId()));
-        actions.add(new FireOnElementInterceptorsAction(c.getDefinitionId(), c.getElementId()));
+        actions = elementHandler.handle(state, cmd, actions);
+
+        // TODO combine?
+        actions.add(new ActivateElementAction(cmd.getDefinitionId(), cmd.getElementId()));
+        actions.add(new FireOnElementInterceptorsAction(cmd.getDefinitionId(), cmd.getElementId()));
+
         return actions;
     }
 

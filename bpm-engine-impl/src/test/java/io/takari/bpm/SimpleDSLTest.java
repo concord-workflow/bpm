@@ -1,17 +1,37 @@
 package io.takari.bpm;
 
-import io.takari.bpm.dsl.SimpleDSL;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.api.interceptors.ExecutionInterceptor;
 import io.takari.bpm.api.interceptors.ExecutionInterceptorAdapter;
-import io.takari.bpm.dsl.CallStep;
-import io.takari.bpm.dsl.Flow;
-import io.takari.bpm.dsl.ParallelStep;
-import io.takari.bpm.dsl.TaskStep;
+import io.takari.bpm.dsl.*;
 import org.junit.Test;
+
 import static org.mockito.Mockito.*;
 
 public class SimpleDSLTest extends AbstractEngineTest {
+
+    @Test
+    public void testTrivial() throws Exception {
+        SimpleDSL.registerDslTask(getServiceTaskRegistry());
+
+        // ---
+
+        Flow masterFlow = new Flow("master",
+                new TaskStep("shell1"),
+                new TaskStep("shell2"));
+
+        deploy(SimpleDSL.from(masterFlow));
+
+        // ---
+
+        String key = "abc";
+        getEngine().start(key, "master", null);
+
+        // shuffle a bit
+
+        getEngine().resume(key, "ok_shell1", null);
+        getEngine().resume(key, "ok_shell2", null);
+    }
 
     @Test
     public void testSimple() throws Exception {
@@ -38,6 +58,52 @@ public class SimpleDSLTest extends AbstractEngineTest {
         getEngine().resume(key, "ok_shell4", null);
         getEngine().resume(key, "ok_shell6", null);
     }
+
+    @Test
+    public void testNested() throws Exception {
+        SimpleDSL.registerDslTask(getServiceTaskRegistry());
+
+        // ---
+
+        Flow masterFlow = new Flow("master",
+                new CallStep("verify"));
+
+        Flow verifyFlow = new Flow("verify",
+                new TaskStep("shell1"),
+                new TaskStep("shell2"));
+
+        deploy(SimpleDSL.from(masterFlow, verifyFlow));
+
+        // --
+
+        final DelegateInterceptor delegate = mock(DelegateInterceptor.class);
+        ExecutionInterceptor interceptor = new ExecutionInterceptorAdapter() {
+            @Override
+            public void onSuspend() throws ExecutionException {
+                delegate.onSuspend();
+            }
+
+            @Override
+            public void onFinish(String processBusinessKey) throws ExecutionException {
+                delegate.onFinish();
+            }
+        };
+        getEngine().addInterceptor(interceptor);
+
+        // ---
+
+        String key = "abc";
+        getEngine().start(key, "master", null);
+        assertOnSuspend(delegate);
+
+        getEngine().resume(key, "ok_shell1", null);
+        assertOnSuspend(delegate);
+
+        getEngine().resume(key, "ok_shell2", null);
+        dumpActivations();
+        assertOnFinish(delegate);
+    }
+
     @Test
     public void testDeeplyNested() throws Exception {
         SimpleDSL.registerDslTask(getServiceTaskRegistry());
@@ -52,12 +118,12 @@ public class SimpleDSLTest extends AbstractEngineTest {
 
         Flow verifyFlow = new Flow("verify",
                 new CallStep("setup"),
-                new TaskStep("shell2"),
-                new TaskStep("shell3"),
-                new ParallelStep(
-                        new TaskStep("shell4"),
-                        new TaskStep("shell5"),
-                        new TaskStep("shell6")),
+//                new TaskStep("shell2"),
+//                new TaskStep("shell3"),
+//                new ParallelStep(
+//                        new TaskStep("shell4"),
+//                        new TaskStep("shell5"),
+//                        new TaskStep("shell6")),
                 new TaskStep("shell7"));
 
         deploy(SimpleDSL.from(masterFlow, setupFlow, verifyFlow));
@@ -87,22 +153,22 @@ public class SimpleDSLTest extends AbstractEngineTest {
         getEngine().resume(key, "ok_shell1", null);
         assertOnSuspend(delegate);
 
-        getEngine().resume(key, "ok_shell2", null);
-        assertOnSuspend(delegate);
-
-        getEngine().resume(key, "ok_shell3", null);
-        assertOnSuspend(delegate);
+//        getEngine().resume(key, "ok_shell2", null);
+//        assertOnSuspend(delegate);
+//
+//        getEngine().resume(key, "ok_shell3", null);
+//        assertOnSuspend(delegate);
 
         // shuffle a bit
 
-        getEngine().resume(key, "ok_shell5", null);
-        assertOnSuspend(delegate);
-
-        getEngine().resume(key, "ok_shell4", null);
-        assertOnSuspend(delegate);
-
-        getEngine().resume(key, "ok_shell6", null);
-        assertOnSuspend(delegate);
+//        getEngine().resume(key, "ok_shell5", null);
+//        assertOnSuspend(delegate);
+//
+//        getEngine().resume(key, "ok_shell4", null);
+//        assertOnSuspend(delegate);
+//
+//        getEngine().resume(key, "ok_shell6", null);
+//        assertOnSuspend(delegate);
 
         // last one
 

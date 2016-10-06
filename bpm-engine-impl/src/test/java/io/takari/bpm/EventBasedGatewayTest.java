@@ -231,7 +231,7 @@ public class EventBasedGatewayTest extends AbstractEngineTest {
     }
 
     /**
-     * start --> gw --> ev1 --> ev1 --> end
+     * start --> gw --> ev1 --> ev2 --> end
      */
     @Test
     public void testTimerEvent() throws Exception {

@@ -1,7 +1,6 @@
 package io.takari.bpm.actions;
 
 import java.util.Collection;
-import java.util.Collections;
 
 public class ActivateFlowsAction implements Action {
 
@@ -10,10 +9,6 @@ public class ActivateFlowsAction implements Action {
     private final String definitionId;
     private final Collection<String> elementIds;
     private final int count;
-
-    public ActivateFlowsAction(String definitionId, String elementId, int count) {
-        this(definitionId, Collections.singleton(elementId), count);
-    }
 
     public ActivateFlowsAction(String definitionId, Collection<String> elementIds) {
         this(definitionId, elementIds, 1);

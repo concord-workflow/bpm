@@ -1,23 +1,23 @@
 package io.takari.bpm.leveldb;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.util.HashSet;
-import java.util.UUID;
-
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import com.esotericsoftware.kryo.pool.KryoFactory;
 import com.esotericsoftware.kryo.pool.KryoPool;
-
-import io.takari.bpm.commands.HandleRaisedErrorCommand;
+import io.takari.bpm.commands.ActivityFinalizerCommand;
 import io.takari.bpm.commands.ProcessElementCommand;
 import io.takari.bpm.context.ExecutionContextImpl;
 import io.takari.bpm.event.Event;
 import io.takari.bpm.event.ExpiredEvent;
-import io.takari.bpm.state.EventMapHelper.EventRecord;
+import io.takari.bpm.state.Events;
 import io.takari.bpm.state.ProcessInstance;
+import io.takari.bpm.state.Scopes;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.util.HashSet;
+import java.util.UUID;
 
 public class KryoSerializer implements Serializer {
 
@@ -36,10 +36,11 @@ public class KryoSerializer implements Serializer {
                 kryo.register(HashSet.class);
                 kryo.register(ProcessInstance.class);
                 kryo.register(ExecutionContextImpl.class);
-                kryo.register(EventRecord.class);
+                kryo.register(Scopes.Scope.class);
+                kryo.register(Events.EventRecord.class);
 
                 kryo.register(ProcessElementCommand.class);
-                kryo.register(HandleRaisedErrorCommand.class);
+                kryo.register(ActivityFinalizerCommand.class);
 
                 // TODO more classes
 

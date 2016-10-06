@@ -16,6 +16,6 @@ public class FireOnErrorInterceptorsAction implements Action {
 
     @Override
     public String toString() {
-        return "FireOnSuspendIterceptorsAction []";
+        return "FireOnSuspendInterceptorsAction []";
     }
 }

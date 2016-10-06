@@ -1,16 +1,6 @@
 package io.takari.bpm;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
 import io.takari.bpm.actions.*;
-import io.takari.bpm.state.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.takari.bpm.api.Engine;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.api.NoEventFoundException;
@@ -20,6 +10,11 @@ import io.takari.bpm.event.EventPersistenceManager;
 import io.takari.bpm.lock.LockManager;
 import io.takari.bpm.persistence.PersistenceManager;
 import io.takari.bpm.planner.Planner;
+import io.takari.bpm.state.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 public abstract class AbstractEngine implements Engine {
 
@@ -137,7 +132,7 @@ public abstract class AbstractEngine implements Engine {
         if (e.isExclusive()) {
             // exclusive event means that only one event from the group of
             // events can happen. The rest of the events must be removed.
-            em.clearGroup(businessKey, e.getGroupId());
+            em.clearGroup(businessKey, e.getScopeId());
         } else {
             em.remove(e.getId());
         }
@@ -160,19 +155,7 @@ public abstract class AbstractEngine implements Engine {
 
         // process event-to-command mappings (e.g. add next command of the flow
         // to the stack)
-        if (!EventMapHelper.isEmpty(state)) {
-            state = EventMapHelper.pushCommands(state, e.getDefinitionId(), e.getId());
-            if (e.isExclusive()) {
-                // if the event is exclusive for its group, we need to remove
-                // the whole group. exclusive events usually declared by
-                // an event based gateway
-                state = EventMapHelper.clearGroup(state, e.getDefinitionId(), e.getGroupId());
-            } else {
-                state = EventMapHelper.remove(state, e.getDefinitionId(), e.getId());
-            }
-        } else if (StateHelper.isDone(state)) {
-            throw new ExecutionException("No event mapping found in process '%s' or no commands in execution", eid);
-        }
+        state = pushEventCommands(state, e);
 
         runLockSafe(state);
     }
@@ -181,6 +164,9 @@ public abstract class AbstractEngine implements Engine {
         log.debug("runLockSafe ['{}'] -> started...", state.getBusinessKey());
 
         while (state.getStatus() == ProcessStatus.RUNNING) {
+            if (log.isTraceEnabled()) {
+                StateHelper.dump(state);
+            }
 
             List<Action> actions = getPlanner().eval(state);
             state = getExecutor().eval(state, actions);
@@ -207,5 +193,25 @@ public abstract class AbstractEngine implements Engine {
             state = getExecutor().eval(state, Arrays.asList(new FireOnFinishInterceptorsAction()));
             log.debug("runLockSafe ['{}'] -> done", state.getBusinessKey());
         }
+
+        if (log.isTraceEnabled()) {
+            StateHelper.dump(state);
+        }
     }
+
+    private static ProcessInstance pushEventCommands(ProcessInstance state, Event ev) {
+        Events events = state.getEvents();
+        state = events.pushCommands(state, ev.getScopeId(), ev.getId());
+
+        if (ev.isExclusive()) {
+            // exclusive event: clear the whole scope
+            events = events.clearScope(ev.getScopeId());
+        } else {
+            // non-exclusive event: remove only the current event
+            events = events.removeEvent(ev.getScopeId(), ev.getId());
+        }
+
+        return state.setEvents(events);
+    }
+
 }

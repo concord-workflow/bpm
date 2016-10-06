@@ -8,6 +8,7 @@ import io.takari.bpm.model.ProcessDefinition;
 import io.takari.bpm.task.ServiceTaskRegistryImpl;
 
 import java.util.Map;
+import java.util.UUID;
 
 public class AbstractEngineTest {
 
@@ -16,6 +17,10 @@ public class AbstractEngineTest {
     @Before
     public void init() throws Exception {
         this.engineHolder = new EngineHolder();
+    }
+
+    protected UUID randomUuid() {
+        return engineHolder.getUuidGenerator().generate();
     }
 
     protected Configuration getConfiguration() {
@@ -44,6 +49,10 @@ public class AbstractEngineTest {
     
     protected void assertActivations(String processBusinessKey, String processDefinitionId, String ... elementIds) {
         engineHolder.assertActivations(processBusinessKey, processDefinitionId, elementIds);
+    }
+
+    protected void dumpActivations() {
+        engineHolder.dumpActivations();
     }
     
     protected void assertNoMoreActivations() {

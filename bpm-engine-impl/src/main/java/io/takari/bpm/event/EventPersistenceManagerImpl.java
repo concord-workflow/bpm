@@ -52,7 +52,7 @@ public class EventPersistenceManagerImpl implements EventPersistenceManager {
 
         Collection<Event> evs = eventStorage.find(processBusinessKey);
         for(Event e : evs) {
-            UUID otherGid = e.getGroupId();
+            UUID otherGid = e.getScopeId();
 
             if (groupId.equals(otherGid)) {
                 eventStorage.remove(e.getId());

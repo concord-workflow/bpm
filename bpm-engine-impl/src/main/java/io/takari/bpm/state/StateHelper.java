@@ -5,32 +5,50 @@ import io.takari.bpm.IndexedProcessDefinition;
 import io.takari.bpm.ProcessDefinitionUtils;
 import io.takari.bpm.actions.Action;
 import io.takari.bpm.actions.FireOnStartInterceptorsAction;
+import io.takari.bpm.actions.PopScopeAction;
+import io.takari.bpm.actions.PushScopeAction;
 import io.takari.bpm.api.ExecutionException;
+import io.takari.bpm.commands.Command;
 import io.takari.bpm.commands.CommandStack;
+import io.takari.bpm.commands.PerformActionsCommand;
 import io.takari.bpm.commands.ProcessElementCommand;
 import io.takari.bpm.model.ProcessDefinition;
 import io.takari.bpm.model.StartEvent;
+import io.takari.bpm.state.Events.EventRecord;
+import io.takari.bpm.state.Scopes.Scope;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public final class StateHelper {
 
+    private static final Logger log = LoggerFactory.getLogger(StateHelper.class);
+
     public static ProcessInstance createInitialState(Executor executor, UUID id, String businessKey,
-            IndexedProcessDefinition pd, Map<String, Object> args) throws ExecutionException {
+                                                     IndexedProcessDefinition pd, Map<String, Object> args) throws ExecutionException {
 
         ProcessInstance state = new ProcessInstance(id, businessKey, pd);
-
-        // add the first command to the stack
         StartEvent start = ProcessDefinitionUtils.findStartEvent(pd);
+
         CommandStack stack = state.getStack();
-        state = state.setStack(stack.push(new ProcessElementCommand(pd.getId(), start.getId())));
+
+        // initial scope removal
+        stack = stack.push(new PerformActionsCommand(new PopScopeAction()));
+
+        // add the first process command to the stack
+        stack = stack.push(new ProcessElementCommand(pd.getId(), start.getId()));
+
+        // initial scope creation
+        stack = stack.push(new PerformActionsCommand(new PushScopeAction(false)));
+
+        state = state.setStack(stack);
 
         // set external variables
         state = applyVariables(state, pd.getAttributes(), args);
 
         // fire interceptors
+        // TODO add to stack?
         Action a = new FireOnStartInterceptorsAction(pd.getId());
         state = executor.eval(state, Arrays.asList(a));
 
@@ -56,8 +74,105 @@ public final class StateHelper {
         return state.setVariables(vars);
     }
 
-    public static boolean isDone(ProcessInstance state) {
-        return state.getStack().isEmpty();
+    public static void dump(ProcessInstance state) {
+        StringBuilder b = new StringBuilder();
+
+        Collection<Command> commands = state.getStack().values();
+        printCollection(b, "COMMANDS", commands);
+
+        printScopes(b, "SCOPES", state.getScopes());
+
+        Map<UUID, Map<UUID, EventRecord>> events = state.getEvents().values();
+        printEvents(b, "EVENTS", events);
+
+        b.append("\n");
+
+        log.trace("{}", b.toString());
+    }
+
+    private static void printCollection(StringBuilder b, String name, Collection<?> items) {
+        b.append("\n=================================\n")
+                .append("\t").append(name).append(": ")
+                .append(items.size())
+                .append("\n");
+
+        for (Iterator<?> i = items.iterator(); i.hasNext(); ) {
+            Object o = i.next();
+            b.append("\t\t").append(o);
+            if (i.hasNext()) {
+                b.append("\n");
+            }
+        }
+    }
+
+    private static void printScopes(StringBuilder b, String name, Scopes scopes) {
+        Map<UUID, Scope> items = scopes.values();
+
+        b.append("\n=================================\n")
+                .append("\t").append(name).append(": ")
+                .append(items.size())
+                .append("\n")
+                .append("\tCURRENT SCOPE: ").append(scopes.getCurrentId()).append("\n");
+
+        for (Map.Entry<?, Scope> e : items.entrySet()) {
+            Scope s = e.getValue();
+            if (s.getParentId() != null) {
+                continue;
+            }
+
+            printScopes(b, items, s.getId(), 2);
+        }
+
+        b.append("\tCURRENT SCOPE STACK:\n");
+
+        UUID currentId = scopes.getCurrentId();
+        if (currentId != null) {
+            List<Scope> stack = scopes.traverse(currentId);
+            for (Scope s : stack) {
+                b.append("\t\t").append(s.getId()).append("=").append(s).append("\n");
+            }
+        }
+    }
+
+    private static void printScopes(StringBuilder b, Map<UUID, Scope> scopes, UUID rootId, int level) {
+        for (int i = 0; i < level; i++) {
+            b.append("\t");
+        }
+
+        Scope s = scopes.get(rootId);
+        b.append(rootId).append("=").append(s).append("\n");
+
+        for (Map.Entry<?, Scope> e : scopes.entrySet()) {
+            Scope next = e.getValue();
+            if (rootId.equals(next.getParentId())) {
+                printScopes(b, scopes, next.getId(), level + 1);
+            }
+        }
+    }
+
+    private static void printEvents(StringBuilder b, String name, Map<UUID, Map<UUID, EventRecord>> items) {
+        b.append("\n=================================\n")
+                .append("\t").append(name).append(": ")
+                .append(items.size())
+                .append("\n");
+
+        for (Map.Entry<UUID, Map<UUID, EventRecord>> e : items.entrySet()) {
+            Object k = e.getKey();
+            Map<?, ?> v = e.getValue();
+            if (v.isEmpty()) {
+                b.append("\t\t").append(k).append(" = EMPTY\n");
+                continue;
+            }
+
+            b.append("\t\t").append(k).append(" = {\n");
+
+            for (Map.Entry<?, ?> ee : v.entrySet()) {
+                Object kk = ee.getKey();
+                Object vv = ee.getValue();
+                b.append("\t\t\t").append(kk).append("=").append(vv).append("\n");
+            }
+            b.append("\t\t}\n");
+        }
     }
 
     private StateHelper() {

@@ -1,23 +1,15 @@
-package io.takari.bpm.actions;
+package io.takari.bpm.commands;
 
-import java.util.List;
-
-public class FollowFlowsAction implements Action {
+public class ActivityFinalizerCommand implements Command {
 
     private static final long serialVersionUID = 1L;
 
     private final String definitionId;
     private final String elementId;
-    private final List<String> flowIds;
 
-    public FollowFlowsAction(String definitionId, String elementId) {
-        this(definitionId, elementId, null);
-    }
-
-    public FollowFlowsAction(String definitionId, String elementId, List<String> flowIds) {
+    public ActivityFinalizerCommand(String definitionId, String elementId) {
         this.definitionId = definitionId;
         this.elementId = elementId;
-        this.flowIds = flowIds;
     }
 
     public String getDefinitionId() {
@@ -28,16 +20,11 @@ public class FollowFlowsAction implements Action {
         return elementId;
     }
 
-    public List<String> getFlowIds() {
-        return flowIds;
-    }
-
     @Override
     public String toString() {
-        return "FollowFlowsAction[" +
+        return "ActivityFinalizerCommand[" +
                 "definitionId='" + definitionId + '\'' +
                 ", elementId='" + elementId + '\'' +
-                ", flowIds=" + flowIds +
                 ']';
     }
 }

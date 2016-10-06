@@ -53,7 +53,7 @@ public class ExpressionsReducer implements Reducer {
 
         List<Timeout<Command>> timeouts = a.getTimeouts();
         if (timeouts != null && !timeouts.isEmpty()) {
-            // a timeout handling decoractor
+            // a timeout handling decorator
             fn = new TimeoutCallable<Command>(executor, timeouts, fn);
         }
 
@@ -87,7 +87,12 @@ public class ExpressionsReducer implements Reducer {
     }
 
     private ProcessInstance applyVariablesChanges(ProcessInstance state, ExecutionContextImpl ctx) {
-        Command cmd = new PerformActionsCommand(ctx.toActions());
+        List<Action> actions = ctx.toActions();
+        if (actions == null || actions.isEmpty()) {
+            return  state;
+        }
+
+        Command cmd = new PerformActionsCommand(actions);
         return state.setStack(state.getStack().push(cmd));
     }
 

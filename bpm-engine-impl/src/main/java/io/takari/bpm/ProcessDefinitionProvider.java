@@ -7,7 +7,7 @@ public interface ProcessDefinitionProvider {
 
     /**
      * Returns a process definition object by its ID. Result must be the
-     * same for each call of this method (idempotency).
+     * same for each call of this method (idempotent).
      * @param id
      * @return process definition or {@code null}
      * @throws ExecutionException

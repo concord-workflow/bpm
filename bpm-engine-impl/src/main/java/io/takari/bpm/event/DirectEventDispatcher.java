@@ -5,15 +5,14 @@ import io.takari.bpm.api.ExecutionException;
 
 public class DirectEventDispatcher implements EventDispatcher {
 
-    // private final AbstractEngine engine;
+    private final AbstractEngine engine;
 
     public DirectEventDispatcher(AbstractEngine engine) {
-        // this.engine = engine;
+        this.engine = engine;
     }
 
     @Override
     public void dispatch(Event e) throws ExecutionException {
-        // TODO
-        // engine.resume(e, null);
+        engine.resume(e.getId(), null);
     }
 }

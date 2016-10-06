@@ -2,21 +2,16 @@ package io.takari.bpm.elements;
 
 import io.takari.bpm.IndexedProcessDefinition;
 import io.takari.bpm.ProcessDefinitionUtils;
-import io.takari.bpm.actions.Action;
-import io.takari.bpm.actions.MakeSubProcessVariablesAction;
-import io.takari.bpm.actions.PopCommandAction;
-import io.takari.bpm.actions.PushCommandAction;
+import io.takari.bpm.actions.*;
 import io.takari.bpm.api.ExecutionException;
-import io.takari.bpm.commands.Command;
-import io.takari.bpm.commands.HandleRaisedErrorCommand;
-import io.takari.bpm.commands.MergeVariablesCommand;
-import io.takari.bpm.commands.ProcessElementCommand;
+import io.takari.bpm.commands.*;
 import io.takari.bpm.model.ProcessDefinition;
 import io.takari.bpm.model.StartEvent;
 import io.takari.bpm.model.SubProcess;
 import io.takari.bpm.model.VariableMapping;
 import io.takari.bpm.state.ProcessInstance;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -31,9 +26,11 @@ public class SubProcessHandler implements ElementHandler {
         SubProcess s = (SubProcess) ProcessDefinitionUtils.findElement(pd, cmd.getElementId());
 
         // add an error handling command to the stack
-        Command errorHandlingCmd = new HandleRaisedErrorCommand(cmd.getDefinitionId(), cmd.getElementId(), cmd.getGroupId(),
-                cmd.isExclusive());
+        Command errorHandlingCmd = new ActivityFinalizerCommand(cmd.getDefinitionId(), cmd.getElementId());
         actions.add(new PushCommandAction(errorHandlingCmd));
+
+        List<Command> finishers = new ArrayList<>();
+        finishers.add(errorHandlingCmd);
 
         if (s.isUseSeparateContext()) {
             // set a new variables container (aka child's "ExecutionContext") as our current
@@ -45,7 +42,9 @@ public class SubProcessHandler implements ElementHandler {
             }
 
             // restore the original variables
-            actions.add(new PushCommandAction(new MergeVariablesCommand(state.getVariables(), outVariables)));
+            Command mergeCommand = new MergeVariablesCommand(state.getVariables(), outVariables);
+            actions.add(new PushCommandAction(mergeCommand));
+            finishers.add(mergeCommand);
         }
 
         // find an start event of the subprocess
@@ -53,8 +52,12 @@ public class SubProcessHandler implements ElementHandler {
         StartEvent start = ProcessDefinitionUtils.findStartEvent(sub);
 
         // add a start command to the stack
-        Command startCmd = new ProcessElementCommand(cmd.getDefinitionId(), start.getId());
+        Command startCmd = new ProcessElementCommand(cmd.getDefinitionId(), start.getId()/*, scopeId, false*/);
         actions.add(new PushCommandAction(startCmd));
+
+        // push the new scope when the subprocess execution begins
+        // the scope will be "popped" by one of the finishing actions
+        actions.add(new PushCommandAction(new PerformActionsCommand(new PushScopeAction(false, finishers.toArray(new Command[finishers.size()])))));
 
         return actions;
     }

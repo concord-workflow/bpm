@@ -1,18 +1,17 @@
 package io.takari.bpm;
 
-import java.util.*;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-
 import io.takari.bpm.model.AbstractElement;
 import io.takari.bpm.model.BoundaryEvent;
 import io.takari.bpm.model.ProcessDefinition;
 import io.takari.bpm.model.SequenceFlow;
 
+import java.util.*;
+
 public class IndexedProcessDefinition extends ProcessDefinition {
-	
-	private static final long serialVersionUID = 1L;
+
+    private static final long serialVersionUID = 1L;
 
     private final Map<String, List<SequenceFlow>> outgoingFlows;
     private final Map<String, List<BoundaryEvent>> boundaryEvents;

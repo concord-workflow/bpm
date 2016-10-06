@@ -1,20 +1,16 @@
 package io.takari.bpm.reducers;
 
-import java.util.Date;
-import java.util.UUID;
-
-import io.takari.bpm.actions.*;
-import io.takari.bpm.commands.ClearCommandStackCommand;
-import org.joda.time.DateTime;
-import org.joda.time.Period;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.google.common.collect.Lists;
 import io.takari.bpm.IndexedProcessDefinition;
 import io.takari.bpm.ProcessDefinitionUtils;
 import io.takari.bpm.UuidGenerator;
+import io.takari.bpm.actions.Action;
+import io.takari.bpm.actions.CreateEventAction;
+import io.takari.bpm.actions.PopScopeAction;
+import io.takari.bpm.actions.SetCurrentScopeAction;
 import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.ExecutionException;
+import io.takari.bpm.commands.Command;
 import io.takari.bpm.commands.PerformActionsCommand;
 import io.takari.bpm.commands.ProcessElementCommand;
 import io.takari.bpm.context.ExecutionContextImpl;
@@ -23,8 +19,18 @@ import io.takari.bpm.event.Event;
 import io.takari.bpm.event.EventPersistenceManager;
 import io.takari.bpm.model.IntermediateCatchEvent;
 import io.takari.bpm.model.SequenceFlow;
-import io.takari.bpm.state.EventMapHelper;
+import io.takari.bpm.state.Events;
 import io.takari.bpm.state.ProcessInstance;
+import io.takari.bpm.state.Scopes.Scope;
+import org.joda.time.DateTime;
+import org.joda.time.Period;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 @Impure
 public class EventsReducer implements Reducer {
@@ -49,31 +55,42 @@ public class EventsReducer implements Reducer {
 
         CreateEventAction a = (CreateEventAction) action;
 
-        Event ev = makeEvent(state, a.getDefinitionId(), a.getElementId(), a.getGroupId(), a.isExclusive());
-
         IndexedProcessDefinition pd = state.getDefinition(a.getDefinitionId());
         SequenceFlow next = ProcessDefinitionUtils.findOutgoingFlow(pd, a.getElementId());
 
-        if (a.getGroupId() != null) {
-            // grouped event
-            state = EventMapHelper.put(state, ev,
-                    new ClearCommandStackCommand(),
-                    new PerformActionsCommand(new PersistExecutionAction()),
-                    new ProcessElementCommand(pd.getId(), next.getId(), a.getGroupId(), a.isExclusive()));
-        } else {
-            // standalone event
-            state = state.setStack(state.getStack()
-                    .push(new ProcessElementCommand(pd.getId(), next.getId(), a.getGroupId(), a.isExclusive()))
-                    .push(new PerformActionsCommand(new SuspendAndPersistAction())));
+        // TODO move to an utility fn
+        Scope scope = state.getScopes().peek();
+        List<Scope> scopes = state.getScopes().traverse(scope.getId());
+
+        // create a list of commands that will be executes on activation of an event
+        List<Command> cmds = new ArrayList<>();
+
+        for (Scope s : Lists.reverse(scopes)) {
+            // scope's finishers will pop their scope themselves
+            if (s.getFinishers() == null) {
+                cmds.add(new PerformActionsCommand(new PopScopeAction()));
+            } else {
+                for (Command f : s.getFinishers()) {
+                    cmds.add(f);
+                }
+            }
         }
 
+        cmds.add(new ProcessElementCommand(pd.getId(), next.getId()/*, scopeId, a.isExclusive()*/));
+        cmds.add(new PerformActionsCommand(new SetCurrentScopeAction(scope.getId())));
+
+        // create and save an event
+        Events events = state.getEvents();
+        Event ev = makeEvent(state, a.getDefinitionId(), a.getElementId());
+        state = state.setEvents(events.addEvent(ev.getScopeId(), ev.getId(), ev.getName(), cmds.toArray(new Command[cmds.size()])));
         eventManager.add(ev);
 
         return state;
     }
 
-    private Event makeEvent(ProcessInstance state, String definitionId, String elementId, UUID groupId, boolean exclusive)
+    private Event makeEvent(ProcessInstance state, String definitionId, String elementId)
             throws ExecutionException {
+
         IndexedProcessDefinition pd = state.getDefinition(definitionId);
         IntermediateCatchEvent ice = (IntermediateCatchEvent) ProcessDefinitionUtils.findElement(pd, elementId);
 
@@ -84,7 +101,11 @@ public class EventsReducer implements Reducer {
         Date timeDuration = parseExpiredAt(state, expressionManager, definitionId, elementId, ice.getTimeDuration());
         Date expiredAt = timeDate != null ? timeDate : timeDuration;
 
-        return new Event(id, state.getId(), pd.getId(), groupId, name, state.getBusinessKey(), exclusive, expiredAt);
+        Scope s = state.getScopes().peek();
+        UUID scopeId = s.getId();
+        boolean exclusive = s.isExclusive();
+
+        return new Event(id, state.getId(), pd.getId(), scopeId, name, state.getBusinessKey(), exclusive, expiredAt);
     }
 
     private static String getEventName(IntermediateCatchEvent e) {
@@ -93,11 +114,11 @@ public class EventsReducer implements Reducer {
 
     private static Date parseTimeDate(ProcessInstance state, ExpressionManager em, String definitionId, String elementId, String s)
             throws ExecutionException {
+
         ExecutionContextImpl ctx = new ExecutionContextImpl(em, state.getVariables());
         Object v = eval(s, ctx, em, Object.class);
 
         // expression evaluation may have side-effects, but they are ignored
-        // there
         if (!ctx.toActions().isEmpty()) {
             log.warn("parseTimeData ['{}', '{}', '{}', '{}'] -> variables changes in the execution context will be ignored",
                     state.getBusinessKey(), definitionId, elementId, s);
@@ -119,11 +140,11 @@ public class EventsReducer implements Reducer {
 
     private static Date parseExpiredAt(ProcessInstance state, ExpressionManager em, String definitionId, String elementId, String s)
             throws ExecutionException {
+
         ExecutionContextImpl ctx = new ExecutionContextImpl(em, state.getVariables());
         Object v = eval(s, ctx, em, Object.class);
 
         // expression evaluation may have side-effects, but they are ignored
-        // there
         if (!ctx.toActions().isEmpty()) {
             log.warn("parseExpiredAt ['{}', '{}', '{}', '{}'] -> variables changes in the execution context will be ignored",
                     state.getBusinessKey(), definitionId, elementId, s);

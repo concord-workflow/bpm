@@ -4,8 +4,7 @@ import org.pcollections.ConsPStack;
 import org.pcollections.PStack;
 
 import java.io.Serializable;
-import java.util.ArrayDeque;
-import java.util.Deque;
+import java.util.List;
 
 public class PersistentStack<T extends Serializable> implements Serializable {
 
@@ -13,7 +12,7 @@ public class PersistentStack<T extends Serializable> implements Serializable {
 
     private final PStack<T> stack;
 
-    public PersistentStack(){
+    public PersistentStack() {
         this.stack = ConsPStack.empty();
     }
 
@@ -37,7 +36,18 @@ public class PersistentStack<T extends Serializable> implements Serializable {
         return new PersistentStack<T>(stack.minus(0));
     }
 
+    public List<T> values() {
+        return stack;
+    }
+
     public boolean isEmpty() {
         return stack.isEmpty();
+    }
+
+    @Override
+    public String toString() {
+        return "PersistentStack[" +
+                "stack=" + stack +
+                ']';
     }
 }

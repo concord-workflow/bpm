@@ -41,7 +41,7 @@ public class CallActivityReducer implements Reducer {
 
         // push the start event of the child process to the stack
         StartEvent ev = ProcessDefinitionUtils.findStartEvent(sub);
-        state = state.setStack(state.getStack().push(new ProcessElementCommand(sub.getId(), ev.getId())));
+        state = state.setStack(state.getStack().push(new ProcessElementCommand(sub.getId(), ev.getId()/*, a.getScopeId(), false*/)));
 
         return state;
     }
