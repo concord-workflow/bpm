@@ -1,14 +1,11 @@
 package io.takari.bpm.reducers;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.takari.bpm.actions.Action;
-import io.takari.bpm.actions.ClearCommandsAction;
 import io.takari.bpm.actions.PopCommandAction;
 import io.takari.bpm.actions.PushCommandAction;
-import io.takari.bpm.commands.CommandStack;
 import io.takari.bpm.state.ProcessInstance;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CommandStackReducer implements Reducer {
 
@@ -23,9 +20,6 @@ public class CommandStackReducer implements Reducer {
         } else if (action instanceof PopCommandAction) {
             log.debug("reduce ['{}'] -> pop", state.getBusinessKey());
             return state.setStack(state.getStack().pop());
-        } else if (action instanceof ClearCommandsAction) {
-            log.debug("reduce ['{}'] -> clear", state.getBusinessKey());
-            return state.setStack(new CommandStack());
         }
 
         return state;

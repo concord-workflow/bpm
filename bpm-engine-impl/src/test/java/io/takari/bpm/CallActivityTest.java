@@ -4,6 +4,7 @@ import io.takari.bpm.api.BpmnError;
 import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.JavaDelegate;
 import io.takari.bpm.model.*;
+import io.takari.bpm.state.Variables;
 import org.junit.Test;
 
 import java.util.*;
@@ -661,6 +662,92 @@ public class CallActivityTest extends AbstractEngineTest {
 
         String key = UUID.randomUUID().toString();
         getEngine().start(key, aId, null);
+
+        // ---
+
+        verify(t1, times(1)).execute(any(ExecutionContext.class));
+    }
+
+    /**
+     * start --> gw --> call                        gw --> t1 --> end
+     *              \       \                     / /
+     *               \       start --> ev1 --> end /
+     *                call                        /
+     *                                           /
+     *                     start --> ev2 --> end
+     */
+    @Test
+    public void testParallelCallsWithEvents() throws Exception {
+        String argKey = "arg_" + System.currentTimeMillis();
+        Object argVal = "argVal_" + System.currentTimeMillis();
+        String outKey = "out_" + System.currentTimeMillis();
+        Object ev1Val = "ev1Val_" + System.currentTimeMillis();
+        Object ev2Val = "ev2Val_" + System.currentTimeMillis();
+
+        JavaDelegate t1 = spy(new JavaDelegate() {
+
+            @Override
+            public void execute(ExecutionContext ctx) throws Exception {
+                Object v = ctx.getVariable(outKey);
+                assertEquals(ev2Val, v);
+            }
+        });
+        getServiceTaskRegistry().register("t1", t1);
+
+        // ---
+
+        String aId = "testA";
+        String bId = "testB";
+        String cId = "testC";
+
+        Set<VariableMapping> inVars = new HashSet<>();
+        inVars.add(new VariableMapping(argKey, null, outKey));
+
+        Set<VariableMapping> outVars = new HashSet<>();
+        outVars.add(new VariableMapping(outKey, null, outKey));
+
+        deploy(new ProcessDefinition(aId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "gw1"),
+
+                new ParallelGateway("gw1"),
+                    new SequenceFlow("f2", "gw1", "call1"),
+                    new CallActivity("call1", bId, inVars, outVars),
+                    new SequenceFlow("f3", "call1", "gw2"),
+
+                    new SequenceFlow("f4", "gw1", "call2"),
+                    new CallActivity("call2", cId, inVars, outVars),
+                    new SequenceFlow("f5", "call2", "gw2"),
+
+                new ParallelGateway("gw2"),
+                new SequenceFlow("f6", "gw2", "t1"),
+                new ServiceTask("t1", ExpressionType.DELEGATE, "${t1}"),
+                new SequenceFlow("f7", "t1", "end"),
+                new EndEvent("end"))));
+
+        deploy(new ProcessDefinition(bId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "ev1"),
+                new IntermediateCatchEvent("ev1", "ev1"),
+                new SequenceFlow("f2", "ev1", "end"),
+                new EndEvent("end"))));
+
+        deploy(new ProcessDefinition(cId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "ev2"),
+                new IntermediateCatchEvent("ev2", "ev2"),
+                new SequenceFlow("f2", "ev2", "end"),
+                new EndEvent("end"))));
+
+        // ---
+
+        String key = UUID.randomUUID().toString();
+        getEngine().start(key, aId, Collections.singletonMap(argKey, argVal));
+
+        // ---
+
+        getEngine().resume(key, "ev1", Collections.singletonMap(outKey, ev1Val));
+        getEngine().resume(key, "ev2", Collections.singletonMap(outKey, ev2Val));
 
         // ---
 

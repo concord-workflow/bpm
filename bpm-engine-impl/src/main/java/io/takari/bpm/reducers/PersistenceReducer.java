@@ -1,7 +1,6 @@
 package io.takari.bpm.reducers;
 
 import io.takari.bpm.actions.Action;
-import io.takari.bpm.actions.PersistExecutionAction;
 import io.takari.bpm.actions.RemoveInstanceAction;
 import io.takari.bpm.actions.SuspendAndPersistAction;
 import io.takari.bpm.api.ExecutionException;
@@ -23,8 +22,6 @@ public class PersistenceReducer implements Reducer {
         if (action instanceof SuspendAndPersistAction) {
             // TODO split into two actions?
             state = state.setStatus(ProcessStatus.SUSPENDED);
-            persistenceManager.save(state);
-        } else if (action instanceof PersistExecutionAction) {
             persistenceManager.save(state);
         } else if (action instanceof RemoveInstanceAction) {
             RemoveInstanceAction a = (RemoveInstanceAction) action;
