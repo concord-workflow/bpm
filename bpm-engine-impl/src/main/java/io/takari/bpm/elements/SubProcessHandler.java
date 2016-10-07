@@ -52,7 +52,7 @@ public class SubProcessHandler implements ElementHandler {
         StartEvent start = ProcessDefinitionUtils.findStartEvent(sub);
 
         // add a start command to the stack
-        Command startCmd = new ProcessElementCommand(cmd.getDefinitionId(), start.getId()/*, scopeId, false*/);
+        Command startCmd = new ProcessElementCommand(cmd.getDefinitionId(), start.getId());
         actions.add(new PushCommandAction(startCmd));
 
         // push the new scope when the subprocess execution begins

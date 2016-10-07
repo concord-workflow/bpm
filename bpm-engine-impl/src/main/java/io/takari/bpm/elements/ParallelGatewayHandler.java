@@ -51,6 +51,6 @@ public class ParallelGatewayHandler implements ElementHandler {
     }
 
     protected Action createForkAction(ProcessElementCommand cmd) {
-        return new ParallelForkAction(cmd.getDefinitionId(), cmd.getElementId()/*, cmd.getScopeId()*/);
+        return new ParallelForkAction(cmd.getDefinitionId(), cmd.getElementId());
     }
 }

@@ -76,7 +76,7 @@ public class EventsReducer implements Reducer {
             }
         }
 
-        cmds.add(new ProcessElementCommand(pd.getId(), next.getId()/*, scopeId, a.isExclusive()*/));
+        cmds.add(new ProcessElementCommand(pd.getId(), next.getId()));
         cmds.add(new PerformActionsCommand(new SetCurrentScopeAction(scope.getId())));
 
         // create and save an event

@@ -14,7 +14,7 @@ public class StartEventHandler implements ElementHandler {
     @Override
     public List<Action> handle(ProcessInstance state, ProcessElementCommand cmd, List<Action> actions) throws ExecutionException {
         actions.add(new PopCommandAction());
-        actions.add(new FollowFlowsAction(cmd.getDefinitionId(), cmd.getElementId()/*, cmd.getScopeId(), cmd.isExclusive()*/));
+        actions.add(new FollowFlowsAction(cmd.getDefinitionId(), cmd.getElementId()));
         return actions;
     }
 }

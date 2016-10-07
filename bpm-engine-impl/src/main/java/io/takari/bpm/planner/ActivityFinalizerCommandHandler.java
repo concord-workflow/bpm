@@ -49,7 +49,7 @@ public class ActivityFinalizerCommandHandler implements CommandHandler<ActivityF
             // no errors were raised, will continue the execution
             log.debug("handle ['{}', '{}'] -> no errors, will continue from '{}'", state.getBusinessKey(), cmd.getElementId(),
                     cmd.getElementId());
-            actions.add(new FollowFlowsAction(cmd.getDefinitionId(), cmd.getElementId()/*, cmd.getScopeId(), cmd.isExclusive()*/));
+            actions.add(new FollowFlowsAction(cmd.getDefinitionId(), cmd.getElementId()));
             actions.add(new PushCommandAction(new PerformActionsCommand(new PopScopeAction())));
             return actions;
         }

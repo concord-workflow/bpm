@@ -42,7 +42,7 @@ public class ForkReducer implements Reducer {
             IndexedProcessDefinition pd = state.getDefinition(a.getDefinitionId());
             List<SequenceFlow> out = ProcessDefinitionUtils.findOutgoingFlows(pd, a.getElementId());
 
-            return follow(state, a.getDefinitionId(), a.getElementId(), /*scopeId, true,*/ out);
+            return follow(state, a.getDefinitionId(), a.getElementId(), out);
         } else if (action instanceof InclusiveForkAction) {
             InclusiveForkAction a = (InclusiveForkAction) action;
 

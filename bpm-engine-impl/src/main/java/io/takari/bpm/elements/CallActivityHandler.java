@@ -20,7 +20,7 @@ public class CallActivityHandler implements ElementHandler {
         actions.add(new PopCommandAction());
 
         // add an error handling command to the stack
-        Command errorHandlingCmd = new ActivityFinalizerCommand(cmd.getDefinitionId(), cmd.getElementId()/*, parentScopeId, cmd.isExclusive()*/);
+        Command errorHandlingCmd = new ActivityFinalizerCommand(cmd.getDefinitionId(), cmd.getElementId());
         actions.add(new PushCommandAction(errorHandlingCmd));
 
         List<Command> finishers = new ArrayList<>();
@@ -47,7 +47,7 @@ public class CallActivityHandler implements ElementHandler {
 
         // find the called process and start its execution
         CallActivity e = (CallActivity) ProcessDefinitionUtils.findElement(pd, cmd.getElementId());
-        actions.add(new FindAndCallActivityAction(e.getCalledElement()/*, scopeId*/));
+        actions.add(new FindAndCallActivityAction(e.getCalledElement()));
 
         // push the new scope when the call begins
         // the scope will be "popped" by one of the finishing actions

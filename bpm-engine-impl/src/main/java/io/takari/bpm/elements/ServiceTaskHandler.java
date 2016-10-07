@@ -45,7 +45,7 @@ public class ServiceTaskHandler implements ElementHandler {
             // create a command which will be executed after a normal task
             // completion
             SequenceFlow nextFlow = ProcessDefinitionUtils.findOutgoingFlow(pd, cmd.getElementId());
-            Command defaultCommand = new ProcessElementCommand(pd.getId(), nextFlow.getId()/*, cmd.getScopeId(), cmd.isExclusive()*/);
+            Command defaultCommand = new ProcessElementCommand(pd.getId(), nextFlow.getId());
 
             // collect all timeout boundary events attached to this task
             List<Timeout<Command>> timeouts = findTimers(pd, cmd);
@@ -66,7 +66,7 @@ public class ServiceTaskHandler implements ElementHandler {
             log.debug("handle ['{}', '{}', {}, '{}'] -> done", state.getBusinessKey(), cmd.getElementId(), type, expr);
         } else {
             log.debug("handle ['{}', '{}', {}, '{}'] -> noop", state.getBusinessKey(), cmd.getElementId(), type, expr);
-            actions.add(new FollowFlowsAction(cmd.getDefinitionId(), cmd.getElementId()/*, cmd.getScopeId(), cmd.isExclusive()*/));
+            actions.add(new FollowFlowsAction(cmd.getDefinitionId(), cmd.getElementId()));
         }
 
         return actions;
@@ -78,7 +78,7 @@ public class ServiceTaskHandler implements ElementHandler {
         for (BoundaryEvent ev : events) {
             if (ev.getTimeDuration() != null) {
                 Duration d = Duration.parse(ev.getTimeDuration());
-                Command c = new ProcessElementCommand(pd.getId(), ev.getId()/*, cmd.getScopeId(), cmd.isExclusive()*/);
+                Command c = new ProcessElementCommand(pd.getId(), ev.getId());
                 l.add(new Timeout<Command>(d.getMillis(), c));
             }
         }
@@ -97,7 +97,7 @@ public class ServiceTaskHandler implements ElementHandler {
         List<BoundaryEvent> events = ProcessDefinitionUtils.findOptionalBoundaryEvents(pd, cmd.getElementId());
         for (BoundaryEvent ev : events) {
             if (ev.getErrorRef() == null && ev.getTimeDuration() == null) {
-                return new ProcessElementCommand(pd.getId(), ev.getId()/*, cmd.getScopeId(), cmd.isExclusive()*/);
+                return new ProcessElementCommand(pd.getId(), ev.getId());
             }
         }
 
@@ -110,7 +110,7 @@ public class ServiceTaskHandler implements ElementHandler {
         List<BoundaryEvent> events = ProcessDefinitionUtils.findOptionalBoundaryEvents(pd, cmd.getElementId());
         for (BoundaryEvent ev : events) {
             if (ev.getErrorRef() != null && ev.getTimeDuration() == null) {
-                m.put(ev.getErrorRef(), new ProcessElementCommand(pd.getId(), ev.getId()/*, cmd.getScopeId(), cmd.isExclusive()*/));
+                m.put(ev.getErrorRef(), new ProcessElementCommand(pd.getId(), ev.getId()));
             }
         }
 

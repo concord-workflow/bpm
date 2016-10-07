@@ -8,6 +8,6 @@ public class InclusiveGatewayHandler extends ParallelGatewayHandler {
 
     @Override
     protected Action createForkAction(ProcessElementCommand cmd) {
-        return new InclusiveForkAction(cmd.getDefinitionId(), cmd.getElementId()/*, cmd.getScopeId()*/);
+        return new InclusiveForkAction(cmd.getDefinitionId(), cmd.getElementId());
     }
 }
