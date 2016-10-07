@@ -1,5 +1,19 @@
 # Change Log
 
+## [0.9.1] - 2016-10-07
+
+### Added
+
+- `EndEvent` now can collect the cause of an error with an expression. Such expressions must return an instance of
+`Throwable`.
+
+### Breaking
+
+- `ExecutionContext#ERROR_CODE_KEY` removed in favor of `#LAST_ERROR_KEY`. The new key is used to retrieve latest
+handled `BpmnError`.
+
+
+
 ## [0.9.0] - 2016-10-07
 
 ### Added

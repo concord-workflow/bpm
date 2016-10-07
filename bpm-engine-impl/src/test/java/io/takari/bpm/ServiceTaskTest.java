@@ -4,20 +4,17 @@ import io.takari.bpm.api.BpmnError;
 import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.api.JavaDelegate;
-import io.takari.bpm.model.BoundaryEvent;
-import io.takari.bpm.model.EndEvent;
-import io.takari.bpm.model.ExpressionType;
-import io.takari.bpm.model.ProcessDefinition;
-import io.takari.bpm.model.SequenceFlow;
-import io.takari.bpm.model.ServiceTask;
-import io.takari.bpm.model.StartEvent;
+import io.takari.bpm.model.*;
+import org.junit.Ignore;
+import org.junit.Test;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.*;
 
 public class ServiceTaskTest extends AbstractEngineTest {
@@ -68,12 +65,12 @@ public class ServiceTaskTest extends AbstractEngineTest {
 
         verify(helloTask, times(1)).execute(any(ExecutionContext.class));
     }
-    
+
     @Ignore
     @Test
     public void testDelegateBoundaryError() throws Exception {
         final String errorRef = "test#" + System.currentTimeMillis();
-        
+
         JavaDelegate t1 = spy(new JavaDelegate() {
 
             @Override
@@ -82,29 +79,29 @@ public class ServiceTaskTest extends AbstractEngineTest {
             }
         });
         getServiceTaskRegistry().register("t1", t1);
-        
+
         ServiceTask t = new ServiceTask("t1", ExpressionType.DELEGATE, "${t1}");
         testBoundaryError(t, errorRef);
-        
+
         verify(t1, times(1)).execute(any(ExecutionContext.class));
     }
-    
+
     @Ignore
     @Test
     public void testExpressionBoundaryError() throws Exception {
         final String errorRef = "test#" + System.currentTimeMillis();
-        
+
         SampleTask t1 = spy(new SampleTask() {
-            
+
             public void doIt(long i) {
                 throw new BpmnError(errorRef);
             }
         });
         getServiceTaskRegistry().register("t1", t1);
-        
+
         ServiceTask t = new ServiceTask("t1", ExpressionType.SIMPLE, "${t1.doIt(123)}");
         testBoundaryError(t, errorRef);
-        
+
         verify(t1, times(1)).doIt(anyLong());
     }
 
@@ -159,13 +156,14 @@ public class ServiceTaskTest extends AbstractEngineTest {
             }
         });
         getServiceTaskRegistry().register("t1", t1);
-        
+
         JavaDelegate t2 = spy(new JavaDelegate() {
 
             @Override
             public void execute(ExecutionContext ctx) throws ExecutionException {
-                Object v = ctx.getVariable(ExecutionContext.ERROR_CODE_KEY);
-                Assert.assertEquals(errorRef, v);
+                BpmnError e = (BpmnError) ctx.getVariable(ExecutionContext.LAST_ERROR_KEY);
+                assertNotNull(e);
+                assertEquals(errorRef, e.getErrorRef());
             }
         });
         getServiceTaskRegistry().register("t2", t2);
@@ -195,7 +193,7 @@ public class ServiceTaskTest extends AbstractEngineTest {
         verify(t1, times(1)).execute(any(ExecutionContext.class));
         verify(t2, times(1)).execute(any(ExecutionContext.class));
     }
-    
+
     /**
      * start --> t1 --> end
      */
@@ -237,9 +235,9 @@ public class ServiceTaskTest extends AbstractEngineTest {
 
         verify(t, times(1)).doIt(eq(123L));
     }
-    
+
     public interface SampleTask {
-        
+
         void doIt(long i);
     }
 }
