@@ -91,6 +91,13 @@ public class Scopes {
         return result;
     }
 
+    public Scopes remove(UUID scopeId) {
+        if (scopeId == currentId) {
+            throw new IllegalArgumentException("Can't remove the current scope: " + scopeId);
+        }
+        return new Scopes(currentId, scopes.minus(scopeId));
+    }
+
     @Override
     public String toString() {
         return "Scopes[" +

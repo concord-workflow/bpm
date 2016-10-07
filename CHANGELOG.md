@@ -1,5 +1,14 @@
 # Change Log
 
+## [Unreleased]
+
+### Added
+
+- more tests.
+- automatically cleanup free scopes. Reduces the memory footprint and strain on serialization.
+
+
+
 ## [0.9.1] - 2016-10-07
 
 ### Added

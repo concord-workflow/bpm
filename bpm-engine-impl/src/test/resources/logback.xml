@@ -6,7 +6,12 @@
         </encoder>
     </appender>
 
-    <root level="DEBUG">
+    <!--
+    <logger name="io.takari.bpm.state.StateHelper" level="TRACE"/>
+    <logger name="io.takari.bpm.AbstractEngine" level="TRACE"/>
+    -->
+
+    <root level="INFO">
         <appender-ref ref="STDOUT" />
     </root>
 </configuration>

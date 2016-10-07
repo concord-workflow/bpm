@@ -35,5 +35,7 @@ Original contributors:
 - subprocess.
 
 ## Limitations
-- tasks with TimerBoundaryEvents executed in a separate thread inside of an unbounded Executor
+- tasks with TimerBoundaryEvents executed in a separate thread inside of an unbounded Executor.
+- currently there is an unbound storage for element activation records. It is used internally in the engine and can
+cause large memory footprint in processes with huge amount of looping (hundreds of thousands loops).
  
