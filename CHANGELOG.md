@@ -6,6 +6,15 @@
 
 - `ExecutionContext` now can be accessed from the `ScriptingExpressionManager` (just like in the
 `DefaultExpressionManager`).
+- `SubProcess` now supports out variables.
+
+### Breaking
+
+- `Event#groupId` renamed to `Event#scopeId`. This may break deserialization of pre-existing data.
+
+### Changed
+
+- Event scoping is completely rewritten in order to support more complex use cases.
 
 
 
