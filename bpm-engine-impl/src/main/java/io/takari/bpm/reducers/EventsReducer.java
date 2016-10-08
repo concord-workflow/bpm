@@ -93,11 +93,12 @@ public class EventsReducer implements Reducer {
 
         IndexedProcessDefinition pd = state.getDefinition(definitionId);
         IntermediateCatchEvent ice = (IntermediateCatchEvent) ProcessDefinitionUtils.findElement(pd, elementId);
+        ExecutionContextImpl ctx = new ExecutionContextImpl(expressionManager, state.getVariables());
 
         UUID id = uuidGenerator.generate();
-        String name = getEventName(ice);
+        String name = getEventName(ice, ctx, expressionManager);
 
-        Date timeDate = parseTimeDate(state, expressionManager, definitionId, elementId, ice.getTimeDate());
+        Date timeDate = parseTimeDate(state, ctx, expressionManager, definitionId, elementId, ice.getTimeDate());
         Date timeDuration = parseExpiredAt(state, expressionManager, definitionId, elementId, ice.getTimeDuration());
         Date expiredAt = timeDate != null ? timeDate : timeDuration;
 
@@ -108,14 +109,16 @@ public class EventsReducer implements Reducer {
         return new Event(id, state.getId(), pd.getId(), scopeId, name, state.getBusinessKey(), exclusive, expiredAt);
     }
 
-    private static String getEventName(IntermediateCatchEvent e) {
+    private static String getEventName(IntermediateCatchEvent e, ExecutionContext ctx, ExpressionManager em) {
+        if (e.getMessageRefExpression() != null) {
+            return em.eval(ctx, e.getMessageRefExpression(), String.class);
+        }
         return e.getMessageRef() != null ? e.getMessageRef() : e.getId();
     }
 
-    private static Date parseTimeDate(ProcessInstance state, ExpressionManager em, String definitionId, String elementId, String s)
+    private static Date parseTimeDate(ProcessInstance state, ExecutionContextImpl ctx, ExpressionManager em, String definitionId, String elementId, String s)
             throws ExecutionException {
 
-        ExecutionContextImpl ctx = new ExecutionContextImpl(em, state.getVariables());
         Object v = eval(s, ctx, em, Object.class);
 
         // expression evaluation may have side-effects, but they are ignored

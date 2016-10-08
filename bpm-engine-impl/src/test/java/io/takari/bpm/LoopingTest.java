@@ -6,6 +6,8 @@ import io.takari.bpm.model.*;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.spy;
@@ -66,5 +68,38 @@ public class LoopingTest extends AbstractEngineTest {
         // ---
 
         verify(t1, times(loops)).execute(any(ExecutionContext.class));
+    }
+
+    /**
+     * start --> ev --
+     *             \  \
+     *              --/
+     */
+    @Test
+    public void testEventLooping() throws Exception {
+        int loops = 500;
+        String evKey = "nextId";
+        String expr = "${\"event_\".concat(" + evKey + ")}";
+
+        String processId = "test";
+        deploy(new ProcessDefinition(processId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "ev"),
+                IntermediateCatchEvent.messageExpr("ev", expr),
+                new SequenceFlow("f2", "ev", "ev"))));
+
+        // ---
+
+        String key = randomUuid().toString();
+        Map<String, Object> args = Collections.singletonMap(evKey, 0);
+        getEngine().start(key, processId, args);
+
+        // ---
+
+        for (int i = 0; i < loops; i++) {
+            String ev = "event_" + i;
+            args = Collections.singletonMap(evKey, i + 1);
+            getEngine().resume(key, ev, args);
+        }
     }
 }

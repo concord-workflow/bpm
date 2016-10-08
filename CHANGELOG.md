@@ -1,11 +1,13 @@
 # Change Log
 
-## [Unreleased]
+## [0.9.2] - 2016-10-07
 
 ### Added
 
 - more tests.
 - automatically cleanup free scopes. Reduces the memory footprint and strain on serialization.
+- `IntermediateCatchEvent#messageRefExpression` can now be used to generate event names. The result of evaluation must
+be a `String`.
 
 
 

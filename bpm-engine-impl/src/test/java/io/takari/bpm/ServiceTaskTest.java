@@ -66,7 +66,6 @@ public class ServiceTaskTest extends AbstractEngineTest {
         verify(helloTask, times(1)).execute(any(ExecutionContext.class));
     }
 
-    @Ignore
     @Test
     public void testDelegateBoundaryError() throws Exception {
         final String errorRef = "test#" + System.currentTimeMillis();
@@ -86,7 +85,6 @@ public class ServiceTaskTest extends AbstractEngineTest {
         verify(t1, times(1)).execute(any(ExecutionContext.class));
     }
 
-    @Ignore
     @Test
     public void testExpressionBoundaryError() throws Exception {
         final String errorRef = "test#" + System.currentTimeMillis();
@@ -133,6 +131,7 @@ public class ServiceTaskTest extends AbstractEngineTest {
                 "start",
                 "f1",
                 "t1",
+                "be1",
                 "f2",
                 "end");
         assertNoMoreActivations();
