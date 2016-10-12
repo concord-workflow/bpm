@@ -12,8 +12,8 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
-import org.openjdk.jmh.runner.options.TimeValue;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 /**
@@ -53,7 +53,7 @@ public class Linear10DelegateBenchmark {
                     new ServiceTask("t10", ExpressionType.DELEGATE, EXPR),
                     new SequenceFlow("f11", "t10", "end"),
                     new EndEvent("end"))));
-            
+
             getServiceTaskRegistry().register("t", new JavaDelegate() {
                 @Override
                 public void execute(ExecutionContext ctx) throws Exception {
@@ -72,8 +72,13 @@ public class Linear10DelegateBenchmark {
             System.exit(1);
         }
     }
-    
+
     public static void main(String[] args) throws RunnerException {
+        try {
+            System.in.read();
+        } catch (IOException e) {
+        }
+
         Options opt = new OptionsBuilder()
                 .include(Linear10DelegateBenchmark.class.getSimpleName())
                 .forks(0)

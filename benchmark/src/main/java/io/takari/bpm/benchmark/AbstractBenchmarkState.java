@@ -4,7 +4,9 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.takari.bpm.CachingIndexedProcessDefinitionProvider;
 import io.takari.bpm.el.ScriptingExpressionManager;
+import io.takari.bpm.lock.NoopLockManager;
 import io.takari.bpm.task.KeyAwareServiceTaskRegistry;
 import org.iq80.leveldb.DBFactory;
 import org.iq80.leveldb.impl.Iq80DBFactory;
@@ -48,7 +50,8 @@ public abstract class AbstractBenchmarkState {
         DummyProcessDefinitionProvider defs = new DummyProcessDefinitionProvider();
         defs.publish(def.getId(), def);
         
-        LockManager lockManager = new StripedLockManagerImpl(65536);
+//        LockManager lockManager = new StripedLockManagerImpl(65536);
+        LockManager lockManager = new NoopLockManager();
         EventPersistenceManager eventPersistenceManager;
         PersistenceManager persistenceManager;
         
@@ -87,6 +90,7 @@ public abstract class AbstractBenchmarkState {
 
         EngineBuilder builder = new EngineBuilder()
                 .withDefinitionProvider(defs)
+                .wrapDefinitionProviderWith((p) -> new CachingIndexedProcessDefinitionProvider(p))
                 .withTaskRegistry(serviceTaskRegistry)
                 .withEventManager(eventPersistenceManager)
                 .withPersistenceManager(persistenceManager)

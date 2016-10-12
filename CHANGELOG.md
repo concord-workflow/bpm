@@ -1,5 +1,14 @@
 # Change Log
 
+## [Unreleased]
+
+### Added
+
+- `EngineBuilder#wrapDefinitionProviderWith` now can be used to decorate definition providers with some additional
+functionality like caching (see `CachingIndexedProcessDefinitionProvider`).
+
+
+
 ## [0.9.2] - 2016-10-07
 
 ### Added
