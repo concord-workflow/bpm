@@ -3,7 +3,7 @@ package io.takari.bpm.planner;
 import java.util.List;
 
 import io.takari.bpm.actions.Action;
-import io.takari.bpm.actions.MergeVariablesAndEventMapAction;
+import io.takari.bpm.actions.MergeVariablesAction;
 import io.takari.bpm.actions.PopCommandAction;
 import io.takari.bpm.actions.SetVariablesAction;
 import io.takari.bpm.api.BpmnError;
@@ -31,7 +31,7 @@ public class MergeVariablesCommandHandler implements CommandHandler<MergeVariabl
 
         // merge out variables of the child process into the parent's (current)
         // variables map
-        actions.add(new MergeVariablesAndEventMapAction(source, cmd.getOutVariables()));
+        actions.add(new MergeVariablesAction(source, cmd.getOutVariables()));
 
         // handle an raised error (see also EndEventHandler)
         BpmnError error = BpmnErrorHelper.getRaisedError(source);

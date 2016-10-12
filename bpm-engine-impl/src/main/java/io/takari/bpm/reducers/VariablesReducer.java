@@ -29,9 +29,9 @@ public class VariablesReducer implements Reducer {
         } else if (action instanceof SetVariablesAction) {
             SetVariablesAction a = (SetVariablesAction) action;
             return state.setVariables(a.getVariables());
-        } else if (action instanceof MergeVariablesAndEventMapAction) {
+        } else if (action instanceof MergeVariablesAction) {
             // TODO move into a separate file
-            MergeVariablesAndEventMapAction a = (MergeVariablesAndEventMapAction) action;
+            MergeVariablesAction a = (MergeVariablesAction) action;
 
             // copy the out variables to the parent's context
             Variables src = a.getSource();
