@@ -1,11 +1,13 @@
 # Change Log
 
-## [Unreleased]
+## [0.9.3] - 2016-10-14
 
 ### Added
 
 - `EngineBuilder#wrapDefinitionProviderWith` now can be used to decorate definition providers with some additional
 functionality like caching (see `CachingIndexedProcessDefinitionProvider`).
+- `SourceAwareProcessDefinition` allows to store "source maps" - an additional metadata that links a process
+definition's source and resulting data structures.
 
 
 
