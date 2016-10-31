@@ -4,12 +4,24 @@ public class RaiseErrorAction implements Action {
 
     private static final long serialVersionUID = 1L;
 
+    private final String definitionId;
+    private final String elementId;
     private final String errorRef;
     private final String causeExpression;
 
-    public RaiseErrorAction(String errorRef, String causeExpression) {
+    public RaiseErrorAction(String definitionId, String elementId, String errorRef, String causeExpression) {
+        this.definitionId = definitionId;
+        this.elementId = elementId;
         this.errorRef = errorRef;
         this.causeExpression = causeExpression;
+    }
+
+    public String getDefinitionId() {
+        return definitionId;
+    }
+
+    public String getElementId() {
+        return elementId;
     }
 
     public String getErrorRef() {
@@ -22,7 +34,11 @@ public class RaiseErrorAction implements Action {
 
     @Override
     public String toString() {
-        return "RaiseErrorAction [errorRef=" + errorRef + ", causeExpression=" + causeExpression + "]";
+        return "RaiseErrorAction[" +
+                "definitionId='" + definitionId + '\'' +
+                ", elementId='" + elementId + '\'' +
+                ", errorRef='" + errorRef + '\'' +
+                ", causeExpression='" + causeExpression + '\'' +
+                ']';
     }
-
 }

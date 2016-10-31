@@ -30,6 +30,7 @@ public class RaiseErrorReducer implements Reducer {
             cause = new ExecutionContextImpl(expressionManager, state.getVariables()).eval(expression, Throwable.class);
         }
 
-        return state.setStack(state.getStack().push(new PerformActionsCommand(BpmnErrorHelper.raiseError(a.getErrorRef(), cause))));
+        return state.setStack(state.getStack().push(new PerformActionsCommand(
+                BpmnErrorHelper.raiseError(a.getDefinitionId(), a.getElementId(), a.getErrorRef(), cause))));
     }
 }

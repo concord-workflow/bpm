@@ -64,11 +64,20 @@ public class ActivityFinalizerCommandHandler implements CommandHandler<ActivityF
         }
 
         if (ev == null) {
-            if (cfg.isThrowExceptionOnUnhandledBpmnError()) {
-                throw new ExecutionException("Unhandled BPMN error: " + error.getErrorRef(), error.getCause());
+            switch (cfg.getUnhandledBpmnErrorStrategy()) {
+                case EXCEPTION: {
+                    throw new ExecutionException("Unhandled BPMN error: " + error.getErrorRef(), error);
+                }
+                case PROPAGATE: {
+                    log.debug("handle ['{}', '{}'] -> propagating the error: '{}'", state.getBusinessKey(), cmd.getElementId(), error.getErrorRef());
+                    return actions;
+                }
+                case IGNORE: {
+                    log.warn("handle ['{}', '{}'] -> unhandled BPMN error: '{}'", state.getBusinessKey(), cmd.getElementId(), error.getErrorRef());
+                    actions.add(BpmnErrorHelper.clear());
+                    return actions;
+                }
             }
-            log.warn("handle ['{}', '{}'] -> unhandled BPMN error '{}'", state.getBusinessKey(), cmd.getElementId(), error.getErrorRef());
-            return actions;
         }
 
         log.debug("handle ['{}', '{}'] -> handling boundary error '{}'", state.getBusinessKey(), cmd.getElementId(), error.getErrorRef());

@@ -1,16 +1,15 @@
 package io.takari.bpm.event;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
+import io.takari.bpm.api.NoEventFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.takari.bpm.api.NoEventFoundException;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 public final class EventScheduler {
 
@@ -111,12 +110,12 @@ public final class EventScheduler {
                         acquiredEventQueue.put(e);
                     }
                 }
-                
-                if(acquiredEvents.size() < maxEventsPerAcquisition) {
+
+                if (acquiredEvents.size() < maxEventsPerAcquisition) {
                     sleep(acquisitionDelay);
                 }
             } catch (InterruptedException e) {
-                log.info("eventAcquisitionLoop -> interrupted");
+                log.debug("eventAcquisitionLoop -> interrupted");
                 Thread.currentThread().interrupt();
             } catch (Exception e) {
                 log.error("eventAcquisitionLoop -> error, retry in {} ms", acquisitionErrorDelay, e);
@@ -124,7 +123,7 @@ public final class EventScheduler {
             }
         }
 
-        log.info("eventAcquisitionLoop -> done");
+        log.debug("eventAcquisitionLoop -> done");
     }
 
     private void eventExecutionLoop() {

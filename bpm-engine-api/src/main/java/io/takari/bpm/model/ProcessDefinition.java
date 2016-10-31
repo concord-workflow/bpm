@@ -18,6 +18,10 @@ public class ProcessDefinition extends AbstractElement {
         this(source.getId(), source.getChildren(), attributes);
     }
 
+    public ProcessDefinition(String id, AbstractElement... children) {
+        this(id, Arrays.asList(children));
+    }
+
     public ProcessDefinition(String id, Collection<AbstractElement> children) {
         this(id, children, Collections.emptyMap());
     }

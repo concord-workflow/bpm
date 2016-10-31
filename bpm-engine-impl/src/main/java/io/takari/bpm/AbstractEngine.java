@@ -9,6 +9,9 @@ import io.takari.bpm.api.interceptors.ExecutionInterceptor;
 import io.takari.bpm.event.Event;
 import io.takari.bpm.event.EventPersistenceManager;
 import io.takari.bpm.lock.LockManager;
+import io.takari.bpm.model.AbstractElement;
+import io.takari.bpm.model.EndEvent;
+import io.takari.bpm.model.ProcessDefinition;
 import io.takari.bpm.persistence.PersistenceManager;
 import io.takari.bpm.planner.Planner;
 import io.takari.bpm.state.*;
@@ -192,13 +195,8 @@ public abstract class AbstractEngine implements Engine {
 
         if (raisedError != null) {
             state = getExecutor().eval(state, Arrays.asList(new FireOnFailureInterceptorsAction(raisedError.getErrorRef())));
-
             log.debug("runLockSafe ['{}'] -> failed with '{}'", state.getBusinessKey(), raisedError.getErrorRef(), raisedError.getCause());
-
-            Configuration cfg = getConfiguration();
-            if (cfg.isThrowExceptionOnErrorEnd()) {
-                throw new ExecutionException("Process finished with an error end event: " + raisedError.getErrorRef(), raisedError.getCause());
-            }
+            handleRaisedError(getConfiguration(), state, raisedError);
         } else if (status == ProcessStatus.SUSPENDED) {
             state = getExecutor().eval(state, Arrays.asList(new FireOnSuspendInterceptorsAction()));
             log.debug("runLockSafe ['{}'] -> suspended", state.getBusinessKey());
@@ -209,6 +207,38 @@ public abstract class AbstractEngine implements Engine {
 
         if (log.isTraceEnabled()) {
             StateHelper.dump(state);
+        }
+    }
+
+    private static void handleRaisedError(Configuration cfg, ProcessInstance state, BpmnError error) throws ExecutionException {
+        if (error.getDefinitionId() != null && error.getElementId() != null) {
+            ProcessDefinition pd = state.getDefinition(error.getDefinitionId());
+            AbstractElement e = ProcessDefinitionUtils.findElement(pd, error.getElementId());
+            if (e instanceof EndEvent) {
+                // raised error reached an "error end event" element, we need to decide to throw an exception or not
+
+                EndEvent ee = (EndEvent) e;
+                if (!error.getErrorRef().equals(ee.getErrorRef())) {
+                    log.warn("handleRaisedError ['{}', '{}'] -> call point mismatch: {}", state.getBusinessKey(), error.getErrorRef(), ee);
+                }
+
+                if (ee.getErrorRef() != null && ee.getErrorRef().equals(error.getErrorRef()) && cfg.isThrowExceptionOnErrorEnd()) {
+                    throw new ExecutionException("Process finished with an error end event: " + error.getErrorRef(), error.getCause());
+                }
+
+                return;
+            }
+        }
+
+        // raised error without an "error end event"
+        switch (cfg.getUnhandledBpmnErrorStrategy()) {
+            case EXCEPTION:
+            case PROPAGATE: {
+                throw new ExecutionException("Unhandled BPMN error: " + error.getErrorRef(), error);
+            }
+            case IGNORE: {
+                log.warn("handleRaisedError ['{}', '{}'] -> unhandled BPMN error", state.getBusinessKey(), error.getErrorRef());
+            }
         }
     }
 

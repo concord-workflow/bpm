@@ -150,22 +150,6 @@ public final class ProcessDefinitionUtils {
     }
 
     public static List<BoundaryEvent> findOptionalBoundaryEvents(IndexedProcessDefinition pd, String attachedToRef) throws ExecutionException {
-        /*
-        List<BoundaryEvent> l = new ArrayList<>();
-        
-        ProcessDefinition sub = findElementProcess(pd, attachedToRef);
-        for (AbstractElement e : sub.getChildren()) {
-            if (e instanceof BoundaryEvent) {
-                BoundaryEvent ev = (BoundaryEvent) e;
-                if (attachedToRef.equals(ev.getAttachedToRef())) {
-                    l.add(ev);
-                }
-            }
-        }
-        
-        return l;
-        */
-
         List<BoundaryEvent> l = pd.findOptionalBoundaryEvents(attachedToRef);
         return l != null ? l : Collections.emptyList();
     }

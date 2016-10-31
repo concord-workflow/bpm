@@ -97,6 +97,11 @@ public class ExpressionsReducer implements Reducer {
     private ProcessInstance handleBpmnError(ProcessInstance state, EvalExpressionAction a, BpmnError e) throws ExecutionException {
         Command nextCmd = null;
 
+        // add call point information to the error
+        if (e.getDefinitionId() == null) {
+            e = new BpmnError(a.getDefinitionId(), a.getElementId(), e.getErrorRef(), e.getCause());
+        }
+
         String errorRef = e.getErrorRef();
 
         if (errorRef != null) {
@@ -115,7 +120,7 @@ public class ExpressionsReducer implements Reducer {
             // the parent execution
 
             CommandStack stack = state.getStack()
-                    .push(new PerformActionsCommand(BpmnErrorHelper.raiseError(errorRef, e.getCause())));
+                    .push(new PerformActionsCommand(BpmnErrorHelper.raiseError(a.getDefinitionId(), a.getElementId(), errorRef, e.getCause())));
             state = state.setStack(stack);
             log.debug("handleBpmnError ['{}', '{}'] -> error will be raised", state.getBusinessKey(), a.getElementId());
         } else {

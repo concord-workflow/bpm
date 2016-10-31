@@ -4,9 +4,18 @@
 
 ### Added
 
-- avoid reloading a process definition on each `CallActivity` invocation when
-`Configuration#avoidDefinitionReloadingOnCall` is set.
-- the new method `AbstractEngine#run(ProcessInstance)` to run a process using a raw state snapshot.
+- avoid reloading a process definition on each `CallActivity` invocation. Enabled by the 
+`Configuration#avoidDefinitionReloadingOnCall` flag.
+- the new method `AbstractEngine#run(ProcessInstance)` to run a process using a state's snapshot.
+- `Configuration#unhandledBpmnErrorStrategy` allows to specify the strategy for unhandled BPMN errors:
+    - `EXCEPTION` - immediately throw an exception;
+    - `PROPAGATE` - propagate an error to an higher level;
+    - `IGNORE` - ignore an error and continue an execution.
+- `BpmnError` now contains a process definition ID and an element ID of an error's source.
+
+# Changed
+
+- a few uninformative log records moved to the `DEBUG` level.
 
 
 

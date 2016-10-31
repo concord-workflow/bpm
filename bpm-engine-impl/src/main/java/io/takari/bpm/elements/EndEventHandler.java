@@ -23,7 +23,7 @@ public class EndEventHandler implements ElementHandler {
         String errorRef = ev.getErrorRef();
         String causeExpression = ev.getCauseExpression();
         if (errorRef != null) {
-            actions.add(BpmnErrorHelper.raiseErrorDeferred(errorRef, causeExpression));
+            actions.add(BpmnErrorHelper.raiseErrorDeferred(cmd.getDefinitionId(), cmd.getElementId(), errorRef, causeExpression));
         }
 
         return actions;

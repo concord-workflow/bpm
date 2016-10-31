@@ -22,7 +22,7 @@ public class IndexedProcessDefinitionProvider {
         }
 
         IndexedProcessDefinition ipd = new IndexedProcessDefinition(pd);
-        log.info("getById ['{}'] -> indexing done", id);
+        log.debug("getById ['{}'] -> indexing done", id);
         return ipd;
     }
 }

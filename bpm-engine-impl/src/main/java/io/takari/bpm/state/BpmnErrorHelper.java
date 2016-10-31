@@ -5,7 +5,6 @@ import io.takari.bpm.actions.RaiseErrorAction;
 import io.takari.bpm.actions.SetVariableAction;
 import io.takari.bpm.actions.UnsetVariableAction;
 import io.takari.bpm.api.BpmnError;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,20 +19,20 @@ public final class BpmnErrorHelper {
         return (BpmnError) vars.getVariable(KEY);
     }
 
-    public static Action raiseError(String errorRef, Throwable cause) {
+    public static Action raiseError(String definitionId, String elementId, String errorRef, Throwable cause) {
         String e = errorRef;
         if (e == null) {
             log.warn("raiseError ['{}'] -> empty error reference will be replaced with a default value", errorRef);
             e = DEFAULT_ERROR_REF;
         }
-        return raiseError(new BpmnError(e, cause));
+        return raiseError(new BpmnError(definitionId, elementId, e, cause));
     }
 
-    public static Action raiseErrorDeferred(String errorRef, String causeExpression) {
+    public static Action raiseErrorDeferred(String definitionId, String elementId, String errorRef, String causeExpression) {
         if (causeExpression == null) {
-            return raiseError(errorRef, (Throwable) null);
+            return raiseError(definitionId, elementId, errorRef, (Throwable) null);
         }
-        return new RaiseErrorAction(errorRef, causeExpression);
+        return new RaiseErrorAction(definitionId, elementId, errorRef, causeExpression);
     }
 
     public static Action raiseError(BpmnError error) {
@@ -44,5 +43,6 @@ public final class BpmnErrorHelper {
         return new UnsetVariableAction(KEY);
     }
 
-    private BpmnErrorHelper() {}
+    private BpmnErrorHelper() {
+    }
 }
