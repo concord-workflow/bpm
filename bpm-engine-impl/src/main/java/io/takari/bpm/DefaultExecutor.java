@@ -15,7 +15,7 @@ public class DefaultExecutor implements Executor {
 
     private final Reducer reducer;
 
-    public DefaultExecutor(ExpressionManager expressionManager, ExecutorService executor,
+    public DefaultExecutor(Configuration cfg, ExpressionManager expressionManager, ExecutorService executor,
                            ExecutionInterceptorHolder interceptors, IndexedProcessDefinitionProvider definitionProvider,
                            UuidGenerator uuidGenerator, EventPersistenceManager eventManager,
                            PersistenceManager persistenceManager) {
@@ -29,7 +29,7 @@ public class DefaultExecutor implements Executor {
                 new RaiseErrorReducer(expressionManager),
                 new ExpressionsReducer(expressionManager, executor),
                 new InterceptorEventsReducer(interceptors),
-                new CallActivityReducer(definitionProvider),
+                new CallActivityReducer(definitionProvider, cfg),
                 new EventsReducer(uuidGenerator, expressionManager, eventManager),
                 new PersistenceReducer(persistenceManager),
                 new EvaluatedFlowsReducer(expressionManager),

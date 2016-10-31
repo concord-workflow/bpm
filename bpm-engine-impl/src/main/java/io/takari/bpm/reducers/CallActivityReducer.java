@@ -1,5 +1,7 @@
 package io.takari.bpm.reducers;
 
+import io.takari.bpm.Configuration;
+import io.takari.bpm.state.Definitions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,9 +20,11 @@ public class CallActivityReducer implements Reducer {
     private static final Logger log = LoggerFactory.getLogger(CallActivityReducer.class);
 
     private final IndexedProcessDefinitionProvider definitionProvider;
+    private final Configuration cfg;
 
-    public CallActivityReducer(IndexedProcessDefinitionProvider definitionProvider) {
+    public CallActivityReducer(IndexedProcessDefinitionProvider definitionProvider, Configuration cfg) {
         this.definitionProvider = definitionProvider;
+        this.cfg = cfg;
     }
 
     @Override
@@ -30,9 +34,17 @@ public class CallActivityReducer implements Reducer {
         }
 
         FindAndCallActivityAction a = (FindAndCallActivityAction) action;
+        String proc = a.getCalledElement();
 
         // find a called process' definition
-        IndexedProcessDefinition sub = definitionProvider.getById(a.getCalledElement());
+        IndexedProcessDefinition sub = null;
+        if (cfg.isAvoidDefinitionReloadingOnCall()) {
+            Definitions defs = state.getDefinitions();
+            sub = defs.get(proc);
+        }
+        if (sub == null) {
+            sub = definitionProvider.getById(proc);
+        }
 
         // add the found definition to the process state
         state = state.setDefinitions(state.getDefinitions().put(sub));

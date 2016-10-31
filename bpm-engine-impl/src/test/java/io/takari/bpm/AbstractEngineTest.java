@@ -38,6 +38,10 @@ public class AbstractEngineTest {
     protected EventPersistenceManager getEventManager() {
         return engineHolder.getEventManager();
     }
+
+    protected ProcessDefinitionProvider getProcessDefinitionProvider() {
+        return engineHolder.getProcessDefinitionProvider();
+    }
     
     protected void deploy(ProcessDefinition pd) {
         engineHolder.deploy(pd);

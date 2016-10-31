@@ -49,16 +49,17 @@ public class EngineHolder {
     
     public EngineHolder() throws Exception {
         serviceTaskRegistry = new ServiceTaskRegistryImpl();
-        processDefinitionProvider = new TestProcessDefinitionProvider();
+        processDefinitionProvider = spy(new TestProcessDefinitionProvider());
         indexedProcessDefinitionProvider = new IndexedProcessDefinitionProvider(processDefinitionProvider);
         eventManager = spy(new EventPersistenceManagerImpl(new InMemEventStorage()));
         persistenceManager = new InMemPersistenceManager();
         expressionManager = new DefaultExpressionManager(serviceTaskRegistry);
         uuidGenerator = new TestUuidGenerator();
-        executor = wrap(new DefaultExecutor(expressionManager, Executors.newCachedThreadPool(), interceptorHolder, indexedProcessDefinitionProvider, uuidGenerator, eventManager, persistenceManager));
-        lockManager = new SingleLockManagerImpl();
         configuration = new Configuration();
-        
+        lockManager = new SingleLockManagerImpl();
+        executor = wrap(new DefaultExecutor(configuration, expressionManager, Executors.newCachedThreadPool(),
+                interceptorHolder, indexedProcessDefinitionProvider, uuidGenerator, eventManager, persistenceManager));
+
         engine = new AbstractEngine() {
             
             private final Planner planner = new DefaultPlanner(configuration);
@@ -139,6 +140,10 @@ public class EngineHolder {
 
     public UuidGenerator getUuidGenerator() {
         return uuidGenerator;
+    }
+
+    public ProcessDefinitionProvider getProcessDefinitionProvider() {
+        return processDefinitionProvider;
     }
 
     public void deploy(ProcessDefinition pd) {

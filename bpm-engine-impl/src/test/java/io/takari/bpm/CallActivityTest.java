@@ -785,4 +785,57 @@ public class CallActivityTest extends AbstractEngineTest {
         String key = UUID.randomUUID().toString();
         getEngine().start(key, aId, null);
     }
+
+    /**
+     * start --> call <------------ ev
+     *               \             /
+     *                start --> end
+     */
+    @Test
+    public void testDefinitionReloading() throws Exception {
+        getConfiguration().setAvoidDefinitionReloadingOnCall(false);
+
+        // ---
+
+        String aId = "testA";
+        String bId = "testB";
+        String ev = "ev";
+
+        deploy(new ProcessDefinition(aId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "call"),
+                new CallActivity("call", bId),
+                new SequenceFlow("f2", "call", "ev"),
+                new IntermediateCatchEvent(ev),
+                new SequenceFlow("f3", ev, "call")
+        )));
+
+        deploy(new ProcessDefinition(bId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "end"),
+                new EndEvent("end")
+        )));
+
+        // ---
+
+
+        String key = UUID.randomUUID().toString();
+        getEngine().start(key, aId, null);
+        getEngine().resume(key, ev, null);
+        getEngine().resume(key, ev, null);
+
+        // ---
+
+        verify(getProcessDefinitionProvider(), times(3)).getById(eq(bId));
+        reset(getProcessDefinitionProvider());
+
+        // ---
+
+        getConfiguration().setAvoidDefinitionReloadingOnCall(true);
+
+        getEngine().resume(key, ev, null);
+        getEngine().resume(key, ev, null);
+
+        verifyZeroInteractions(getProcessDefinitionProvider());
+    }
 }

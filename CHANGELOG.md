@@ -1,5 +1,15 @@
 # Change Log
 
+## [Unreleased]
+
+### Added
+
+- avoid reloading a process definition on each `CallActivity` invocation when
+`Configuration#avoidDefinitionReloadingOnCall` is set.
+- the new method `AbstractEngine#run(ProcessInstance)` to run a process using a raw state snapshot.
+
+
+
 ## [0.9.3] - 2016-10-14
 
 ### Added

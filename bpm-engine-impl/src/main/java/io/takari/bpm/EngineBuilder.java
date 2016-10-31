@@ -154,8 +154,8 @@ public final class EngineBuilder {
         }
 
         if (executor == null) {
-            executor = new DefaultExecutor(expressionManager, threadPool, interceptors, indexedDefinitionProvider, uuidGenerator,
-                    eventManager, persistenceManager);
+            executor = new DefaultExecutor(configuration, expressionManager, threadPool, interceptors,
+                    indexedDefinitionProvider, uuidGenerator, eventManager, persistenceManager);
         }
 
         if (executorWrappingFn != null) {

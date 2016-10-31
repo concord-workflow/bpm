@@ -6,6 +6,7 @@ public class Configuration implements Serializable {
 
     private boolean throwExceptionOnErrorEnd = false;
     private boolean throwExceptionOnUnhandledBpmnError = true;
+    private boolean avoidDefinitionReloadingOnCall = true;
 
     public boolean isThrowExceptionOnErrorEnd() {
         return throwExceptionOnErrorEnd;
@@ -30,5 +31,18 @@ public class Configuration implements Serializable {
      */
     public void setThrowExceptionOnUnhandledBpmnError(boolean throwExceptionOnUnhandledBpmnError) {
         this.throwExceptionOnUnhandledBpmnError = throwExceptionOnUnhandledBpmnError;
+    }
+
+    public boolean isAvoidDefinitionReloadingOnCall() {
+        return avoidDefinitionReloadingOnCall;
+    }
+
+    /**
+     * If {@code true}, then a CallActivity's process definition will be loaded only once. Otherwise, it will be
+     * reloaded on each call.
+     * @param avoidDefinitionReloadingOnCall
+     */
+    public void setAvoidDefinitionReloadingOnCall(boolean avoidDefinitionReloadingOnCall) {
+        this.avoidDefinitionReloadingOnCall = avoidDefinitionReloadingOnCall;
     }
 }

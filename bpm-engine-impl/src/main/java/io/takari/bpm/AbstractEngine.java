@@ -161,6 +161,17 @@ public abstract class AbstractEngine implements Engine {
         runLockSafe(state);
     }
 
+    public void run(ProcessInstance state) throws ExecutionException {
+        LockManager lm = getLockManager();
+        lm.lock(state.getBusinessKey());
+
+        try {
+            runLockSafe(state);
+        } finally {
+            lm.unlock(state.getBusinessKey());
+        }
+    }
+
     private void runLockSafe(ProcessInstance state) throws ExecutionException {
         log.debug("runLockSafe ['{}'] -> started...", state.getBusinessKey());
 
@@ -215,5 +226,4 @@ public abstract class AbstractEngine implements Engine {
 
         return state.setEvents(events);
     }
-
 }
