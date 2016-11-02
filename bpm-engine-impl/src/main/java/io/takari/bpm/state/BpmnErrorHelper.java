@@ -22,7 +22,7 @@ public final class BpmnErrorHelper {
     public static Action raiseError(String definitionId, String elementId, String errorRef, Throwable cause) {
         String e = errorRef;
         if (e == null) {
-            log.warn("raiseError ['{}'] -> empty error reference will be replaced with a default value", errorRef);
+            log.warn("raiseError ['{}', '{}', '{}'] -> empty error reference will be replaced with a default value", definitionId, elementId, errorRef);
             e = DEFAULT_ERROR_REF;
         }
         return raiseError(new BpmnError(definitionId, elementId, e, cause));

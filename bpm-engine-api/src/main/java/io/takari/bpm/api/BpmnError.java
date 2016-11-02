@@ -25,6 +25,7 @@ public class BpmnError extends RuntimeException {
     }
 
     public BpmnError(String definitionId, String elementId, String errorRef, Throwable cause) {
+        super(String.format("Error at %s/%s: %s", definitionId, elementId, errorRef));
         this.definitionId = definitionId;
         this.elementId = elementId;
         this.errorRef = errorRef;

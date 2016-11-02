@@ -1,5 +1,14 @@
 # Change Log
 
+## [Unreleased]
+
+### Changed
+
+- fixed the scoping issue with subprocesses and error propagation.
+- minor logging improvements.
+
+
+
 ## [0.9.4] - 2016-11-01
 
 ### Added
