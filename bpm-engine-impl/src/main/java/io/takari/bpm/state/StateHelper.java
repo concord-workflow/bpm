@@ -12,6 +12,7 @@ import io.takari.bpm.commands.Command;
 import io.takari.bpm.commands.CommandStack;
 import io.takari.bpm.commands.PerformActionsCommand;
 import io.takari.bpm.commands.ProcessElementCommand;
+import io.takari.bpm.misc.CoverageIgnore;
 import io.takari.bpm.model.ProcessDefinition;
 import io.takari.bpm.model.StartEvent;
 import io.takari.bpm.state.Events.EventRecord;
@@ -74,6 +75,7 @@ public final class StateHelper {
         return state.setVariables(vars);
     }
 
+    @CoverageIgnore
     public static void dump(ProcessInstance state) {
         StringBuilder b = new StringBuilder();
 
@@ -90,6 +92,7 @@ public final class StateHelper {
         log.trace("{}", b.toString());
     }
 
+    @CoverageIgnore
     private static void printCollection(StringBuilder b, String name, Collection<?> items) {
         b.append("\n=================================\n")
                 .append("\t").append(name).append(": ")
@@ -105,6 +108,7 @@ public final class StateHelper {
         }
     }
 
+    @CoverageIgnore
     private static void printScopes(StringBuilder b, String name, Scopes scopes) {
         Map<UUID, Scope> items = scopes.values();
 
@@ -134,6 +138,7 @@ public final class StateHelper {
         }
     }
 
+    @CoverageIgnore
     private static void printScopes(StringBuilder b, Map<UUID, Scope> scopes, UUID rootId, int level) {
         for (int i = 0; i < level; i++) {
             b.append("\t");
@@ -150,6 +155,7 @@ public final class StateHelper {
         }
     }
 
+    @CoverageIgnore
     private static void printEvents(StringBuilder b, String name, Map<UUID, Map<UUID, EventRecord>> items) {
         b.append("\n=================================\n")
                 .append("\t").append(name).append(": ")
