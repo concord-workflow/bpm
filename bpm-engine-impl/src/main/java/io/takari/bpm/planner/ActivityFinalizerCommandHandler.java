@@ -70,11 +70,13 @@ public class ActivityFinalizerCommandHandler implements CommandHandler<ActivityF
                 }
                 case PROPAGATE: {
                     log.debug("handle ['{}', '{}'] -> propagating the error: '{}'", state.getBusinessKey(), cmd.getElementId(), error.getErrorRef());
+                    actions.add(new PushCommandAction(new PerformActionsCommand(new PopScopeAction())));
                     return actions;
                 }
                 case IGNORE: {
                     log.warn("handle ['{}', '{}'] -> unhandled BPMN error: '{}'", state.getBusinessKey(), cmd.getElementId(), error.getErrorRef());
                     actions.add(BpmnErrorHelper.clear());
+                    actions.add(new PushCommandAction(new PerformActionsCommand(new PopScopeAction())));
                     return actions;
                 }
             }

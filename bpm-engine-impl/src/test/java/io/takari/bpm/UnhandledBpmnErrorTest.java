@@ -71,41 +71,41 @@ public class UnhandledBpmnErrorTest extends AbstractEngineTest {
         getEngine().start(key, PROCESS_ID, null);
 
         // ---
-        
+
         assertActivations(key, PROCESS_ID,
-            "start",
-            "f1",
-            "sub1",
-            "sub1start",
-            "f2",
-            "sub2",
-            "sub2start",
-            "f3",
-            "gate1",
-            "f4",
-            "ev1");
-        assertNoMoreActivations();
-        
-        // ---
-        
-        getEngine().resume(key, "ev1", null);
-        
-        assertActivations(key, PROCESS_ID,
-            "f5",
-            "sub2end",
-            "f6",
-            "gate2",
-            "f7",
-            "ev3");
+                "start",
+                "f1",
+                "sub1",
+                "sub1start",
+                "f2",
+                "sub2",
+                "sub2start",
+                "f3",
+                "gate1",
+                "f4",
+                "ev1");
         assertNoMoreActivations();
 
         // ---
-        
-        getEngine().resume(key, "ev3", null);
-        
+
+        getEngine().resume(key, "ev1", null);
+
         assertActivations(key, PROCESS_ID,
-            "f8",
-            "end"); // FIXME additional f6,gate2,f6,ev3 activations
+                "f5",
+                "sub2end",
+                "f6",
+                "gate2",
+                "f7",
+                "ev3");
+        assertNoMoreActivations();
+
+        // ---
+
+        getEngine().resume(key, "ev3", null);
+
+        assertActivations(key, PROCESS_ID,
+                "f8",
+                "end");
         assertNoMoreActivations();
 
     }
@@ -229,10 +229,10 @@ public class UnhandledBpmnErrorTest extends AbstractEngineTest {
     }
 
     /*
-     * start --> sub1                                                               ---------------> end
-     *              \                                                              /                /
-     *               sub1start --> sub2                                     sub1end --> error --> ev3
-     *                                 \                                   /
+     * start --> sub1                                                                   ---------------> end
+     *              \                                                                  /                /
+     *               sub1start --> sub2                                         sub1end --> error --> ev3
+     *                                 \                                       /
      *                                  sub2start --> ev1 --> sub2end (kaboom!)
      */
     private void deployProcessWithBoundaryErrorAndEvents() {
