@@ -61,6 +61,56 @@ public class UnhandledBpmnErrorTest extends AbstractEngineTest {
     }
 
     @Test
+    public void testPropagateWithEvents() throws Exception {
+        getConfiguration().setUnhandledBpmnErrorStrategy(UnhandledBpmnErrorStrategy.PROPAGATE);
+        deployProcessWithBoundaryErrorAndEvents();
+
+        // ---
+
+        String key = UUID.randomUUID().toString();
+        getEngine().start(key, PROCESS_ID, null);
+
+        // ---
+        
+        assertActivations(key, PROCESS_ID,
+            "start",
+            "f1",
+            "sub1",
+            "sub1start",
+            "f2",
+            "sub2",
+            "sub2start",
+            "f3",
+            "gate1",
+            "f4",
+            "ev1");
+        assertNoMoreActivations();
+        
+        // ---
+        
+        getEngine().resume(key, "ev1", null);
+        
+        assertActivations(key, PROCESS_ID,
+            "f5",
+            "sub2end",
+            "f6",
+            "gate2",
+            "f7",
+            "ev3");
+        assertNoMoreActivations();
+
+        // ---
+        
+        getEngine().resume(key, "ev3", null);
+        
+        assertActivations(key, PROCESS_ID,
+            "f8",
+            "end"); // FIXME additional f6,gate2,f6,ev3 activations
+        assertNoMoreActivations();
+
+    }
+
+    @Test
     public void testException() throws Exception {
         getConfiguration().setUnhandledBpmnErrorStrategy(UnhandledBpmnErrorStrategy.EXCEPTION);
         deployProcessWithBoundaryError();
@@ -176,5 +226,37 @@ public class UnhandledBpmnErrorTest extends AbstractEngineTest {
                 new SequenceFlow("f6", "t2", "end"),
                 new SequenceFlow("f7", "sub1", "end"),
                 new EndEvent("end")));
+    }
+
+    /*
+     * start --> sub1                                                               ---------------> end
+     *              \                                                              /                /
+     *               sub1start --> sub2                                     sub1end --> error --> ev3
+     *                                 \                                   /
+     *                                  sub2start --> ev1 --> sub2end (kaboom!)
+     */
+    private void deployProcessWithBoundaryErrorAndEvents() {
+        deploy(new ProcessDefinition(PROCESS_ID,
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "sub1"),
+                new SubProcess("sub1",
+                        new StartEvent("sub1start"),
+                        new SequenceFlow("f2", "sub1start", "sub2"),
+                        new SubProcess("sub2",
+                                new StartEvent("sub2start"),
+                                new SequenceFlow("f3", "sub2start", "gate1"),
+                                new EventBasedGateway("gate1"),
+                                new SequenceFlow("f4", "gate1", "ev1"),
+                                new IntermediateCatchEvent("ev1"),
+                                new SequenceFlow("f5", "ev1", "sub2end"),
+                                new EndEvent("sub2end", ERROR_REF))),
+                new BoundaryEvent("ev2", "sub1", null),
+                new SequenceFlow("f6", "ev2", "gate2", "end"),
+                new EventBasedGateway("gate2"),
+                new SequenceFlow("f7", "gate2", "ev3"),
+                new IntermediateCatchEvent("ev3"),
+                new SequenceFlow("f8", "ev3", "end"),
+                new SequenceFlow("f9", "sub1", "end"),
+                new EndEvent("end", "fail")));
     }
 }
