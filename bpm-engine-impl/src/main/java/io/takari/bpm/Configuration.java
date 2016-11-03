@@ -4,21 +4,8 @@ import java.io.Serializable;
 
 public class Configuration implements Serializable {
 
-    private boolean throwExceptionOnErrorEnd = false;
     private boolean avoidDefinitionReloadingOnCall = true;
     private UnhandledBpmnErrorStrategy unhandledBpmnErrorStrategy = UnhandledBpmnErrorStrategy.PROPAGATE;
-
-    public boolean isThrowExceptionOnErrorEnd() {
-        return throwExceptionOnErrorEnd;
-    }
-
-    /**
-     * Throw an exception if a process ends with an error end event.
-     * @param throwExceptionOnErrorEnd
-     */
-    public void setThrowExceptionOnErrorEnd(boolean throwExceptionOnErrorEnd) {
-        this.throwExceptionOnErrorEnd = throwExceptionOnErrorEnd;
-    }
 
     public boolean isThrowExceptionOnUnhandledBpmnError() {
         return unhandledBpmnErrorStrategy == UnhandledBpmnErrorStrategy.EXCEPTION;
@@ -27,6 +14,7 @@ public class Configuration implements Serializable {
     /**
      * Throw an exception on an unhandled {@BpmnError} (e.g. when error occurs in a subprocess without a boundary error
      * event).
+     *
      * @param throwExceptionOnUnhandledBpmnError
      * @deprecated use {@link #setUnhandledBpmnErrorStrategy(UnhandledBpmnErrorStrategy)}
      */
@@ -42,6 +30,7 @@ public class Configuration implements Serializable {
     /**
      * Determines how to process unhandled BPMN errors (e.g. errors in subprocesses without boundary error events).
      * By default, unhandled errors are propagated to a higher level.
+     *
      * @param unhandledBpmnErrorStrategy
      */
     public void setUnhandledBpmnErrorStrategy(UnhandledBpmnErrorStrategy unhandledBpmnErrorStrategy) {
@@ -55,6 +44,7 @@ public class Configuration implements Serializable {
     /**
      * If {@code true}, then a CallActivity's process definition will be loaded only once. Otherwise, it will be
      * reloaded on each call.
+     *
      * @param avoidDefinitionReloadingOnCall
      */
     public void setAvoidDefinitionReloadingOnCall(boolean avoidDefinitionReloadingOnCall) {

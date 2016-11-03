@@ -1,5 +1,17 @@
 # Change Log
 
+## [Unreleased]
+
+### Changed
+
+- do not throw unhandled BPMN errors if a process is not finished.
+
+### Breaking
+
+- `Configuration#throwExceptionOnErrorEnd` is removed. See `Configuration#unhandledBpmnErrorStrategy = PROPAGATE`.
+
+
+
 ## [0.9.5] - 2016-11-02
 
 ### Changed

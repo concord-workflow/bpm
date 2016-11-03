@@ -1,5 +1,7 @@
 package io.takari.bpm;
 
+import io.takari.bpm.api.BpmnError;
+import io.takari.bpm.api.ExecutionException;
 import org.junit.Before;
 
 import io.takari.bpm.api.Engine;
@@ -9,6 +11,9 @@ import io.takari.bpm.task.ServiceTaskRegistryImpl;
 
 import java.util.Map;
 import java.util.UUID;
+
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
 
 public class AbstractEngineTest {
 
@@ -61,5 +66,17 @@ public class AbstractEngineTest {
     
     protected void assertNoMoreActivations() {
         engineHolder.assertNoMoreActivations();
+    }
+
+    protected static void assertBpmnError(Exception e, String errorRef) {
+        BpmnError err = null;
+        if (e instanceof BpmnError) {
+            err = (BpmnError) e;
+        } else if (e.getCause() instanceof BpmnError) {
+            err = (BpmnError) e.getCause();
+        }
+
+        assertNotNull(err);
+        assertEquals(errorRef, err.getErrorRef());
     }
 }

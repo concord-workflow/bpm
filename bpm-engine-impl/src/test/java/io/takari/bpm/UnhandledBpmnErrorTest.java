@@ -101,7 +101,12 @@ public class UnhandledBpmnErrorTest extends AbstractEngineTest {
 
         // ---
 
-        getEngine().resume(key, "ev3", null);
+        try {
+            getEngine().resume(key, "ev3", null);
+            fail("Should fail");
+        } catch (ExecutionException e) {
+            assertBpmnError(e, "fail");
+        }
 
         assertActivations(key, PROCESS_ID,
                 "f8",

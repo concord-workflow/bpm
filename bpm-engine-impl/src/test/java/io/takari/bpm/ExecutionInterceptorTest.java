@@ -2,6 +2,7 @@ package io.takari.bpm;
 
 import io.takari.bpm.api.BpmnError;
 import io.takari.bpm.api.ExecutionContext;
+import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.api.JavaDelegate;
 import io.takari.bpm.api.interceptors.ExecutionInterceptor;
 import io.takari.bpm.api.interceptors.InterceptorStartEvent;
@@ -107,7 +108,12 @@ public class ExecutionInterceptorTest extends AbstractEngineTest {
 
 
         String key = UUID.randomUUID().toString();
-        getEngine().start(key, processId, null);
+        try {
+            getEngine().start(key, processId, null);
+            fail("Should fail");
+        } catch (ExecutionException e) {
+            assertBpmnError(e, errorRef);
+        }
 
         verify(interceptor).onFailure(eq(key), eq(errorRef));
     }
@@ -153,7 +159,12 @@ public class ExecutionInterceptorTest extends AbstractEngineTest {
 
 
         String key = UUID.randomUUID().toString();
-        getEngine().start(key, processId, null);
+        try {
+            getEngine().start(key, processId, null);
+            fail("Should fail");
+        } catch (ExecutionException e) {
+            assertBpmnError(e, errorRef);
+        }
 
         // ---
 

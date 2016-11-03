@@ -9,9 +9,6 @@ import io.takari.bpm.api.interceptors.ExecutionInterceptor;
 import io.takari.bpm.event.Event;
 import io.takari.bpm.event.EventPersistenceManager;
 import io.takari.bpm.lock.LockManager;
-import io.takari.bpm.model.AbstractElement;
-import io.takari.bpm.model.EndEvent;
-import io.takari.bpm.model.ProcessDefinition;
 import io.takari.bpm.persistence.PersistenceManager;
 import io.takari.bpm.planner.Planner;
 import io.takari.bpm.state.*;
@@ -193,16 +190,19 @@ public abstract class AbstractEngine implements Engine {
         ProcessStatus status = state.getStatus();
         BpmnError raisedError = BpmnErrorHelper.getRaisedError(state.getVariables());
 
-        if (raisedError != null) {
-            state = getExecutor().eval(state, Arrays.asList(new FireOnFailureInterceptorsAction(raisedError.getErrorRef())));
-            log.debug("runLockSafe ['{}'] -> failed with '{}'", state.getBusinessKey(), raisedError.getErrorRef(), raisedError.getCause());
-            handleRaisedError(getConfiguration(), state, raisedError);
-        } else if (status == ProcessStatus.SUSPENDED) {
+        if (status == ProcessStatus.SUSPENDED) {
+            // TODO fire an interceptor?
             state = getExecutor().eval(state, Arrays.asList(new FireOnSuspendInterceptorsAction()));
             log.debug("runLockSafe ['{}'] -> suspended", state.getBusinessKey());
         } else if (status == ProcessStatus.FINISHED) {
-            state = getExecutor().eval(state, Arrays.asList(new FireOnFinishInterceptorsAction()));
-            log.debug("runLockSafe ['{}'] -> done", state.getBusinessKey());
+            if (raisedError != null) {
+                state = getExecutor().eval(state, Arrays.asList(new FireOnFailureInterceptorsAction(raisedError.getErrorRef())));
+                log.debug("runLockSafe ['{}'] -> failed with '{}'", state.getBusinessKey(), raisedError.getErrorRef(), raisedError.getCause());
+                handleRaisedError(getConfiguration(), state, raisedError);
+            } else {
+                state = getExecutor().eval(state, Arrays.asList(new FireOnFinishInterceptorsAction()));
+                log.debug("runLockSafe ['{}'] -> done", state.getBusinessKey());
+            }
         }
 
         if (log.isTraceEnabled()) {
@@ -211,6 +211,7 @@ public abstract class AbstractEngine implements Engine {
     }
 
     private static void handleRaisedError(Configuration cfg, ProcessInstance state, BpmnError error) throws ExecutionException {
+        /*
         if (error.getDefinitionId() != null && error.getElementId() != null) {
             ProcessDefinition pd = state.getDefinition(error.getDefinitionId());
             AbstractElement e = ProcessDefinitionUtils.findElement(pd, error.getElementId());
@@ -229,6 +230,7 @@ public abstract class AbstractEngine implements Engine {
                 return;
             }
         }
+        */
 
         // raised error without an "error end event"
         switch (cfg.getUnhandledBpmnErrorStrategy()) {

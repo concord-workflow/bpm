@@ -329,10 +329,6 @@ public class SubProcessTest extends AbstractEngineTest {
      */
     @Test
     public void testSeparateContextErrorPropagation() throws Exception {
-        getConfiguration().setThrowExceptionOnErrorEnd(true);
-
-        // --
-
         JavaDelegate t1 = spy(new JavaDelegate() {
             @Override
             public void execute(ExecutionContext ctx) throws Exception {
