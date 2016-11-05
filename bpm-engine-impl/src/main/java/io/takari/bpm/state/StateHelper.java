@@ -7,6 +7,7 @@ import io.takari.bpm.actions.Action;
 import io.takari.bpm.actions.FireOnStartInterceptorsAction;
 import io.takari.bpm.actions.PopScopeAction;
 import io.takari.bpm.actions.PushScopeAction;
+import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.commands.Command;
 import io.takari.bpm.commands.CommandStack;
@@ -71,6 +72,8 @@ public final class StateHelper {
                 vars = vars.setVariable(e.getKey(), e.getValue());
             }
         }
+
+        vars = vars.setVariable(ExecutionContext.PROCESS_BUSINESS_KEY, state.getBusinessKey());
 
         return state.setVariables(vars);
     }

@@ -1,12 +1,14 @@
 package io.takari.bpm.elements;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import io.takari.bpm.IndexedProcessDefinition;
 import io.takari.bpm.ProcessDefinitionUtils;
 import io.takari.bpm.actions.*;
+import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.commands.*;
 import io.takari.bpm.model.CallActivity;
@@ -29,7 +31,13 @@ public class CallActivityHandler implements ElementHandler {
         // retrieve the variables mapping
         IndexedProcessDefinition pd = state.getDefinition(cmd.getDefinitionId());
         CallActivity a = (CallActivity) ProcessDefinitionUtils.findElement(pd, cmd.getElementId());
+
         Set<VariableMapping> inVariables = a.getIn();
+        if (inVariables == null) {
+            inVariables = new HashSet<>();
+        }
+        inVariables.add(new VariableMapping(ExecutionContext.PROCESS_BUSINESS_KEY, null, ExecutionContext.PROCESS_BUSINESS_KEY));
+
         Set<VariableMapping> outVariables = a.getOut();
 
         // set a new variables container (aka child's "ExecutionContext") as our

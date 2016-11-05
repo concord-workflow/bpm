@@ -5,6 +5,7 @@
 ### Changed
 
 - do not throw unhandled BPMN errors if a process is not finished.
+- the `ExecutionContext#PROCESS_BUSINESS_KEY` variable is now usable again.
 
 ### Breaking
 
