@@ -146,6 +146,7 @@ public class SubProcessTest extends AbstractEngineTest {
                 "substart",
                 "f2",
                 "t1",
+                "be1",
                 "f4",
                 "t3",
                 "f5",
@@ -198,6 +199,7 @@ public class SubProcessTest extends AbstractEngineTest {
                 "substart",
                 "f2",
                 "subend",
+                "be1",
                 "f4",
                 "end");
         assertNoMoreActivations();

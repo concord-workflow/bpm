@@ -5,6 +5,7 @@ import java.util.Set;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.context.ExecutionContextImpl;
 import io.takari.bpm.el.ExpressionManager;
+import io.takari.bpm.misc.CoverageIgnore;
 import io.takari.bpm.model.VariableMapping;
 
 public final class VariablesHelper {
@@ -46,6 +47,7 @@ public final class VariablesHelper {
         return dst;
     }
 
+    @CoverageIgnore
     private VariablesHelper() {
     }
 }

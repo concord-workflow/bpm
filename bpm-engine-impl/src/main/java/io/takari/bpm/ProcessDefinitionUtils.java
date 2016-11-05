@@ -1,6 +1,7 @@
 package io.takari.bpm;
 
 import io.takari.bpm.api.ExecutionException;
+import io.takari.bpm.misc.CoverageIgnore;
 import io.takari.bpm.model.*;
 
 import java.util.ArrayList;
@@ -209,6 +210,7 @@ public final class ProcessDefinitionUtils {
         return result;
     }
 
+    @CoverageIgnore
     private ProcessDefinitionUtils() {
     }
 }

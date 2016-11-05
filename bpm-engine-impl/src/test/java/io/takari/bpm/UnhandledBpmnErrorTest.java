@@ -93,6 +93,7 @@ public class UnhandledBpmnErrorTest extends AbstractEngineTest {
         assertActivations(key, PROCESS_ID,
                 "f5",
                 "sub2end",
+                "ev2",
                 "f6",
                 "gate2",
                 "f7",

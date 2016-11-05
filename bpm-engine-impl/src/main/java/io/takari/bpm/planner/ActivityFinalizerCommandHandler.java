@@ -90,6 +90,9 @@ public class ActivityFinalizerCommandHandler implements CommandHandler<ActivityF
         // save the error for later
         actions.add(new SetVariableAction(ExecutionContext.LAST_ERROR_KEY, error));
 
+        // activate the boundary error event element
+        actions.add(new ActivateElementAction(cmd.getDefinitionId(), ev.getId()));
+
         // follow the outbound flow
         actions.add(new FollowFlowsAction(cmd.getDefinitionId(), ev.getId()));
 

@@ -21,7 +21,7 @@ public class ProcessElementCommandHandler implements CommandHandler<ProcessEleme
 
         // TODO combine?
         actions.add(new ActivateElementAction(cmd.getDefinitionId(), cmd.getElementId()));
-        actions.add(new FireOnElementInterceptorsAction(cmd.getDefinitionId(), cmd.getElementId()));
+//        actions.add(new FireOnElementInterceptorsAction(cmd.getDefinitionId(), cmd.getElementId()));
 
         return actions;
     }

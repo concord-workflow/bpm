@@ -33,7 +33,7 @@ public class DefaultExecutor implements Executor {
                 new EventsReducer(uuidGenerator, expressionManager, eventManager),
                 new PersistenceReducer(persistenceManager),
                 new EvaluatedFlowsReducer(expressionManager),
-                new ActivationsReducer(),
+                new ActivationsReducer(interceptors),
                 new FlowListenerReducer(expressionManager),
                 new ScopeReducer(uuidGenerator),
                 new EventGatewayReducer());

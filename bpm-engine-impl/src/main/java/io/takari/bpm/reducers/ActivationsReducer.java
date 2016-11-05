@@ -1,5 +1,6 @@
 package io.takari.bpm.reducers;
 
+import io.takari.bpm.ExecutionInterceptorHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,9 +13,16 @@ import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.state.Activations;
 import io.takari.bpm.state.ProcessInstance;
 
+@Impure
 public class ActivationsReducer implements Reducer {
 
     private static final Logger log = LoggerFactory.getLogger(ActivationsReducer.class);
+
+    private final ExecutionInterceptorHolder interceptors;
+
+    public ActivationsReducer(ExecutionInterceptorHolder interceptors) {
+        this.interceptors = interceptors;
+    }
 
     @Override
     public ProcessInstance reduce(ProcessInstance state, Action action) throws ExecutionException {
@@ -31,6 +39,9 @@ public class ActivationsReducer implements Reducer {
             ActivateElementAction a = (ActivateElementAction) action;
             Activations acts = state.getActivations();
             acts = acts.inc(a.getDefinitionId(), a.getElementId(), a.getCount());
+
+            interceptors.fireOnElement(state.getBusinessKey(), a.getDefinitionId(), state.getId(), a.getElementId());
+
             log.debug("reduce ['{}', '{}', '{}'] -> single activation", state.getBusinessKey(), a.getElementId(), a.getCount());
             return state.setActivations(acts);
         }
@@ -48,7 +59,7 @@ public class ActivationsReducer implements Reducer {
         }
 
         log.debug("activateFlows ['{}', '{}'] -> activating '{}' via '{}' (count: {})", state.getBusinessKey(), elementId, gwId, elementId, count);
-        acts = acts.inc(pd.getId(), gwId, 1);
+        acts = acts.inc(pd.getId(), gwId, count);
 
         return acts;
     }

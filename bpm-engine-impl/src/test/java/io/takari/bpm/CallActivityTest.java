@@ -271,6 +271,7 @@ public class CallActivityTest extends AbstractEngineTest {
 
         verify(t1Task, times(1)).execute(any(ExecutionContext.class));
     }
+
     /**
      * start --> call                       end
      *               \                     /
@@ -325,7 +326,79 @@ public class CallActivityTest extends AbstractEngineTest {
                 "bend");
 
         assertActivations(key, aId,
+                "be",
                 "f3",
+                "end");
+
+        assertNoMoreActivations();
+    }
+
+
+    /**
+     * start --> gw --> call                ----------
+     *                      \              /          \
+     *                       start --> end ---error1-----> gw --> end
+     *                                     \          /
+     *                                      --error2--
+     *
+     */
+    @Test
+    public void testMultipleErrorTypesGw() throws Exception {
+        String aId = "testA";
+        String bId = "testB";
+
+        String errorA = "errorA#" + System.currentTimeMillis();
+        String errorB = "errorB#" + System.currentTimeMillis();
+
+        deploy(new ProcessDefinition(aId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "gw1"),
+                new InclusiveGateway("gw1"),
+                new SequenceFlow("f2", "gw1", "call"),
+                new CallActivity("call", bId),
+                new SequenceFlow("f3", "call", "gw2"),
+
+                new BoundaryEvent("beA", "call", errorA),
+                new SequenceFlow("f4", "beA", "gw2"),
+
+                new BoundaryEvent("beB", "call", errorB),
+                new SequenceFlow("f5", "beB", "gw2"),
+
+                new InclusiveGateway("gw2"),
+                new SequenceFlow("f6", "gw2", "end"),
+                new EndEvent("end")
+        )));
+
+        deploy(new ProcessDefinition(bId, Arrays.asList(
+                new StartEvent("bstart"),
+                new SequenceFlow("bf1", "bstart", "bend"),
+                new EndEvent("bend", errorB)
+        )));
+
+        // ---
+
+        String key = UUID.randomUUID().toString();
+        getEngine().start(key, aId, null);
+
+        // ---
+
+        assertActivations(key, aId,
+                "start",
+                "f1",
+                "gw1",
+                "f2",
+                "call");
+
+        assertActivations(key, bId,
+                "bstart",
+                "bf1",
+                "bend");
+
+        assertActivations(key, aId,
+                "beB",
+                "f5",
+                "gw2",
+                "f6",
                 "end");
 
         assertNoMoreActivations();
@@ -385,6 +458,7 @@ public class CallActivityTest extends AbstractEngineTest {
                 "t1");
 
         assertActivations(key, aId,
+                "be2",
                 "f4",
                 "end");
 
