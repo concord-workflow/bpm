@@ -87,7 +87,7 @@ public class ForkReducer implements Reducer {
     }
 
     private static List<SequenceFlow> filterInactive(ExpressionManager em, ExecutionContext ctx, List<SequenceFlow> flows) {
-        List<SequenceFlow> result = new ArrayList<SequenceFlow>(flows);
+        List<SequenceFlow> result = new ArrayList<>(flows);
 
         for (Iterator<SequenceFlow> i = result.iterator(); i.hasNext(); ) {
             SequenceFlow f = i.next();

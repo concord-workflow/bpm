@@ -79,16 +79,11 @@ public class ServiceTaskHandler implements ElementHandler {
             if (ev.getTimeDuration() != null) {
                 Duration d = Duration.parse(ev.getTimeDuration());
                 Command c = new ProcessElementCommand(pd.getId(), ev.getId());
-                l.add(new Timeout<Command>(d.getMillis(), c));
+                l.add(new Timeout<>(d.getMillis(), c));
             }
         }
 
-        Collections.sort(l, new Comparator<Timeout<?>>() {
-            @Override
-            public int compare(Timeout<?> o1, Timeout<?> o2) {
-                return (int) (o1.getDuration() - o2.getDuration());
-            }
-        });
+        Collections.sort(l, (o1, o2) -> (int) (o1.getDuration() - o2.getDuration()));
 
         return l;
     }

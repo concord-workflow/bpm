@@ -52,7 +52,7 @@ public class ExpressionsReducer implements Reducer {
         List<Timeout<Command>> timeouts = a.getTimeouts();
         if (timeouts != null && !timeouts.isEmpty()) {
             // a timeout handling decorator
-            fn = new TimeoutCallable<Command>(executor, timeouts, fn);
+            fn = new TimeoutCallable<>(executor, timeouts, fn);
         }
 
         try {

@@ -30,7 +30,7 @@ public final class BpmnErrorHelper {
 
     public static Action raiseErrorDeferred(String definitionId, String elementId, String errorRef, String causeExpression) {
         if (causeExpression == null) {
-            return raiseError(definitionId, elementId, errorRef, (Throwable) null);
+            return raiseError(definitionId, elementId, errorRef, null);
         }
         return new RaiseErrorAction(definitionId, elementId, errorRef, causeExpression);
     }

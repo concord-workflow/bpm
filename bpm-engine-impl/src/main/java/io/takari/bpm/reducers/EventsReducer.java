@@ -27,10 +27,7 @@ import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Impure
 public class EventsReducer implements Reducer {
@@ -70,9 +67,7 @@ public class EventsReducer implements Reducer {
             if (s.getFinishers() == null) {
                 cmds.add(new PerformActionsCommand(new PopScopeAction()));
             } else {
-                for (Command f : s.getFinishers()) {
-                    cmds.add(f);
-                }
+                Collections.addAll(cmds, s.getFinishers());
             }
         }
 

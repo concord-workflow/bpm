@@ -51,7 +51,7 @@ public final class StateHelper {
         // fire interceptors
         // TODO add to stack?
         Action a = new FireOnStartInterceptorsAction(pd.getId());
-        state = executor.eval(state, Arrays.asList(a));
+        state = executor.eval(state, Collections.singletonList(a));
 
         return state;
     }

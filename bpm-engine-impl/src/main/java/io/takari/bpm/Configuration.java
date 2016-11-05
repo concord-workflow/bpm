@@ -12,7 +12,7 @@ public class Configuration implements Serializable {
     }
 
     /**
-     * Throw an exception on an unhandled {@BpmnError} (e.g. when error occurs in a subprocess without a boundary error
+     * Throw an exception on an unhandled {@code BpmnError} (e.g. when error occurs in a subprocess without a boundary error
      * event).
      *
      * @param throwExceptionOnUnhandledBpmnError

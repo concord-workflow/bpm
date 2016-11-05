@@ -1,9 +1,9 @@
 package io.takari.bpm.commands;
 
-import java.util.Arrays;
-import java.util.List;
-
 import io.takari.bpm.actions.Action;
+
+import java.util.Collections;
+import java.util.List;
 
 public class PerformActionsCommand implements Command {
 
@@ -12,7 +12,7 @@ public class PerformActionsCommand implements Command {
     private final List<Action> actions;
 
     public PerformActionsCommand(Action action) {
-        this(Arrays.asList(action));
+        this(Collections.singletonList(action));
     }
 
     public PerformActionsCommand(List<Action> actions) {

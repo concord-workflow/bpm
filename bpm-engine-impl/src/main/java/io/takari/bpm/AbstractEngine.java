@@ -15,7 +15,12 @@ import io.takari.bpm.state.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import static java.util.Collections.singletonList;
 
 public abstract class AbstractEngine implements Engine {
 
@@ -152,7 +157,7 @@ public abstract class AbstractEngine implements Engine {
 
         // fire the interceptors
         // TODO move to the planner?
-        state = getExecutor().eval(state, Arrays.asList(new FireOnResumeInterceptorsAction()));
+        state = getExecutor().eval(state, singletonList(new FireOnResumeInterceptorsAction()));
 
         // process event-to-command mappings (e.g. add next command of the flow
         // to the stack)
@@ -192,15 +197,15 @@ public abstract class AbstractEngine implements Engine {
 
         if (status == ProcessStatus.SUSPENDED) {
             // TODO fire an interceptor?
-            state = getExecutor().eval(state, Arrays.asList(new FireOnSuspendInterceptorsAction()));
+            state = getExecutor().eval(state, singletonList(new FireOnSuspendInterceptorsAction()));
             log.debug("runLockSafe ['{}'] -> suspended", state.getBusinessKey());
         } else if (status == ProcessStatus.FINISHED) {
             if (raisedError != null) {
-                state = getExecutor().eval(state, Arrays.asList(new FireOnFailureInterceptorsAction(raisedError.getErrorRef())));
+                state = getExecutor().eval(state, singletonList(new FireOnFailureInterceptorsAction(raisedError.getErrorRef())));
                 log.debug("runLockSafe ['{}'] -> failed with '{}'", state.getBusinessKey(), raisedError.getErrorRef(), raisedError.getCause());
                 handleRaisedError(getConfiguration(), state, raisedError);
             } else {
-                state = getExecutor().eval(state, Arrays.asList(new FireOnFinishInterceptorsAction()));
+                state = getExecutor().eval(state, singletonList(new FireOnFinishInterceptorsAction()));
                 log.debug("runLockSafe ['{}'] -> done", state.getBusinessKey());
             }
         }
@@ -211,27 +216,6 @@ public abstract class AbstractEngine implements Engine {
     }
 
     private static void handleRaisedError(Configuration cfg, ProcessInstance state, BpmnError error) throws ExecutionException {
-        /*
-        if (error.getDefinitionId() != null && error.getElementId() != null) {
-            ProcessDefinition pd = state.getDefinition(error.getDefinitionId());
-            AbstractElement e = ProcessDefinitionUtils.findElement(pd, error.getElementId());
-            if (e instanceof EndEvent) {
-                // raised error reached an "error end event" element, we need to decide to throw an exception or not
-
-                EndEvent ee = (EndEvent) e;
-                if (!error.getErrorRef().equals(ee.getErrorRef())) {
-                    log.warn("handleRaisedError ['{}', '{}'] -> call point mismatch: {}", state.getBusinessKey(), error.getErrorRef(), ee);
-                }
-
-                if (ee.getErrorRef() != null && ee.getErrorRef().equals(error.getErrorRef()) && cfg.isThrowExceptionOnErrorEnd()) {
-                    throw new ExecutionException("Process finished with an error end event: " + error.getErrorRef(), error.getCause());
-                }
-
-                return;
-            }
-        }
-        */
-
         // raised error without an "error end event"
         switch (cfg.getUnhandledBpmnErrorStrategy()) {
             case EXCEPTION:

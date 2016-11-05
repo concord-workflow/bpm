@@ -48,9 +48,7 @@ public class Variables implements Serializable {
 
     public Set<String> getVariableNames() {
         Set<String> result = new HashSet<>();
-        for (String s : values.keySet()) {
-            result.add(s);
-        }
+        result.addAll(values.keySet());
         return result;
     }
 

@@ -21,7 +21,7 @@ public class PersistentStack<T extends Serializable> implements Serializable {
     }
 
     public PersistentStack<T> push(T el) {
-        return new PersistentStack<T>(stack.plus(el));
+        return new PersistentStack<>(stack.plus(el));
     }
 
     public T peek() {
@@ -33,7 +33,7 @@ public class PersistentStack<T extends Serializable> implements Serializable {
             return this;
         }
 
-        return new PersistentStack<T>(stack.minus(0));
+        return new PersistentStack<>(stack.minus(0));
     }
 
     public List<T> values() {
