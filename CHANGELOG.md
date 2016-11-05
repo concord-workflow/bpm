@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Added
+
+- the new `ExecutionInterceptor#onUnhandledError` method can be used to track unhandled errors in suspended processes.
+E.g., in situations when one of `Engine#resume` branches fails, but the process is not finished due to other events
+waiting.
+
 ### Changed
 
 - do not throw unhandled BPMN errors if a process is not finished.

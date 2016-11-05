@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import io.takari.bpm.api.BpmnError;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.api.interceptors.InterceptorElementEvent;
 import io.takari.bpm.api.interceptors.ExecutionInterceptor;
@@ -48,6 +49,12 @@ public class ExecutionInterceptorHolder {
     public void fireOnFailure(String processBusinessKey, String errorRef) throws ExecutionException {
         for (ExecutionInterceptor i : interceptors) {
             i.onFailure(processBusinessKey, errorRef);
+        }
+    }
+
+    public void fireOnUnhandledError(String processBusinessKey, BpmnError error) throws ExecutionException {
+        for (ExecutionInterceptor i : interceptors) {
+            i.onUnhandledError(processBusinessKey, error);
         }
     }
 

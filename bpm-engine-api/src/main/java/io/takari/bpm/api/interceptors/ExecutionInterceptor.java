@@ -1,5 +1,6 @@
 package io.takari.bpm.api.interceptors;
 
+import io.takari.bpm.api.BpmnError;
 import io.takari.bpm.api.ExecutionException;
 
 /**
@@ -16,6 +17,8 @@ public interface ExecutionInterceptor {
     void onFinish(String processBusinessKey) throws ExecutionException;
 
     void onFailure(String processBusinessKey, String errorRef) throws ExecutionException;
+
+    void onUnhandledError(String processBusinessKey, BpmnError bpmnError) throws ExecutionException;
     
     void onElement(InterceptorElementEvent ev) throws ExecutionException;
     

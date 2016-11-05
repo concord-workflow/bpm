@@ -36,6 +36,9 @@ public class InterceptorEventsReducer implements Reducer {
         } else if (action instanceof FireOnFailureInterceptorsAction) {
             FireOnFailureInterceptorsAction a = (FireOnFailureInterceptorsAction) action;
             interceptors.fireOnFailure(state.getBusinessKey(), a.getErrorRef());
+        } else if (action instanceof FireOnUnhandledErrorAction) {
+            FireOnUnhandledErrorAction a = (FireOnUnhandledErrorAction) action;
+            interceptors.fireOnUnhandledError(state.getBusinessKey(), a.getError());
         }
 
         return state;

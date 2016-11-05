@@ -3,6 +3,7 @@ package io.takari.bpm;
 import io.takari.bpm.Configuration.UnhandledBpmnErrorStrategy;
 import io.takari.bpm.api.BpmnError;
 import io.takari.bpm.api.ExecutionException;
+import io.takari.bpm.api.interceptors.ExecutionInterceptor;
 import io.takari.bpm.model.*;
 import org.junit.Test;
 
@@ -10,6 +11,9 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
 
 public class CallActivityErrorTest extends AbstractEngineTest {
 
@@ -68,6 +72,9 @@ public class CallActivityErrorTest extends AbstractEngineTest {
         getConfiguration().setUnhandledBpmnErrorStrategy(UnhandledBpmnErrorStrategy.PROPAGATE);
         getServiceTaskRegistry().register("gen", new MessageRefGenerator());
 
+        ExecutionInterceptor interceptor = mock(ExecutionInterceptor.class);
+        getEngine().addInterceptor(interceptor);
+
         // ---
 
         String processA = "testA";
@@ -106,6 +113,8 @@ public class CallActivityErrorTest extends AbstractEngineTest {
         // ---
 
         getEngine().resume(key, "test1", null);
+        verify(interceptor, times(1)).onUnhandledError(eq(key), any(BpmnError.class));
+        reset(interceptor);
 
         // ---
 
@@ -118,6 +127,8 @@ public class CallActivityErrorTest extends AbstractEngineTest {
             assertEquals(errorRef, err.getErrorRef());
             assertEquals(processB, err.getDefinitionId());
         }
+
+        verify(interceptor, times(1)).onFailure(eq(key), anyString());
     }
 
     public static class MessageRefGenerator {

@@ -1,5 +1,6 @@
 package io.takari.bpm.api.interceptors;
 
+import io.takari.bpm.api.BpmnError;
 import io.takari.bpm.api.ExecutionException;
 
 public abstract class ExecutionInterceptorAdapter implements ExecutionInterceptor {
@@ -22,6 +23,10 @@ public abstract class ExecutionInterceptorAdapter implements ExecutionIntercepto
 
     @Override
     public void onFailure(String processBusinessKey, String errorRef) throws ExecutionException {
+    }
+
+    @Override
+    public void onUnhandledError(String processBusinessKey, BpmnError bpmnError) throws ExecutionException {
     }
 
     @Override

@@ -196,7 +196,10 @@ public abstract class AbstractEngine implements Engine {
         BpmnError raisedError = BpmnErrorHelper.getRaisedError(state.getVariables());
 
         if (status == ProcessStatus.SUSPENDED) {
-            // TODO fire an interceptor?
+            if (raisedError != null) {
+                state = getExecutor().eval(state, singletonList(new FireOnUnhandledErrorAction(raisedError)));
+                log.debug("runLockSafe ['{}'] -> failed with '{}'", state.getBusinessKey(), raisedError.getErrorRef(), raisedError.getCause());
+            }
             state = getExecutor().eval(state, singletonList(new FireOnSuspendInterceptorsAction()));
             log.debug("runLockSafe ['{}'] -> suspended", state.getBusinessKey());
         } else if (status == ProcessStatus.FINISHED) {
