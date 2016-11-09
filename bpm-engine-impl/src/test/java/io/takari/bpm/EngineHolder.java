@@ -1,17 +1,8 @@
 package io.takari.bpm;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.spy;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Executors;
-
 import io.takari.bpm.api.ExecutionException;
-import io.takari.bpm.api.interceptors.InterceptorElementEvent;
 import io.takari.bpm.api.interceptors.ExecutionInterceptorAdapter;
+import io.takari.bpm.api.interceptors.InterceptorElementEvent;
 import io.takari.bpm.el.DefaultExpressionManager;
 import io.takari.bpm.el.ExpressionManager;
 import io.takari.bpm.event.EventPersistenceManager;
@@ -19,8 +10,8 @@ import io.takari.bpm.event.EventPersistenceManagerImpl;
 import io.takari.bpm.event.InMemEventStorage;
 import io.takari.bpm.lock.LockManager;
 import io.takari.bpm.lock.SingleLockManagerImpl;
-import io.takari.bpm.model.AbstractElement;
 import io.takari.bpm.model.ProcessDefinition;
+import io.takari.bpm.model.ProcessDefinitionHelper;
 import io.takari.bpm.persistence.InMemPersistenceManager;
 import io.takari.bpm.persistence.PersistenceManager;
 import io.takari.bpm.planner.DefaultPlanner;
@@ -28,6 +19,15 @@ import io.takari.bpm.planner.Planner;
 import io.takari.bpm.task.ServiceTaskRegistryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Executors;
+
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.spy;
 
 public class EngineHolder {
 
@@ -46,7 +46,7 @@ public class EngineHolder {
     private final UuidGenerator uuidGenerator;
     private final LockManager lockManager;
     private final Configuration configuration;
-    
+
     public EngineHolder() throws Exception {
         serviceTaskRegistry = new ServiceTaskRegistryImpl();
         processDefinitionProvider = spy(new TestProcessDefinitionProvider());
@@ -61,34 +61,34 @@ public class EngineHolder {
                 interceptorHolder, indexedProcessDefinitionProvider, uuidGenerator, eventManager, persistenceManager));
 
         engine = new AbstractEngine() {
-            
+
             private final Planner planner = new DefaultPlanner(configuration);
-            
+
             @Override
             protected UuidGenerator getUuidGenerator() {
                 return uuidGenerator;
             }
-            
+
             @Override
             protected IndexedProcessDefinitionProvider getProcessDefinitionProvider() {
                 return indexedProcessDefinitionProvider;
             }
-            
+
             @Override
             protected PersistenceManager getPersistenceManager() {
                 return persistenceManager;
             }
-            
+
             @Override
             protected ExecutionInterceptorHolder getInterceptorHolder() {
                 return interceptorHolder;
             }
-            
+
             @Override
             protected EventPersistenceManager getEventManager() {
                 return eventManager;
             }
-            
+
             @Override
             protected LockManager getLockManager() {
                 return lockManager;
@@ -98,7 +98,7 @@ public class EngineHolder {
             protected Planner getPlanner() {
                 return planner;
             }
-            
+
             @Override
             protected Executor getExecutor() {
                 return executor;
@@ -109,15 +109,15 @@ public class EngineHolder {
                 return configuration;
             }
         };
-        
+
         activations = new HashMap<>();
         engine.addInterceptor(new Interceptor());
     }
-    
+
     protected Executor wrap(Executor e) {
         return e;
     }
-    
+
     public AbstractEngine getEngine() {
         return engine;
     }
@@ -129,11 +129,11 @@ public class EngineHolder {
     public ServiceTaskRegistryImpl getServiceTaskRegistry() {
         return serviceTaskRegistry;
     }
-    
+
     public EventPersistenceManager getEventManager() {
         return eventManager;
     }
-    
+
     public Executor getExecutor() {
         return executor;
     }
@@ -148,7 +148,7 @@ public class EngineHolder {
 
     public void deploy(ProcessDefinition pd) {
         if (log.isDebugEnabled()) {
-            log.debug("deploy ->\n{}", dump(pd));
+            log.debug("deploy ->\n{}", ProcessDefinitionHelper.dump(pd));
         }
         processDefinitionProvider.add(pd);
     }
@@ -156,31 +156,12 @@ public class EngineHolder {
     public void deploy(Map<String, ProcessDefinition> pds) {
         for (ProcessDefinition p : pds.values()) {
             if (log.isDebugEnabled()) {
-                log.debug("deploy ->\n{}", dump(p));
+                log.debug("deploy ->\n{}", ProcessDefinitionHelper.dump(p));
             }
             processDefinitionProvider.add(p);
         }
     }
 
-    private static String dump(ProcessDefinition pd) {
-        StringBuilder b = new StringBuilder();
-        b.append("===================================\n").append("\tID: ").append(pd.getId()).append("\n");
-        dump(b, pd, 2);
-        return b.toString();
-    }
-
-    private static void dump(StringBuilder b, ProcessDefinition pd, int level) {
-        for (AbstractElement e : pd.getChildren()) {
-            for (int i = 0; i < level; i++) {
-                b.append("\t");
-            }
-            b.append(e.getClass().getSimpleName()).append(" // ").append(e.getId()).append("\n");
-            if (e instanceof ProcessDefinition) {
-                dump(b, (ProcessDefinition) e, level + 1);
-            }
-        }
-    }
-    
     private void onActivation(String businessKey, String processDefinitionId, String elementId) {
         String k = businessKey + "/" + processDefinitionId;
         List<String> l = activations.get(k);
@@ -191,7 +172,7 @@ public class EngineHolder {
 
         l.add(elementId);
     }
-    
+
     private void assertActivation(String processBusinessKey, String processDefinitionId, String elementId) {
         String k = processBusinessKey + "/" + processDefinitionId;
         List<String> l = activations.get(k);
@@ -201,13 +182,13 @@ public class EngineHolder {
         String s = l.remove(0);
         assertTrue("Unexpected activation: '" + s + "' instead of '" + elementId + "'", elementId.equals(s));
     }
-    
-    public void assertActivations(String processBusinessKey, String processDefinitionId, String ... elementIds) {
+
+    public void assertActivations(String processBusinessKey, String processDefinitionId, String... elementIds) {
         for (String eid : elementIds) {
             assertActivation(processBusinessKey, processDefinitionId, eid);
         }
     }
-    
+
     public void assertNoMoreActivations() {
         int s = 0;
         for (List<String> l : activations.values()) {

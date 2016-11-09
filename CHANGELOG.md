@@ -1,5 +1,13 @@
 # Change Log
 
+## Unreleased
+
+### Added
+
+- the `ProcessDefinitionHelper#dump` method prints a process structure as a String.
+
+
+
 ## [0.10.0] - 2016-11-05
 
 ### Added
