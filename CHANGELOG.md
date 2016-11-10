@@ -4,7 +4,7 @@
 
 ### Added
 
-- the `ProcessDefinitionHelper#dump` method prints a process structure as a String.
+- the `ProcessDefinitionHelper#dump` utility method to print a process structure as a String.
 
 
 

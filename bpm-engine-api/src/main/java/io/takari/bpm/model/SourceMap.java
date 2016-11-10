@@ -38,6 +38,17 @@ public class SourceMap implements Serializable {
         return description;
     }
 
+    @Override
+    public String toString() {
+        return "SourceMap[" +
+                "significance=" + significance +
+                ", source='" + source + '\'' +
+                ", line=" + line +
+                ", column=" + column +
+                ", description='" + description + '\'' +
+                ']';
+    }
+
     public enum Significance {
 
         HIGH,
