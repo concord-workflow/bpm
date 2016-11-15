@@ -7,9 +7,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import io.takari.bpm.api.BpmnError;
 import io.takari.bpm.api.ExecutionException;
-import io.takari.bpm.api.interceptors.InterceptorElementEvent;
-import io.takari.bpm.api.interceptors.ExecutionInterceptor;
-import io.takari.bpm.api.interceptors.InterceptorStartEvent;
+import io.takari.bpm.api.interceptors.*;
 
 public class ExecutionInterceptorHolder {
 
@@ -58,18 +56,40 @@ public class ExecutionInterceptorHolder {
         }
     }
 
-    public void fireOnError(String processBusinessKey, Throwable cause) throws ExecutionException {
+    public void fireOnError(String processBusinessKey, String processDefinitionId, UUID executionId, UUID scopeId, Throwable cause)
+            throws ExecutionException {
+
+        InterceptorErrorEvent ev = new InterceptorErrorEvent(processBusinessKey, processDefinitionId, executionId, scopeId, cause);
         for (ExecutionInterceptor i : interceptors) {
             i.onError(processBusinessKey, cause);
+            i.onError(ev);
         }
     }
 
-    public void fireOnElement(String processBusinessKey, String processDefinitionId, UUID executionId, String elementId)
+    public void fireOnElement(String processBusinessKey, String processDefinitionId, UUID executionId, UUID scopeId, String elementId)
             throws ExecutionException {
 
-        InterceptorElementEvent ev = new InterceptorElementEvent(processBusinessKey, processDefinitionId, executionId, elementId);
+        InterceptorElementEvent ev = new InterceptorElementEvent(processBusinessKey, processDefinitionId, executionId, elementId, scopeId);
         for (ExecutionInterceptor i : interceptors) {
             i.onElement(ev);
+        }
+    }
+
+    public void fireOnScopeCreated(String processBusinessKey, String processDefinitionId, UUID executionId, UUID scopeId, String elementId)
+            throws  ExecutionException{
+
+        InterceptorScopeCreatedEvent ev = new InterceptorScopeCreatedEvent(processBusinessKey, processDefinitionId, executionId, scopeId, elementId);
+        for (ExecutionInterceptor i : interceptors) {
+            i.onScopeCreated(ev);
+        }
+    }
+
+    public void fireOnScopeDestroyed(String processBusinessKey, UUID executionId, UUID scopeId)
+            throws  ExecutionException{
+
+        InterceptorScopeDestroyedEvent ev = new InterceptorScopeDestroyedEvent(processBusinessKey, executionId, scopeId);
+        for (ExecutionInterceptor i : interceptors) {
+            i.onScopeDestroyed(ev);
         }
     }
 }

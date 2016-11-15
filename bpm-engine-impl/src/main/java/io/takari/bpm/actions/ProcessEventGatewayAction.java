@@ -21,8 +21,8 @@ public class ProcessEventGatewayAction implements Action {
     @Override
     public String toString() {
         return "ProcessEventGatewayAction[" +
-                "definitionId='" + definitionId + '\'' +
-                ", elementId='" + elementId + '\'' +
+                "definitionId=" + definitionId +
+                ", elementId=" + elementId +
                 ']';
     }
 }

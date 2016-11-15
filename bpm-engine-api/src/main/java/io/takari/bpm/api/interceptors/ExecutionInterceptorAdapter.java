@@ -36,4 +36,16 @@ public abstract class ExecutionInterceptorAdapter implements ExecutionIntercepto
     @Override
     public void onError(String processBusinessKey, Throwable cause) throws ExecutionException {
     }
+
+    @Override
+    public void onError(InterceptorErrorEvent ev) throws ExecutionException {
+    }
+
+    @Override
+    public void onScopeCreated(InterceptorScopeCreatedEvent ev) throws ExecutionException {
+    }
+
+    @Override
+    public void onScopeDestroyed(InterceptorScopeDestroyedEvent ev) throws ExecutionException {
+    }
 }

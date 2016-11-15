@@ -23,8 +23,8 @@ public class CreateEventAction implements Action {
     @Override
     public String toString() {
         return "CreateEventAction[" +
-                "definitionId='" + definitionId + '\'' +
-                ", elementId='" + elementId + '\'' +
+                "definitionId=" + definitionId +
+                ", elementId=" + elementId +
                 ']';
     }
 }

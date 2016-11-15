@@ -61,7 +61,8 @@ public abstract class AbstractEngine implements Engine {
             runLockSafe(state);
         } catch (Exception e) {
             // TODO move to the executor?
-            getInterceptorHolder().fireOnError(processBusinessKey, e);
+            UUID scopeId = state.getScopes().getCurrentId();
+            getInterceptorHolder().fireOnError(processBusinessKey, pd.getId(), state.getId(), scopeId, e);
             throw e;
         } finally {
             lm.unlock(processBusinessKey);
@@ -91,7 +92,7 @@ public abstract class AbstractEngine implements Engine {
             resumeLockSafe(e, variables);
         } catch (Exception e) {
             // TODO move to the executor?
-            getInterceptorHolder().fireOnError(processBusinessKey, e);
+            getInterceptorHolder().fireOnError(processBusinessKey, null, null, null, e);
             throw e;
         } finally {
             lm.unlock(processBusinessKey);
@@ -115,7 +116,7 @@ public abstract class AbstractEngine implements Engine {
             resumeLockSafe(ev, variables);
         } catch (Exception e) {
             // TODO move to the executor?
-            getInterceptorHolder().fireOnError(businessKey, e);
+            getInterceptorHolder().fireOnError(businessKey, ev.getDefinitionId(), ev.getExecutionId(), null, e);
             throw e;
         } finally {
             lm.unlock(businessKey);

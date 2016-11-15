@@ -6,6 +6,7 @@ import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.state.ProcessInstance;
 
 import java.util.Map;
+import java.util.UUID;
 
 @Impure
 public class InterceptorEventsReducer implements Reducer {
@@ -20,7 +21,8 @@ public class InterceptorEventsReducer implements Reducer {
     public ProcessInstance reduce(ProcessInstance state, Action action) throws ExecutionException {
         if (action instanceof FireOnElementInterceptorsAction) {
             FireOnElementInterceptorsAction a = (FireOnElementInterceptorsAction) action;
-            interceptors.fireOnElement(state.getBusinessKey(), a.getDefinitionId(), state.getId(), a.getElementId());
+            UUID scopeId = state.getScopes().getCurrentId();
+            interceptors.fireOnElement(state.getBusinessKey(), a.getDefinitionId(), state.getId(), scopeId, a.getElementId());
         } else if (action instanceof FireOnStartInterceptorsAction) {
             FireOnStartInterceptorsAction a = (FireOnStartInterceptorsAction) action;
             interceptors.fireOnStart(state.getBusinessKey(), a.getDefinitionId(), state.getId(), getCurrentVariables(state));
@@ -36,6 +38,12 @@ public class InterceptorEventsReducer implements Reducer {
         } else if (action instanceof FireOnUnhandledErrorAction) {
             FireOnUnhandledErrorAction a = (FireOnUnhandledErrorAction) action;
             interceptors.fireOnUnhandledError(state.getBusinessKey(), a.getError());
+        } else if (action instanceof FireOnScopeCreatedInterceptorsAction) {
+            FireOnScopeCreatedInterceptorsAction a = (FireOnScopeCreatedInterceptorsAction) action;
+            interceptors.fireOnScopeCreated(state.getBusinessKey(), a.getDefinitionId(), state.getId(), a.getScopeId(), a.getElementId());
+        } else if (action instanceof FireOnScopeDestroyedInterceptorsAction) {
+            FireOnScopeDestroyedInterceptorsAction a = (FireOnScopeDestroyedInterceptorsAction) action;
+            interceptors.fireOnScopeDestroyed(state.getBusinessKey(), state.getId(), a.getScopeId());
         }
 
         return state;

@@ -21,6 +21,13 @@ public interface ExecutionInterceptor {
     void onUnhandledError(String processBusinessKey, BpmnError bpmnError) throws ExecutionException;
     
     void onElement(InterceptorElementEvent ev) throws ExecutionException;
-    
+
+    @Deprecated
     void onError(String processBusinessKey, Throwable cause) throws ExecutionException;
+
+    void onError(InterceptorErrorEvent ev) throws ExecutionException;
+
+    void onScopeCreated(InterceptorScopeCreatedEvent ev) throws ExecutionException;
+
+    void onScopeDestroyed(InterceptorScopeDestroyedEvent ev) throws ExecutionException;
 }

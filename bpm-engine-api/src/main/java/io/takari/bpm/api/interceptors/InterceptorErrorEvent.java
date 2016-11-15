@@ -3,22 +3,20 @@ package io.takari.bpm.api.interceptors;
 import java.io.Serializable;
 import java.util.UUID;
 
-public class InterceptorElementEvent implements Serializable {
-	
-	private static final long serialVersionUID = 1L;
+public class InterceptorErrorEvent implements Serializable {
 
     private final String processBusinessKey;
     private final String processDefinitionId;
     private final UUID executionId;
-    private final String elementId;
     private final UUID scopeId;
+    private final Throwable cause;
 
-    public InterceptorElementEvent(String processBusinessKey, String processDefinitionId, UUID executionId, String elementId, UUID scopeId) {
+    public InterceptorErrorEvent(String processBusinessKey, String processDefinitionId, UUID executionId, UUID scopeId, Throwable cause) {
         this.processBusinessKey = processBusinessKey;
         this.processDefinitionId = processDefinitionId;
         this.executionId = executionId;
-        this.elementId = elementId;
         this.scopeId = scopeId;
+        this.cause = cause;
     }
 
     public String getProcessBusinessKey() {
@@ -33,11 +31,11 @@ public class InterceptorElementEvent implements Serializable {
         return executionId;
     }
 
-    public String getElementId() {
-        return elementId;
-    }
-
     public UUID getScopeId() {
         return scopeId;
+    }
+
+    public Throwable getCause() {
+        return cause;
     }
 }

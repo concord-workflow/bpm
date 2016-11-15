@@ -35,10 +35,10 @@ public class RaiseErrorAction implements Action {
     @Override
     public String toString() {
         return "RaiseErrorAction[" +
-                "definitionId='" + definitionId + '\'' +
-                ", elementId='" + elementId + '\'' +
-                ", errorRef='" + errorRef + '\'' +
-                ", causeExpression='" + causeExpression + '\'' +
+                "definitionId=" + definitionId +
+                ", elementId=" + elementId +
+                ", errorRef=" + errorRef +
+                ", causeExpression=" + causeExpression +
                 ']';
     }
 }

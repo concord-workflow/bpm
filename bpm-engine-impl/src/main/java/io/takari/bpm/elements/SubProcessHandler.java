@@ -57,7 +57,9 @@ public class SubProcessHandler implements ElementHandler {
 
         // push the new scope when the subprocess execution begins
         // the scope will be "popped" by one of the finishing actions
-        actions.add(new PushCommandAction(new PerformActionsCommand(new PushScopeAction(false, finishers.toArray(new Command[finishers.size()])))));
+        actions.add(new PushCommandAction(new PerformActionsCommand(
+                new PushScopeAction(cmd.getDefinitionId(), cmd.getElementId(), false,
+                        finishers.toArray(new Command[finishers.size()])))));
 
         return actions;
     }

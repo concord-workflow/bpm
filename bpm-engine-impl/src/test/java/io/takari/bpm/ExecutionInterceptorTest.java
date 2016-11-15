@@ -5,15 +5,21 @@ import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.api.JavaDelegate;
 import io.takari.bpm.api.interceptors.ExecutionInterceptor;
+import io.takari.bpm.api.interceptors.InterceptorScopeCreatedEvent;
+import io.takari.bpm.api.interceptors.InterceptorScopeDestroyedEvent;
 import io.takari.bpm.api.interceptors.InterceptorStartEvent;
 import io.takari.bpm.model.*;
-
-import java.util.Arrays;
-import java.util.UUID;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
 public class ExecutionInterceptorTest extends AbstractEngineTest {
@@ -170,5 +176,60 @@ public class ExecutionInterceptorTest extends AbstractEngineTest {
 
         verify(t1).execute(any(ExecutionContext.class));
         verify(interceptor).onFailure(eq(key), eq(errorRef));
+    }
+
+    /**
+     * start --> call               end
+     *               \             /
+     *                start --> end
+     */
+    @Test
+    public void testActivityScopes() throws Exception {
+        String aId = "testA";
+        String bId = "testB";
+
+        deploy(new ProcessDefinition(aId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "call"),
+                new CallActivity("call", bId),
+                new SequenceFlow("f2", "call", "end"),
+                new EndEvent("end")
+        )));
+
+        deploy(new ProcessDefinition(bId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "end"),
+                new EndEvent("end")
+        )));
+
+        // ---
+
+        String key = UUID.randomUUID().toString();
+        getEngine().start(key, aId, null);
+
+        // ---
+
+        ArgumentCaptor<InterceptorScopeCreatedEvent> createEvCapture = ArgumentCaptor.forClass(InterceptorScopeCreatedEvent.class);
+        verify(interceptor, atLeastOnce()).onScopeCreated(createEvCapture.capture());
+
+        List<InterceptorScopeCreatedEvent> createEvs = createEvCapture.getAllValues();
+        assertEquals(2, createEvs.size());
+
+        InterceptorScopeCreatedEvent createEv = createEvs.get(1);
+        assertEquals(aId, createEv.getProcessDefinitionId());
+        assertEquals("call", createEv.getElementId());
+
+        UUID scopeId = createEv.getScopeId();
+
+        // ---
+
+        ArgumentCaptor<InterceptorScopeDestroyedEvent> destroyEvCapture = ArgumentCaptor.forClass(InterceptorScopeDestroyedEvent.class);
+        verify(interceptor, atLeastOnce()).onScopeDestroyed(destroyEvCapture.capture());
+
+        List<InterceptorScopeDestroyedEvent> destroyEvs = destroyEvCapture.getAllValues();
+        assertEquals(2, createEvs.size());
+
+        InterceptorScopeDestroyedEvent destroyEv = destroyEvs.get(0);
+        assertEquals(scopeId, destroyEv.getScopeId());
     }
 }

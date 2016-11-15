@@ -59,7 +59,8 @@ public class EventGatewayReducer implements Reducer {
         }
 
         // start a new scope
-        stack = stack.push(new PerformActionsCommand(new PushScopeAction(true)));
+        stack = stack.push(new PerformActionsCommand(
+                new PushScopeAction(a.getDefinitionId(), a.getElementId(), true)));
 
         return state.setStack(stack);
     }

@@ -23,8 +23,8 @@ public class InclusiveForkAction implements Action {
     @Override
     public String toString() {
         return "InclusiveForkAction[" +
-                "definitionId='" + definitionId + '\'' +
-                ", elementId='" + elementId + '\'' +
+                "definitionId=" + definitionId +
+                ", elementId='" + elementId +
                 ']';
     }
 }

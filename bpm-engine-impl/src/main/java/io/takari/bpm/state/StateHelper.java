@@ -42,7 +42,7 @@ public final class StateHelper {
         stack = stack.push(new ProcessElementCommand(pd.getId(), start.getId()));
 
         // initial scope creation
-        stack = stack.push(new PerformActionsCommand(new PushScopeAction(false)));
+        stack = stack.push(new PerformActionsCommand(new PushScopeAction(pd.getId(), start.getId(), false)));
 
         state = state.setStack(stack);
 

@@ -13,6 +13,8 @@ import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.state.Activations;
 import io.takari.bpm.state.ProcessInstance;
 
+import java.util.UUID;
+
 @Impure
 public class ActivationsReducer implements Reducer {
 
@@ -40,7 +42,8 @@ public class ActivationsReducer implements Reducer {
             Activations acts = state.getActivations();
             acts = acts.inc(a.getDefinitionId(), a.getElementId(), a.getCount());
 
-            interceptors.fireOnElement(state.getBusinessKey(), a.getDefinitionId(), state.getId(), a.getElementId());
+            UUID scopeId = state.getScopes().getCurrentId();
+            interceptors.fireOnElement(state.getBusinessKey(), a.getDefinitionId(), state.getId(), scopeId, a.getElementId());
 
             log.debug("reduce ['{}', '{}', '{}'] -> single activation", state.getBusinessKey(), a.getElementId(), a.getCount());
             return state.setActivations(acts);

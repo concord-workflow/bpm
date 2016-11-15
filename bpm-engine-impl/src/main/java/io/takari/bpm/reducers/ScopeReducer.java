@@ -1,11 +1,9 @@
 package io.takari.bpm.reducers;
 
 import io.takari.bpm.UuidGenerator;
-import io.takari.bpm.actions.Action;
-import io.takari.bpm.actions.PopScopeAction;
-import io.takari.bpm.actions.PushScopeAction;
-import io.takari.bpm.actions.SetCurrentScopeAction;
+import io.takari.bpm.actions.*;
 import io.takari.bpm.api.ExecutionException;
+import io.takari.bpm.commands.PerformActionsCommand;
 import io.takari.bpm.state.Events;
 import io.takari.bpm.state.ProcessInstance;
 import io.takari.bpm.state.Scopes;
@@ -25,7 +23,13 @@ public class ScopeReducer implements Reducer {
         if (action instanceof PushScopeAction) {
             PushScopeAction a = (PushScopeAction) action;
             UUID id = uuidGenerator.generate();
-            return state.setScopes(state.getScopes().push(id, a.isExclusive(), a.getFinishers()));
+
+            state = state.setScopes(state.getScopes().push(id, a.isExclusive(), a.getFinishers()));
+
+            FireOnScopeCreatedInterceptorsAction i = new FireOnScopeCreatedInterceptorsAction(id, a.getDefinitionId(), a.getElementId());
+            state = state.setStack(state.getStack().push(new PerformActionsCommand(i)));
+
+            return state;
         } else if (action instanceof PopScopeAction) {
             Scopes s = state.getScopes();
             UUID id = s.getCurrentId();
@@ -37,6 +41,9 @@ public class ScopeReducer implements Reducer {
             Events e = state.getEvents();
             if (e.isEmpty(s, id)) {
                 s = s.remove(id);
+
+                FireOnScopeDestroyedInterceptorsAction i = new FireOnScopeDestroyedInterceptorsAction(id);
+                state = state.setStack(state.getStack().push(new PerformActionsCommand(i)));
             }
 
             return state.setScopes(s);

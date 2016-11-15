@@ -23,8 +23,8 @@ public class ParallelForkAction implements Action {
     @Override
     public String toString() {
         return "ParallelForkAction[" +
-                "definitionId='" + definitionId + '\'' +
-                ", elementId='" + elementId + '\'' +
+                "definitionId=" + definitionId +
+                ", elementId=" + elementId +
                 ']';
     }
 }

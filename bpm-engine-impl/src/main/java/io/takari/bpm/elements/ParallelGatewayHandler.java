@@ -42,7 +42,8 @@ public class ParallelGatewayHandler implements ElementHandler {
             actions.add(new PushCommandAction(new PerformActionsCommand(a)));
 
             // new scope
-            actions.add(new PushCommandAction(new PerformActionsCommand(new PushScopeAction(false))));
+            actions.add(new PushCommandAction(new PerformActionsCommand(
+                    new PushScopeAction(cmd.getDefinitionId(), cmd.getElementId(), false))));
         } else {
             // join: keep processing
         }

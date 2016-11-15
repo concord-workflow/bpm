@@ -1,5 +1,18 @@
 # Change Log
 
+## [Unreleased]
+
+### Added
+
+- the new methods `ExecutionInterceptor#onScopeCreated` and `#onScopeDestroyed` allow to monitor logical scopes
+creation and removal.
+
+### Deprecated
+
+- `ExecutionInterceptor#onError(String, Throwable)` superseded by `ExecutionInterceptor(InterceptorErrorEvent)`.
+
+
+
 ## [0.10.1] - 2016-11-10 
 
 ### Added

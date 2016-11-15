@@ -35,8 +35,8 @@ public class FollowFlowsAction implements Action {
     @Override
     public String toString() {
         return "FollowFlowsAction[" +
-                "definitionId='" + definitionId + '\'' +
-                ", elementId='" + elementId + '\'' +
+                "definitionId=" + definitionId +
+                ", elementId=" + elementId +
                 ", flowIds=" + flowIds +
                 ']';
     }
