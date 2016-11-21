@@ -7,11 +7,6 @@
 A simple implementation of an BPM engine, designed to mimic Activiti's behaviour. Optimized for high performance
 (rather than strict following of the BPMN specification).
 
-It is based on the original implementation at [ibodrov/bpm](https://github.com/ibodrov/bpm).
-Original contributors:
-- Ivan Bodrov <ibodrov@gmail.com>
-- Yuri Brigadirenko <ybrigo@gmail.com>
-
 ## Main features
 - a lightweight BPM engine, inspired by Activiti BPM engine;
 - high-performance on-disk persistence;
@@ -38,4 +33,9 @@ Original contributors:
 - tasks with TimerBoundaryEvents executed in a separate thread inside of an unbounded Executor.
 - currently there is an unbound storage for element activation records. It is used internally in the engine and can
 cause large memory footprint in processes with huge amount of looping (hundreds of thousands loops).
- 
+
+## Prior work
+Based on the original implementation at [ibodrov/bpm](https://github.com/ibodrov/bpm).
+Original contributors:
+- Ivan Bodrov <ibodrov@gmail.com>
+- Yuri Brigadirenko <ybrigo@gmail.com>
