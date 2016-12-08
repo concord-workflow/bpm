@@ -1,5 +1,7 @@
 package io.takari.bpm.actions;
 
+import io.takari.bpm.misc.CoverageIgnore;
+
 public class UnsetVariableAction implements Action {
 
     private static final long serialVersionUID = 1L;
@@ -15,6 +17,7 @@ public class UnsetVariableAction implements Action {
     }
 
     @Override
+    @CoverageIgnore
     public String toString() {
         return "UnsetVariableAction [key=" + key + "]";
     }

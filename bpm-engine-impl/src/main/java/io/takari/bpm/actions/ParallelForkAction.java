@@ -1,5 +1,7 @@
 package io.takari.bpm.actions;
 
+import io.takari.bpm.misc.CoverageIgnore;
+
 public class ParallelForkAction implements Action {
 
     private static final long serialVersionUID = 1L;
@@ -21,8 +23,9 @@ public class ParallelForkAction implements Action {
     }
 
     @Override
+    @CoverageIgnore
     public String toString() {
-        return "ParallelForkAction[" +
+        return "ParallelForkAction [" +
                 "definitionId=" + definitionId +
                 ", elementId=" + elementId +
                 ']';

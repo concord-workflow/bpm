@@ -136,7 +136,63 @@ public class ServiceTaskTest extends AbstractEngineTest {
                 "end");
         assertNoMoreActivations();
     }
-    
+
+    /**
+     * start --> t1 -------------------->  end1
+     *             \                   /
+     *              -> some error -----
+     *              \
+     *               -> default error --> end2
+     *
+     *
+     */
+    @Test
+    public void testDefaultBoundaryError() throws Exception {
+        JavaDelegate t1 = spy(new JavaDelegate() {
+            @Override
+            public void execute(ExecutionContext ctx) throws Exception {
+                throw new BpmnError("kaboom!");
+            }
+        });
+
+        getServiceTaskRegistry().register("t1", t1);
+
+        // ---
+
+        String processId = "test";
+        deploy(new ProcessDefinition(processId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "t1"),
+                new ServiceTask("t1", ExpressionType.DELEGATE, "${t1}"),
+                new SequenceFlow("f2", "t1", "end1"),
+
+                new BoundaryEvent("be1", "t1", "some error"),
+                new SequenceFlow("f3", "be1", "end1"),
+
+                new BoundaryEvent("be2", "t1", null),
+                new SequenceFlow("f4", "be2", "end2"),
+
+                new EndEvent("end1"),
+                new EndEvent("end2")
+        )));
+
+        // ---
+
+        String key = UUID.randomUUID().toString();
+        getEngine().start(key, processId, null);
+
+        // ---
+
+        assertActivations(key, processId,
+                "start",
+                "f1",
+                "t1",
+                "be2",
+                "f4",
+                "end2");
+        assertNoMoreActivations();
+    }
+
     /**
      * start --> t1 --------- t2 --> end
      *             \        /

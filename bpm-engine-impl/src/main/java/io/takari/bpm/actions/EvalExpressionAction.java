@@ -1,11 +1,12 @@
 package io.takari.bpm.actions;
 
-import java.util.List;
-import java.util.Map;
-
 import io.takari.bpm.commands.Command;
+import io.takari.bpm.misc.CoverageIgnore;
 import io.takari.bpm.model.ExpressionType;
 import io.takari.bpm.utils.Timeout;
+
+import java.util.List;
+import java.util.Map;
 
 public class EvalExpressionAction implements Action {
 
@@ -21,7 +22,7 @@ public class EvalExpressionAction implements Action {
     private final Map<String, Command> errors;
 
     private EvalExpressionAction(String definitionId, String elementId, ExpressionType type, String expression,
-            Command defaultCommand, List<Timeout<Command>> timeouts, Command defaultError, Map<String, Command> errors) {
+                                 Command defaultCommand, List<Timeout<Command>> timeouts, Command defaultError, Map<String, Command> errors) {
         this.definitionId = definitionId;
         this.elementId = elementId;
         this.type = type;
@@ -65,6 +66,7 @@ public class EvalExpressionAction implements Action {
     }
 
     @Override
+    @CoverageIgnore
     public String toString() {
         return "EvalExpressionAction [definitionId=" + definitionId + ", elementId=" + elementId + ", type=" + type + ", expression="
                 + expression + ", defaultCommand=" + defaultCommand + ", timeouts=" + timeouts + ", defaultError=" + defaultError

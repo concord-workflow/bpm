@@ -1,5 +1,7 @@
 package io.takari.bpm.actions;
 
+import io.takari.bpm.misc.CoverageIgnore;
+
 import java.util.UUID;
 
 public class RemoveInstanceAction implements Action {
@@ -17,6 +19,7 @@ public class RemoveInstanceAction implements Action {
     }
 
     @Override
+    @CoverageIgnore
     public String toString() {
         return "RemoveInstanceAction [instanceId=" + instanceId + "]";
     }

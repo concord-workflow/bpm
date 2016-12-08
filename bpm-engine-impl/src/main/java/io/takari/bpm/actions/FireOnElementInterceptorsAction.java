@@ -1,5 +1,7 @@
 package io.takari.bpm.actions;
 
+import io.takari.bpm.misc.CoverageIgnore;
+
 public class FireOnElementInterceptorsAction implements Action {
 
     private static final long serialVersionUID = 1L;
@@ -21,6 +23,7 @@ public class FireOnElementInterceptorsAction implements Action {
     }
 
     @Override
+    @CoverageIgnore
     public String toString() {
         return "FireOnElementInterceptorsAction [definitionId=" + definitionId + ", elementId=" + elementId + "]";
     }

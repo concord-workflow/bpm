@@ -1,5 +1,7 @@
 package io.takari.bpm.actions;
 
+import io.takari.bpm.misc.CoverageIgnore;
+
 public class EvaluateAndFollowFlowsAction implements Action {
 
     private static final long serialVersionUID = 1L;
@@ -27,6 +29,7 @@ public class EvaluateAndFollowFlowsAction implements Action {
     }
 
     @Override
+    @CoverageIgnore
     public String toString() {
         return "EvaluateAndFollowFlowsAction [definitionId=" + definitionId + ", elementId=" + elementId + ", defaultFlow=" + defaultFlow
                 + "]";

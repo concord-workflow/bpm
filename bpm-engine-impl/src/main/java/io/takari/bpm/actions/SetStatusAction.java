@@ -1,5 +1,6 @@
 package io.takari.bpm.actions;
 
+import io.takari.bpm.misc.CoverageIgnore;
 import io.takari.bpm.state.ProcessStatus;
 
 public class SetStatusAction implements Action {
@@ -17,6 +18,7 @@ public class SetStatusAction implements Action {
     }
 
     @Override
+    @CoverageIgnore
     public String toString() {
         return "SetStatusAction [status=" + status + "]";
     }

@@ -1,6 +1,7 @@
 package io.takari.bpm.actions;
 
 import io.takari.bpm.commands.Command;
+import io.takari.bpm.misc.CoverageIgnore;
 
 public class PushCommandAction implements Action {
 
@@ -17,6 +18,7 @@ public class PushCommandAction implements Action {
     }
 
     @Override
+    @CoverageIgnore
     public String toString() {
         return "PushCommandAction [command=" + command + "]";
     }

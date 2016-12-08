@@ -1,5 +1,7 @@
 package io.takari.bpm.actions;
 
+import io.takari.bpm.misc.CoverageIgnore;
+
 public class RaiseErrorAction implements Action {
 
     private static final long serialVersionUID = 1L;
@@ -33,8 +35,9 @@ public class RaiseErrorAction implements Action {
     }
 
     @Override
+    @CoverageIgnore
     public String toString() {
-        return "RaiseErrorAction[" +
+        return "RaiseErrorAction [" +
                 "definitionId=" + definitionId +
                 ", elementId=" + elementId +
                 ", errorRef=" + errorRef +

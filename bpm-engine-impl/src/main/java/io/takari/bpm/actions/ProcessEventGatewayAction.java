@@ -1,5 +1,7 @@
 package io.takari.bpm.actions;
 
+import io.takari.bpm.misc.CoverageIgnore;
+
 public class ProcessEventGatewayAction implements Action {
 
     private final String definitionId;
@@ -19,8 +21,9 @@ public class ProcessEventGatewayAction implements Action {
     }
 
     @Override
+    @CoverageIgnore
     public String toString() {
-        return "ProcessEventGatewayAction[" +
+        return "ProcessEventGatewayAction [" +
                 "definitionId=" + definitionId +
                 ", elementId=" + elementId +
                 ']';

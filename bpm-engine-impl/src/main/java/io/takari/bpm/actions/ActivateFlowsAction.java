@@ -1,5 +1,7 @@
 package io.takari.bpm.actions;
 
+import io.takari.bpm.misc.CoverageIgnore;
+
 import java.util.Collection;
 
 public class ActivateFlowsAction implements Action {
@@ -29,6 +31,7 @@ public class ActivateFlowsAction implements Action {
     }
 
     @Override
+    @CoverageIgnore
     public String toString() {
         return "ActivateFlowsAction [definitionId=" + definitionId + ", elementIds=" + elementIds + ", count=" + count + "]";
     }

@@ -1,8 +1,9 @@
 package io.takari.bpm.actions;
 
-import java.util.Set;
-
+import io.takari.bpm.misc.CoverageIgnore;
 import io.takari.bpm.model.VariableMapping;
+
+import java.util.Set;
 
 public class MakeSubProcessVariablesAction implements Action {
 
@@ -29,6 +30,7 @@ public class MakeSubProcessVariablesAction implements Action {
     }
 
     @Override
+    @CoverageIgnore
     public String toString() {
         return "MakeSubProcessVariablesAction [inVariables=" + inVariables + ", copyAllVariables=" + copyAllVariables + "]";
     }

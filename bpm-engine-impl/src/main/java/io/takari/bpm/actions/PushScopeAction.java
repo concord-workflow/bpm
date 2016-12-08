@@ -1,6 +1,7 @@
 package io.takari.bpm.actions;
 
 import io.takari.bpm.commands.Command;
+import io.takari.bpm.misc.CoverageIgnore;
 
 import java.util.Arrays;
 
@@ -12,7 +13,7 @@ public class PushScopeAction implements Action {
     private final Command[] finishers;
 
     public PushScopeAction(String definitionId, String elementId, boolean exclusive) {
-        this(definitionId, elementId, exclusive, (Command[])null);
+        this(definitionId, elementId, exclusive, (Command[]) null);
     }
 
     public PushScopeAction(String definitionId, String elementId, boolean exclusive, Command... finishers) {
@@ -39,8 +40,9 @@ public class PushScopeAction implements Action {
     }
 
     @Override
+    @CoverageIgnore
     public String toString() {
-        return "PushScopeAction[" +
+        return "PushScopeAction [" +
                 "definitionId=" + definitionId +
                 ", elementId=" + elementId +
                 ", exclusive=" + exclusive +
