@@ -1,13 +1,12 @@
 package io.takari.bpm;
 
+import io.takari.bpm.api.EventService;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.api.interceptors.ExecutionInterceptorAdapter;
 import io.takari.bpm.api.interceptors.InterceptorElementEvent;
 import io.takari.bpm.el.DefaultExpressionManager;
 import io.takari.bpm.el.ExpressionManager;
-import io.takari.bpm.event.EventPersistenceManager;
-import io.takari.bpm.event.EventPersistenceManagerImpl;
-import io.takari.bpm.event.InMemEventStorage;
+import io.takari.bpm.event.*;
 import io.takari.bpm.lock.LockManager;
 import io.takari.bpm.lock.SingleLockManagerImpl;
 import io.takari.bpm.model.ProcessDefinition;
@@ -38,6 +37,7 @@ public class EngineHolder {
     private final IndexedProcessDefinitionProvider indexedProcessDefinitionProvider;
     private final AbstractEngine engine;
     private final Map<String, List<String>> activations;
+    private final EventStorage eventStorage;
     private final EventPersistenceManager eventManager;
     private final PersistenceManager persistenceManager;
     private final Executor executor;
@@ -51,7 +51,8 @@ public class EngineHolder {
         serviceTaskRegistry = new ServiceTaskRegistryImpl();
         processDefinitionProvider = spy(new TestProcessDefinitionProvider());
         indexedProcessDefinitionProvider = new IndexedProcessDefinitionProvider(processDefinitionProvider);
-        eventManager = spy(new EventPersistenceManagerImpl(new InMemEventStorage()));
+        eventStorage = new InMemEventStorage();
+        eventManager = spy(new EventPersistenceManagerImpl(eventStorage));
         persistenceManager = new InMemPersistenceManager();
         expressionManager = new DefaultExpressionManager(serviceTaskRegistry);
         uuidGenerator = new TestUuidGenerator();
@@ -63,6 +64,7 @@ public class EngineHolder {
         engine = new AbstractEngine() {
 
             private final Planner planner = new DefaultPlanner(configuration);
+            private final EventService eventService = new EventServiceImpl(lockManager, eventStorage);
 
             @Override
             protected UuidGenerator getUuidGenerator() {
@@ -107,6 +109,11 @@ public class EngineHolder {
             @Override
             protected Configuration getConfiguration() {
                 return configuration;
+            }
+
+            @Override
+            public EventService getEventService() {
+                return eventService;
             }
         };
 

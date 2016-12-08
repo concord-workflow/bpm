@@ -1,6 +1,7 @@
 package io.takari.bpm.api;
 
 import io.takari.bpm.api.interceptors.ExecutionInterceptor;
+
 import java.util.Map;
 import java.util.UUID;
 
@@ -34,7 +35,7 @@ public interface Engine {
      * @throws ExecutionException
      */
     void resume(UUID eventId, Map<String, Object> variables) throws ExecutionException;
-    
+
     /**
      * Adds an execution interceptor. Execution interceptor will receive events
      * synchronously and may block the execution. It is recommended to configure
@@ -42,4 +43,10 @@ public interface Engine {
      * @param i
      */
     void addInterceptor(ExecutionInterceptor i);
+
+    /**
+     * Provides utility methods to work with BPM events.
+     * @return instance of the event manager.
+     */
+    EventService getEventService();
 }

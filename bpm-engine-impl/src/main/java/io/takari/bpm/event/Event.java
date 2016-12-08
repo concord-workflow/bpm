@@ -1,13 +1,12 @@
 package io.takari.bpm.event;
 
-import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
 import java.util.UUID;
 
-public final class Event implements Serializable {
-	
-	private static final long serialVersionUID = 1L;
+public final class Event implements io.takari.bpm.api.Event {
+
+    private static final long serialVersionUID = 1L;
 
     private final UUID id;
     private final UUID executionId;
@@ -30,34 +29,42 @@ public final class Event implements Serializable {
         this.expiredAt = expiredAt;
     }
 
+    @Override
     public UUID getId() {
         return id;
     }
-    
+
+    @Override
     public UUID getExecutionId() {
         return executionId;
     }
 
+    @Override
     public String getDefinitionId() {
         return definitionId;
     }
 
+    @Override
     public UUID getScopeId() {
         return scopeId;
     }
 
+    @Override
     public boolean isExclusive() {
         return exclusive;
     }
 
+    @Override
     public Date getExpiredAt() {
         return expiredAt;
     }
 
+    @Override
     public String getProcessBusinessKey() {
         return processBusinessKey;
     }
 
+    @Override
     public String getName() {
         return name;
     }
@@ -108,6 +115,6 @@ public final class Event implements Serializable {
     // TODO replace
     @Override
     public String toString() {
-        return "Event{" + "id=" + id  + ", name=" + name + ", executionId=" + executionId + ", scopeId=" + scopeId + ", processBusinessKey=" + processBusinessKey + ", exclusive=" + exclusive + ", expiredAt=" + expiredAt + '}';
+        return "Event{" + "id=" + id + ", name=" + name + ", executionId=" + executionId + ", scopeId=" + scopeId + ", processBusinessKey=" + processBusinessKey + ", exclusive=" + exclusive + ", expiredAt=" + expiredAt + '}';
     }
 }

@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- initial implementation of the `EventService` API.
+
 ### Changed
 
 - fixed the bug, preventing processes with multiple calls to a same activity from working with parallel or

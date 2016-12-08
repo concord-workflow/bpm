@@ -1,12 +1,10 @@
 package io.takari.bpm;
 
 import io.takari.bpm.api.Engine;
+import io.takari.bpm.api.EventService;
 import io.takari.bpm.el.DefaultExpressionManager;
 import io.takari.bpm.el.ExpressionManager;
-import io.takari.bpm.event.EventPersistenceManager;
-import io.takari.bpm.event.EventPersistenceManagerImpl;
-import io.takari.bpm.event.EventStorage;
-import io.takari.bpm.event.InMemEventStorage;
+import io.takari.bpm.event.*;
 import io.takari.bpm.lock.LockManager;
 import io.takari.bpm.lock.StripedLockManagerImpl;
 import io.takari.bpm.persistence.InMemPersistenceManager;
@@ -23,6 +21,7 @@ public final class EngineBuilder {
 
     private static final int DEFAULT_CONCURRENCY_LEVEL = 64;
 
+    private EventStorage eventStorage;
     private EventPersistenceManager eventManager;
     private ExecutionInterceptorHolder interceptors;
     private Executor executor;
@@ -40,6 +39,11 @@ public final class EngineBuilder {
 
     public EngineBuilder withDefinitionProvider(ProcessDefinitionProvider definitionProvider) {
         this.definitionProvider = definitionProvider;
+        return this;
+    }
+
+    public EngineBuilder withEventStorage(EventStorage eventStorage) {
+        this.eventStorage = eventStorage;
         return this;
     }
 
@@ -108,9 +112,12 @@ public final class EngineBuilder {
                     + "Use the method `builder.withDefinitionProvider(...)` to specify your own implementation.");
         }
 
+        if (eventStorage == null) {
+            eventStorage = new InMemEventStorage();
+        }
+
         if (eventManager == null) {
-            EventStorage es = new InMemEventStorage();
-            eventManager = new EventPersistenceManagerImpl(es);
+            eventManager = new EventPersistenceManagerImpl(eventStorage);
         }
 
         if (persistenceManager == null) {
@@ -163,7 +170,10 @@ public final class EngineBuilder {
         }
 
         return new EngineImpl(new IndexedProcessDefinitionProvider(definitionProvider),
-                eventManager, persistenceManager, lockManager, uuidGenerator, executor, planner, configuration, interceptors);
+                eventStorage, eventManager,
+                persistenceManager, lockManager, uuidGenerator,
+                executor, planner,
+                configuration, interceptors);
     }
 
     public static final class EngineImpl extends AbstractEngine {
@@ -178,8 +188,11 @@ public final class EngineBuilder {
         private final Configuration configuration;
         private final ExecutionInterceptorHolder interceptors;
 
+        private final EventService eventService;
+
         public EngineImpl(
                 IndexedProcessDefinitionProvider definitionProvider,
+                EventStorage eventStorage,
                 EventPersistenceManager eventManager,
                 PersistenceManager persistenceManager,
                 LockManager lockManager,
@@ -200,6 +213,8 @@ public final class EngineBuilder {
             this.configuration = configuration;
 
             this.interceptors = interceptors;
+
+            this.eventService = new EventServiceImpl(lockManager, eventStorage);
         }
 
         @Override
@@ -245,6 +260,11 @@ public final class EngineBuilder {
         @Override
         public Configuration getConfiguration() {
             return configuration;
+        }
+
+        @Override
+        public EventService getEventService() {
+            return eventService;
         }
     }
 }
