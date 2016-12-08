@@ -1,9 +1,6 @@
 package io.takari.bpm.reducers;
 
 import io.takari.bpm.ExecutionInterceptorHolder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.takari.bpm.IndexedProcessDefinition;
 import io.takari.bpm.ProcessDefinitionUtils;
 import io.takari.bpm.actions.Action;
@@ -12,6 +9,8 @@ import io.takari.bpm.actions.ActivateFlowsAction;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.state.Activations;
 import io.takari.bpm.state.ProcessInstance;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 
@@ -40,9 +39,9 @@ public class ActivationsReducer implements Reducer {
         } else if (action instanceof ActivateElementAction) {
             ActivateElementAction a = (ActivateElementAction) action;
             Activations acts = state.getActivations();
-            acts = acts.inc(a.getDefinitionId(), a.getElementId(), a.getCount());
-
             UUID scopeId = state.getScopes().getCurrentId();
+
+            acts = acts.inc(scopeId, a.getElementId(), a.getCount());
             interceptors.fireOnElement(state.getBusinessKey(), a.getDefinitionId(), state.getId(), scopeId, a.getElementId());
 
             log.debug("reduce ['{}', '{}', '{}'] -> single activation", state.getBusinessKey(), a.getElementId(), a.getCount());
@@ -62,7 +61,8 @@ public class ActivationsReducer implements Reducer {
         }
 
         log.debug("activateFlows ['{}', '{}'] -> activating '{}' via '{}' (count: {})", state.getBusinessKey(), elementId, gwId, elementId, count);
-        acts = acts.inc(pd.getId(), gwId, count);
+        UUID scopeId = state.getScopes().getCurrentId();
+        acts = acts.inc(scopeId, gwId, count);
 
         return acts;
     }

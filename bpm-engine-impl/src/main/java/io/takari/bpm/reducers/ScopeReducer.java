@@ -4,6 +4,7 @@ import io.takari.bpm.UuidGenerator;
 import io.takari.bpm.actions.*;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.commands.PerformActionsCommand;
+import io.takari.bpm.state.Activations;
 import io.takari.bpm.state.Events;
 import io.takari.bpm.state.ProcessInstance;
 import io.takari.bpm.state.Scopes;

@@ -30,9 +30,6 @@ public class EventGatewayReducer implements Reducer {
 
         CommandStack stack = state.getStack();
 
-        // close the (future) scope right after the events
-        stack = stack.push(new PerformActionsCommand(new PopScopeAction()));
-
         // find all events and create actions to handle them
         IndexedProcessDefinition pd = state.getDefinition(a.getDefinitionId());
         List<SequenceFlow> flows = ProcessDefinitionUtils.findOptionalOutgoingFlows(pd, a.getElementId());

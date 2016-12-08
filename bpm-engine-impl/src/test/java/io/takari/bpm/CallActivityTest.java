@@ -356,11 +356,15 @@ public class CallActivityTest extends AbstractEngineTest {
                 new InclusiveGateway("gw1"),
                 new SequenceFlow("f2", "gw1", "call"),
                 new CallActivity("call", bId),
+
+                // normal
                 new SequenceFlow("f3", "call", "gw2"),
 
+                // errorA
                 new BoundaryEvent("beA", "call", errorA),
                 new SequenceFlow("f4", "beA", "gw2"),
 
+                // errorB
                 new BoundaryEvent("beB", "call", errorB),
                 new SequenceFlow("f5", "beB", "gw2"),
 

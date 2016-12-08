@@ -11,6 +11,7 @@ import io.takari.bpm.state.Activations;
 import io.takari.bpm.state.ProcessInstance;
 
 import java.util.List;
+import java.util.UUID;
 
 public class ParallelGatewayHandler implements ElementHandler {
 
@@ -20,7 +21,8 @@ public class ParallelGatewayHandler implements ElementHandler {
 
         // include the current activation
         Activations acts = state.getActivations();
-        int activated = acts.count(cmd.getDefinitionId(), cmd.getElementId()) + 1;
+        UUID scopeId = state.getScopes().getCurrentId();
+        int activated = acts.count(scopeId, cmd.getElementId()) + 1;
 
         IndexedProcessDefinition pd = state.getDefinition(cmd.getDefinitionId());
         List<SequenceFlow> in = ProcessDefinitionUtils.findIncomingFlows(pd, cmd.getElementId());
@@ -38,7 +40,7 @@ public class ParallelGatewayHandler implements ElementHandler {
             Action a = createForkAction(cmd);
 
             // we need to defer the action until the next iteration, so all
-            // actions produced on this iteration, will be applied
+            // actions produced on this iteration will be applied
             actions.add(new PushCommandAction(new PerformActionsCommand(a)));
 
             // new scope

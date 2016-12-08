@@ -96,11 +96,13 @@ public class ActivityFinalizerCommandHandler implements CommandHandler<ActivityF
         // follow the outbound flow
         actions.add(new FollowFlowsAction(cmd.getDefinitionId(), ev.getId()));
 
-        // process the inactive flows
+        // process the inactive flows. Use a deferred action, so the activation will be performed after
+        // the call's scope is closed
         List<SequenceFlow> flows = ProcessDefinitionUtils.findOptionalOutgoingFlows(pd, cmd.getElementId());
-        actions.add(new ActivateFlowsAction(cmd.getDefinitionId(), ProcessDefinitionUtils.toIds(flows)));
+        actions.add(new PushCommandAction(new PerformActionsCommand(
+                new ActivateFlowsAction(cmd.getDefinitionId(), ProcessDefinitionUtils.toIds(flows)))));
 
-        // process the inactive boundary events
+        // process the inactive boundary events: Use a deferred action, just as in the case above
         List<BoundaryEvent> evs = new ArrayList<>(ProcessDefinitionUtils.findOptionalBoundaryEvents(pd, cmd.getElementId()));
         for (Iterator<BoundaryEvent> i = evs.iterator(); i.hasNext(); ) {
             BoundaryEvent e = i.next();
@@ -108,8 +110,10 @@ public class ActivityFinalizerCommandHandler implements CommandHandler<ActivityF
                 i.remove();
             }
         }
-        actions.add(new ActivateFlowsAction(cmd.getDefinitionId(), ProcessDefinitionUtils.toIds(evs)));
+        actions.add(new PushCommandAction(new PerformActionsCommand(
+                new ActivateFlowsAction(cmd.getDefinitionId(), ProcessDefinitionUtils.toIds(evs)))));
 
+        // close the call's scope
         actions.add(new PushCommandAction(new PerformActionsCommand(new PopScopeAction())));
 
         return actions;

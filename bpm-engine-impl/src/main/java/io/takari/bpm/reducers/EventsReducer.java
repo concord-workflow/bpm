@@ -59,19 +59,14 @@ public class EventsReducer implements Reducer {
         Scope scope = state.getScopes().peek();
         List<Scope> scopes = state.getScopes().traverse(scope.getId());
 
-        // create a list of commands that will be executes on activation of an event
+        // create a list of commands that will be executed on activation of an event
         List<Command> cmds = new ArrayList<>();
 
-        for (Scope s : Lists.reverse(scopes)) {
-            // scope's finishers will pop their scope themselves
-            if (s.getFinishers() == null) {
-                cmds.add(new PerformActionsCommand(new PopScopeAction()));
-            } else {
-                Collections.addAll(cmds, s.getFinishers());
-            }
-        }
+        addScopeClosingActions(cmds, scopes);
 
+        // evaluate the following element after the event
         cmds.add(new ProcessElementCommand(pd.getId(), next.getId()));
+
         cmds.add(new PerformActionsCommand(new SetCurrentScopeAction(scope.getId())));
 
         // create and save an event
@@ -102,6 +97,18 @@ public class EventsReducer implements Reducer {
         boolean exclusive = s.isExclusive();
 
         return new Event(id, state.getId(), pd.getId(), scopeId, name, state.getBusinessKey(), exclusive, expiredAt);
+    }
+
+    private static void addScopeClosingActions(Collection<Command> cmds, List<Scope> currentStack) {
+
+        for (Scope s : Lists.reverse(currentStack)) {
+            // scope finishers must pop their scopes themselves
+            if (s.getFinishers() == null) {
+                cmds.add(new PerformActionsCommand(new PopScopeAction()));
+            } else {
+                Collections.addAll(cmds, s.getFinishers());
+            }
+        }
     }
 
     private static String getEventName(IntermediateCatchEvent e, ExecutionContext ctx, ExpressionManager em) {

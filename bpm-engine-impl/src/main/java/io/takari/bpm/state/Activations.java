@@ -4,6 +4,8 @@ import org.pcollections.PVector;
 import org.pcollections.TreePVector;
 
 import java.io.Serializable;
+import java.util.List;
+import java.util.UUID;
 
 public class Activations implements Serializable {
 
@@ -19,30 +21,46 @@ public class Activations implements Serializable {
         this.values = values;
     }
 
-    public Activations inc(String definitionId, String elementId, int count) {
-        return new Activations(values.plus(new Activation(definitionId, elementId, count)));
+    public Activations inc(UUID scopeId, String elementId, int count) {
+        return new Activations(values.plus(new Activation(scopeId, elementId, count)));
     }
 
-    public int count(String definitionId, String elementId) {
+    public int count(UUID scopeId, String elementId) {
         int cnt = 0;
         for (Activation a : values) {
-            if (definitionId.equals(a.definitionId) && elementId.equals(a.elementId)) {
+            if (scopeId.equals(a.scopeId) && elementId.equals(a.elementId)) {
                 cnt += a.count;
             }
         }
         return cnt;
     }
 
-    private static final class Activation implements Serializable {
+    public List<Activation> values() {
+        return values;
+    }
 
-        private final String definitionId;
+    public static final class Activation implements Serializable {
+
+        private final UUID scopeId;
         private final String elementId;
         private final int count;
 
-        public Activation(String definitionId, String elementId, int count) {
-            this.definitionId = definitionId;
+        public Activation(UUID scopeId, String elementId, int count) {
+            this.scopeId = scopeId;
             this.elementId = elementId;
             this.count = count;
+        }
+
+        public UUID getScopeId() {
+            return scopeId;
+        }
+
+        public String getElementId() {
+            return elementId;
+        }
+
+        public int getCount() {
+            return count;
         }
     }
 }

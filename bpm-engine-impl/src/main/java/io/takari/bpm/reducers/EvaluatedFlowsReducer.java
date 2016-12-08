@@ -1,12 +1,5 @@
 package io.takari.bpm.reducers;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.takari.bpm.IndexedProcessDefinition;
 import io.takari.bpm.ProcessDefinitionUtils;
 import io.takari.bpm.actions.Action;
@@ -20,6 +13,13 @@ import io.takari.bpm.el.ExpressionManager;
 import io.takari.bpm.model.SequenceFlow;
 import io.takari.bpm.state.Activations;
 import io.takari.bpm.state.ProcessInstance;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.UUID;
 
 @Impure
 public class EvaluatedFlowsReducer implements Reducer {
@@ -49,12 +49,12 @@ public class EvaluatedFlowsReducer implements Reducer {
         // results
 
         ExecutionContextImpl ctx = new ExecutionContextImpl(expressionManager, state.getVariables());
-        for (Iterator<SequenceFlow> i = flows.iterator(); i.hasNext();) {
+        for (Iterator<SequenceFlow> i = flows.iterator(); i.hasNext(); ) {
             SequenceFlow f = i.next();
             if (f.getExpression() == null) {
                 continue;
             }
-            
+
             i.remove();
 
             if (eval(expressionManager, ctx, f)) {
@@ -115,11 +115,13 @@ public class EvaluatedFlowsReducer implements Reducer {
         IndexedProcessDefinition pd = state.getDefinition(definitionId);
 
         Activations acts = state.getActivations();
+        UUID scopeId = state.getScopes().getCurrentId();
+
         for (SequenceFlow f : ProcessDefinitionUtils.findOutgoingFlows(pd, elementId)) {
             if (f.getId().equals(usedFlowId)) {
                 continue;
             }
-            acts = acts.inc(pd.getId(), f.getId(), 1);
+            acts = acts.inc(scopeId, f.getId(), 1);
             log.debug("activateUnusedFlows ['{}', '{}', '{}'] -> single activation of '{}'", state.getBusinessKey(), definitionId,
                     elementId, f.getId());
         }

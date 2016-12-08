@@ -40,13 +40,8 @@ public class CallActivityHandler implements ElementHandler {
 
         Set<VariableMapping> outVariables = a.getOut();
 
-        // set a new variables container (aka child's "ExecutionContext") as our
-        // current
+        // set a new variables container (aka child's "ExecutionContext") as the current one
         actions.add(new MakeSubProcessVariablesAction(inVariables, a.isCopyAllVariables()));
-
-        // copy the events map from the parent process to the child, so the
-        // child process can track all external events
-        //actions.add(new CopyEventMapAction(EventMapHelper.getMap(state.getVariables())));
 
         // add a variables merging command to the stack
         Command mergeCommand = new MergeVariablesCommand(state.getVariables(), outVariables);

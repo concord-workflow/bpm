@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 @Impure
 public class ForkReducer implements Reducer {
@@ -69,7 +70,8 @@ public class ForkReducer implements Reducer {
                 // directly activate the unused flows, so they will be visible
                 // for the next commands on the stack
                 Activations acts = state.getActivations();
-                state = state.setActivations(acts.inc(pd.getId(), gwId, count));
+                UUID scopeId = state.getScopes().getCurrentId();
+                state = state.setActivations(acts.inc(scopeId, gwId, count));
             }
 
             return follow(state, a.getDefinitionId(), a.getElementId(), filtered);

@@ -1,5 +1,15 @@
 # Change Log
 
+## [Unreleased]
+
+### Changed
+
+- fixed the bug, preventing processes with multiple calls to a same activity from working with parallel or
+inclusive gateways.
+
+
+
+
 ## [0.10.2] - 2016-11-15
 
 ### Added

@@ -16,16 +16,19 @@ import io.takari.bpm.commands.ProcessElementCommand;
 import io.takari.bpm.misc.CoverageIgnore;
 import io.takari.bpm.model.ProcessDefinition;
 import io.takari.bpm.model.StartEvent;
+import io.takari.bpm.state.Activations.Activation;
 import io.takari.bpm.state.Events.EventRecord;
 import io.takari.bpm.state.Scopes.Scope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Serializable;
 import java.util.*;
 
 public final class StateHelper {
 
     private static final Logger log = LoggerFactory.getLogger(StateHelper.class);
+    private static final boolean PRINT_ACTIVATIONS = false;
 
     public static ProcessInstance createInitialState(Executor executor, UUID id, String businessKey,
                                                      IndexedProcessDefinition pd, Map<String, Object> args) throws ExecutionException {
@@ -89,6 +92,11 @@ public final class StateHelper {
 
         Map<UUID, Map<UUID, EventRecord>> events = state.getEvents().values();
         printEvents(b, "EVENTS", events);
+
+        if (PRINT_ACTIVATIONS) {
+            List<Activation> activations = state.getActivations().values();
+            printActivations(b, "ACTIVATIONS", activations);
+        }
 
         b.append("\n");
 
@@ -181,6 +189,62 @@ public final class StateHelper {
                 b.append("\t\t\t").append(kk).append("=").append(vv).append("\n");
             }
             b.append("\t\t}\n");
+        }
+    }
+
+    private static void printActivations(StringBuilder b, String name, List<Activation> items) {
+        b.append("\n=================================\n")
+                .append("\t").append(name).append(": ")
+                .append(items.size())
+                .append("\n");
+
+        Map<ActivationKey, Integer> result = new HashMap<>();
+        for (Activation a : items) {
+            ActivationKey k = new ActivationKey(a.getScopeId(), a.getElementId());
+            Integer v = result.get(k);
+            if (v == null) {
+                v = 0;
+            }
+            result.put(k, v + 1);
+        }
+
+        for (Map.Entry<ActivationKey, Integer> e : result.entrySet()) {
+            ActivationKey k = e.getKey();
+            Integer v = e.getValue();
+
+            b.append("\t\t").append(k.scopeId)
+                    .append(" / ").append(k.elementId)
+                    .append(" = ").append(v)
+                    .append("\n");
+        }
+    }
+
+    private static final class ActivationKey implements Serializable {
+
+        private final UUID scopeId;
+        private final String elementId;
+
+        private ActivationKey(UUID scopeId, String elementId) {
+            this.scopeId = scopeId;
+            this.elementId = elementId;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            ActivationKey that = (ActivationKey) o;
+
+            if (!scopeId.equals(that.scopeId)) return false;
+            return elementId.equals(that.elementId);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = scopeId.hashCode();
+            result = 31 * result + elementId.hashCode();
+            return result;
         }
     }
 

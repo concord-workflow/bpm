@@ -22,7 +22,7 @@ public class ProcessElementCommand implements Command {
 
     @Override
     public String toString() {
-        return "ProcessElementCommand[" +
+        return "ProcessElementCommand [" +
                 "definitionId='" + definitionId + '\'' +
                 ", elementId='" + elementId + '\'' +
                 ']';

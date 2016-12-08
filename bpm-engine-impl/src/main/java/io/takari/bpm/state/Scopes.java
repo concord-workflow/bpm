@@ -69,6 +69,10 @@ public class Scopes {
         return this.scopes;
     }
 
+    /**
+     * @param scopeId ID of a starting scope
+     * @return a list of parent scopes, including the specified one.
+     */
     public List<Scope> traverse(UUID scopeId) {
         List<Scope> result = new ArrayList<>();
 

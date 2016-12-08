@@ -4,18 +4,20 @@ import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.api.interceptors.ExecutionInterceptor;
 import io.takari.bpm.api.interceptors.ExecutionInterceptorAdapter;
 import io.takari.bpm.dsl.*;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.mockito.Mockito.*;
 
 public class SimpleDSLTest extends AbstractEngineTest {
 
+    @Before
+    public void initDsl() {
+        SimpleDSL.registerDslTask(getServiceTaskRegistry());
+    }
+
     @Test
     public void testTrivial() throws Exception {
-        SimpleDSL.registerDslTask(getServiceTaskRegistry());
-
-        // ---
-
         Flow masterFlow = new Flow("master",
                 new TaskStep("shell1"),
                 new TaskStep("shell2"));
@@ -35,10 +37,6 @@ public class SimpleDSLTest extends AbstractEngineTest {
 
     @Test
     public void testSimple() throws Exception {
-        SimpleDSL.registerDslTask(getServiceTaskRegistry());
-
-        // ---
-
         Flow masterFlow = new Flow("master",
                 new ParallelStep(
                         new TaskStep("shell4"),
@@ -61,10 +59,6 @@ public class SimpleDSLTest extends AbstractEngineTest {
 
     @Test
     public void testNested() throws Exception {
-        SimpleDSL.registerDslTask(getServiceTaskRegistry());
-
-        // ---
-
         Flow masterFlow = new Flow("master",
                 new CallStep("verify"));
 
@@ -106,10 +100,6 @@ public class SimpleDSLTest extends AbstractEngineTest {
 
     @Test
     public void testDeeplyNested() throws Exception {
-        SimpleDSL.registerDslTask(getServiceTaskRegistry());
-
-        // ---
-
         Flow masterFlow = new Flow("master",
                 new CallStep("verify"));
 
@@ -118,12 +108,6 @@ public class SimpleDSLTest extends AbstractEngineTest {
 
         Flow verifyFlow = new Flow("verify",
                 new CallStep("setup"),
-//                new TaskStep("shell2"),
-//                new TaskStep("shell3"),
-//                new ParallelStep(
-//                        new TaskStep("shell4"),
-//                        new TaskStep("shell5"),
-//                        new TaskStep("shell6")),
                 new TaskStep("shell7"));
 
         deploy(SimpleDSL.from(masterFlow, setupFlow, verifyFlow));
@@ -152,23 +136,6 @@ public class SimpleDSLTest extends AbstractEngineTest {
 
         getEngine().resume(key, "ok_shell1", null);
         assertOnSuspend(delegate);
-
-//        getEngine().resume(key, "ok_shell2", null);
-//        assertOnSuspend(delegate);
-//
-//        getEngine().resume(key, "ok_shell3", null);
-//        assertOnSuspend(delegate);
-
-        // shuffle a bit
-
-//        getEngine().resume(key, "ok_shell5", null);
-//        assertOnSuspend(delegate);
-//
-//        getEngine().resume(key, "ok_shell4", null);
-//        assertOnSuspend(delegate);
-//
-//        getEngine().resume(key, "ok_shell6", null);
-//        assertOnSuspend(delegate);
 
         // last one
 
