@@ -8,10 +8,6 @@ public class ActivateElementAction implements Action {
     private final String elementId;
     private final int count;
 
-    public ActivateElementAction(String definitionId, String elementId) {
-        this(definitionId, elementId, 1);
-    }
-
     public ActivateElementAction(String definitionId, String elementId, int count) {
         this.definitionId = definitionId;
         this.elementId = elementId;

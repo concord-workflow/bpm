@@ -91,7 +91,7 @@ public class ActivityFinalizerCommandHandler implements CommandHandler<ActivityF
         actions.add(new SetVariableAction(ExecutionContext.LAST_ERROR_KEY, error));
 
         // activate the boundary error event element
-        actions.add(new ActivateElementAction(cmd.getDefinitionId(), ev.getId()));
+        actions.add(new ActivateElementAction(cmd.getDefinitionId(), ev.getId(), 1));
 
         // follow the outbound flow
         actions.add(new FollowFlowsAction(cmd.getDefinitionId(), ev.getId()));
@@ -100,7 +100,7 @@ public class ActivityFinalizerCommandHandler implements CommandHandler<ActivityF
         // the call's scope is closed
         List<SequenceFlow> flows = ProcessDefinitionUtils.findOptionalOutgoingFlows(pd, cmd.getElementId());
         actions.add(new PushCommandAction(new PerformActionsCommand(
-                new ActivateFlowsAction(cmd.getDefinitionId(), ProcessDefinitionUtils.toIds(flows)))));
+                new ActivateFlowsAction(cmd.getDefinitionId(), ProcessDefinitionUtils.toIds(flows), 1))));
 
         // process the inactive boundary events: Use a deferred action, just as in the case above
         List<BoundaryEvent> evs = new ArrayList<>(ProcessDefinitionUtils.findOptionalBoundaryEvents(pd, cmd.getElementId()));
@@ -111,7 +111,7 @@ public class ActivityFinalizerCommandHandler implements CommandHandler<ActivityF
             }
         }
         actions.add(new PushCommandAction(new PerformActionsCommand(
-                new ActivateFlowsAction(cmd.getDefinitionId(), ProcessDefinitionUtils.toIds(evs)))));
+                new ActivateFlowsAction(cmd.getDefinitionId(), ProcessDefinitionUtils.toIds(evs), 1))));
 
         // close the call's scope
         actions.add(new PushCommandAction(new PerformActionsCommand(new PopScopeAction())));

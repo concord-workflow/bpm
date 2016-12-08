@@ -85,16 +85,16 @@ public final class StateHelper {
         StringBuilder b = new StringBuilder();
 
         Collection<Command> commands = state.getStack().values();
-        printCollection(b, "COMMANDS", commands);
+        printCollection(b, commands);
 
-        printScopes(b, "SCOPES", state.getScopes());
+        printScopes(b, state.getScopes());
 
         Map<UUID, Map<UUID, EventRecord>> events = state.getEvents().values();
-        printEvents(b, "EVENTS", events);
+        printEvents(b, events);
 
         if (PRINT_ACTIVATIONS) {
             Map<ActivationKey, Integer> activations = state.getActivations().values();
-            printActivations(b, "ACTIVATIONS", activations);
+            printActivations(b, activations);
         }
 
         b.append("\n");
@@ -103,9 +103,9 @@ public final class StateHelper {
     }
 
     @CoverageIgnore
-    private static void printCollection(StringBuilder b, String name, Collection<?> items) {
+    private static void printCollection(StringBuilder b, Collection<?> items) {
         b.append("\n=================================\n")
-                .append("\t").append(name).append(": ")
+                .append("\t").append("COMMANDS").append(": ")
                 .append(items.size())
                 .append("\n");
 
@@ -119,11 +119,11 @@ public final class StateHelper {
     }
 
     @CoverageIgnore
-    private static void printScopes(StringBuilder b, String name, Scopes scopes) {
+    private static void printScopes(StringBuilder b, Scopes scopes) {
         Map<UUID, Scope> items = scopes.values();
 
         b.append("\n=================================\n")
-                .append("\t").append(name).append(": ")
+                .append("\t").append("SCOPES").append(": ")
                 .append(items.size())
                 .append("\n")
                 .append("\tCURRENT SCOPE: ").append(scopes.getCurrentId()).append("\n");
@@ -166,9 +166,9 @@ public final class StateHelper {
     }
 
     @CoverageIgnore
-    private static void printEvents(StringBuilder b, String name, Map<UUID, Map<UUID, EventRecord>> items) {
+    private static void printEvents(StringBuilder b, Map<UUID, Map<UUID, EventRecord>> items) {
         b.append("\n=================================\n")
-                .append("\t").append(name).append(": ")
+                .append("\t").append("EVENTS").append(": ")
                 .append(items.size())
                 .append("\n");
 
@@ -192,9 +192,9 @@ public final class StateHelper {
     }
 
     @CoverageIgnore
-    private static void printActivations(StringBuilder b, String name, Map<ActivationKey, Integer> items) {
+    private static void printActivations(StringBuilder b, Map<ActivationKey, Integer> items) {
         b.append("\n=================================\n")
-                .append("\t").append(name).append(": ")
+                .append("\t").append("ACTIVATIONS").append(": ")
                 .append(items.size())
                 .append("\n");
 

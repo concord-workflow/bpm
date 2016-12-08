@@ -80,12 +80,7 @@ public class LevelDbEventStorage implements EventStorage {
     @Override
     public Collection<Event> find(String processBusinessKey, String eventName) {
         Collection<Event> events = find(processBusinessKey);
-        for (Iterator<Event> i = events.iterator(); i.hasNext();) {
-            Event e = i.next();
-            if (!e.getName().equals(eventName)) {
-                i.remove();
-            }
-        }
+        events.removeIf(e -> !e.getName().equals(eventName));
         return events;
     }
     

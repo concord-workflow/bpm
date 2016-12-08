@@ -10,10 +10,6 @@ public class ActivateFlowsAction implements Action {
     private final Collection<String> elementIds;
     private final int count;
 
-    public ActivateFlowsAction(String definitionId, Collection<String> elementIds) {
-        this(definitionId, elementIds, 1);
-    }
-
     public ActivateFlowsAction(String definitionId, Collection<String> elementIds, int count) {
         this.definitionId = definitionId;
         this.elementIds = elementIds;

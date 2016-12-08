@@ -1,16 +1,5 @@
 package io.takari.bpm.elements;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.joda.time.Duration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.takari.bpm.IndexedProcessDefinition;
 import io.takari.bpm.ProcessDefinitionUtils;
 import io.takari.bpm.actions.Action;
@@ -26,6 +15,11 @@ import io.takari.bpm.model.SequenceFlow;
 import io.takari.bpm.model.ServiceTask;
 import io.takari.bpm.state.ProcessInstance;
 import io.takari.bpm.utils.Timeout;
+import org.joda.time.Duration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 public class ServiceTaskHandler implements ElementHandler {
 
@@ -72,7 +66,7 @@ public class ServiceTaskHandler implements ElementHandler {
         return actions;
     }
 
-    private static final List<Timeout<Command>> findTimers(IndexedProcessDefinition pd, ProcessElementCommand cmd) throws ExecutionException {
+    private static List<Timeout<Command>> findTimers(IndexedProcessDefinition pd, ProcessElementCommand cmd) throws ExecutionException {
         List<BoundaryEvent> events = ProcessDefinitionUtils.findOptionalBoundaryEvents(pd, cmd.getElementId());
         List<Timeout<Command>> l = new ArrayList<>(events.size());
         for (BoundaryEvent ev : events) {
@@ -83,12 +77,12 @@ public class ServiceTaskHandler implements ElementHandler {
             }
         }
 
-        Collections.sort(l, (o1, o2) -> (int) (o1.getDuration() - o2.getDuration()));
+        l.sort((o1, o2) -> (int) (o1.getDuration() - o2.getDuration()));
 
         return l;
     }
 
-    private static final Command findDefaultError(IndexedProcessDefinition pd, ProcessElementCommand cmd) throws ExecutionException {
+    private static Command findDefaultError(IndexedProcessDefinition pd, ProcessElementCommand cmd) throws ExecutionException {
         List<BoundaryEvent> events = ProcessDefinitionUtils.findOptionalBoundaryEvents(pd, cmd.getElementId());
         for (BoundaryEvent ev : events) {
             if (ev.getErrorRef() == null && ev.getTimeDuration() == null) {
@@ -99,7 +93,7 @@ public class ServiceTaskHandler implements ElementHandler {
         return null;
     }
 
-    private static final Map<String, Command> findErrors(IndexedProcessDefinition pd, ProcessElementCommand cmd) throws ExecutionException {
+    private static Map<String, Command> findErrors(IndexedProcessDefinition pd, ProcessElementCommand cmd) throws ExecutionException {
         Map<String, Command> m = new HashMap<>();
 
         List<BoundaryEvent> events = ProcessDefinitionUtils.findOptionalBoundaryEvents(pd, cmd.getElementId());

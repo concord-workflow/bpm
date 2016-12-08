@@ -1,23 +1,12 @@
 package io.takari.bpm.benchmark;
 
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-
-import io.takari.bpm.CachingIndexedProcessDefinitionProvider;
-import io.takari.bpm.el.ScriptingExpressionManager;
-import io.takari.bpm.lock.NoopLockManager;
-import io.takari.bpm.task.KeyAwareServiceTaskRegistry;
-import org.iq80.leveldb.DBFactory;
-import org.iq80.leveldb.impl.Iq80DBFactory;
-import org.openjdk.jmh.annotations.TearDown;
-
 import com.google.common.io.Files;
-
+import io.takari.bpm.CachingIndexedProcessDefinitionProvider;
 import io.takari.bpm.EngineBuilder;
 import io.takari.bpm.ProcessDefinitionProvider;
 import io.takari.bpm.api.Engine;
 import io.takari.bpm.api.ExecutionException;
+import io.takari.bpm.el.ScriptingExpressionManager;
 import io.takari.bpm.event.EventPersistenceManager;
 import io.takari.bpm.event.EventPersistenceManagerImpl;
 import io.takari.bpm.event.InMemEventStorage;
@@ -26,35 +15,42 @@ import io.takari.bpm.leveldb.KryoSerializer;
 import io.takari.bpm.leveldb.LevelDbEventStorage;
 import io.takari.bpm.leveldb.Serializer;
 import io.takari.bpm.lock.LockManager;
-import io.takari.bpm.lock.StripedLockManagerImpl;
+import io.takari.bpm.lock.NoopLockManager;
 import io.takari.bpm.mapdb.MapDbPersistenceManager;
 import io.takari.bpm.model.ProcessDefinition;
 import io.takari.bpm.persistence.InMemPersistenceManager;
 import io.takari.bpm.persistence.PersistenceManager;
-import io.takari.bpm.task.ServiceTaskRegistry;
+import io.takari.bpm.task.KeyAwareServiceTaskRegistry;
+import org.iq80.leveldb.DBFactory;
+import org.iq80.leveldb.impl.Iq80DBFactory;
+import org.openjdk.jmh.annotations.TearDown;
+
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 public abstract class AbstractBenchmarkState {
-    
+
     private final Engine engine;
     private final DummyServiceTaskRegistry serviceTaskRegistry;
     private LevelDbEventStorage levelDbEventStorage;
     private MapDbPersistenceManager mapDbPersistenceManager;
-    
+
     public AbstractBenchmarkState(ProcessDefinition def) {
         this(true, false, def);
     }
-    
+
     public AbstractBenchmarkState(boolean inMem, boolean nashorn, ProcessDefinition def) {
         this.serviceTaskRegistry = new DummyServiceTaskRegistry();
-        
+
         DummyProcessDefinitionProvider defs = new DummyProcessDefinitionProvider();
         defs.publish(def.getId(), def);
-        
+
 //        LockManager lockManager = new StripedLockManagerImpl(65536);
         LockManager lockManager = new NoopLockManager();
         EventPersistenceManager eventPersistenceManager;
         PersistenceManager persistenceManager;
-        
+
         if (inMem) {
             eventPersistenceManager = new EventPersistenceManagerImpl(new InMemEventStorage());
             persistenceManager = new InMemPersistenceManager();
@@ -67,21 +63,21 @@ public abstract class AbstractBenchmarkState {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-            
+
             Configuration cfg = new Configuration();
             cfg.setEventPath(baseDir + "/events");
             cfg.setExecutionPath(baseDir + "/executions");
             cfg.setExpiredEventIndexPath(baseDir + "/exprired");
             cfg.setBusinessKeyEventIndexPath(baseDir + "/bki");
-            
+
             DBFactory dbf = new Iq80DBFactory();
-            
+
             Serializer serializer = new KryoSerializer();
-            
+
             levelDbEventStorage = new LevelDbEventStorage(cfg, dbf, serializer);
             levelDbEventStorage.init();
             eventPersistenceManager = new EventPersistenceManagerImpl(levelDbEventStorage);
-            
+
             mapDbPersistenceManager = new MapDbPersistenceManager();
             mapDbPersistenceManager.setBaseDir(baseDir + "/executions");
             mapDbPersistenceManager.start();
@@ -90,7 +86,7 @@ public abstract class AbstractBenchmarkState {
 
         EngineBuilder builder = new EngineBuilder()
                 .withDefinitionProvider(defs)
-                .wrapDefinitionProviderWith((p) -> new CachingIndexedProcessDefinitionProvider(p))
+                .wrapDefinitionProviderWith(CachingIndexedProcessDefinitionProvider::new)
                 .withTaskRegistry(serviceTaskRegistry)
                 .withEventManager(eventPersistenceManager)
                 .withPersistenceManager(persistenceManager)
@@ -102,13 +98,13 @@ public abstract class AbstractBenchmarkState {
 
         this.engine = builder.build();
     }
-    
+
     @TearDown
     public void close() {
         if (levelDbEventStorage != null) {
             levelDbEventStorage.close();
         }
-        
+
         if (mapDbPersistenceManager != null) {
             mapDbPersistenceManager.stop();
         }
@@ -121,7 +117,7 @@ public abstract class AbstractBenchmarkState {
     public final DummyServiceTaskRegistry getServiceTaskRegistry() {
         return serviceTaskRegistry;
     }
-    
+
     public static class DummyProcessDefinitionProvider implements ProcessDefinitionProvider {
 
         private final Map<String, ProcessDefinition> defs = new HashMap<>();
@@ -139,7 +135,7 @@ public abstract class AbstractBenchmarkState {
     public static class DummyServiceTaskRegistry implements KeyAwareServiceTaskRegistry {
 
         private final Map<String, Object> tasks = new HashMap<>();
-        
+
         public void register(String key, Object instance) {
             tasks.put(key, instance);
         }

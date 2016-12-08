@@ -18,13 +18,7 @@ public class ScriptingExpressionManager implements ExpressionManager {
     private final KeyAwareServiceTaskRegistry taskRegistry;
 
     public ScriptingExpressionManager(final String engineName, KeyAwareServiceTaskRegistry taskRegistry) {
-        this.engine = new ThreadLocal<ScriptEngine>() {
-            @Override
-            protected ScriptEngine initialValue() {
-                return new ScriptEngineManager().getEngineByName(engineName);
-            }
-        };
-
+        this.engine = ThreadLocal.withInitial(() -> new ScriptEngineManager().getEngineByName(engineName));
         this.taskRegistry = taskRegistry;
     }
 
@@ -58,12 +52,12 @@ public class ScriptingExpressionManager implements ExpressionManager {
             if (super.containsKey(key)) {
                 return super.get(key);
             }
-            
+
             Object res = ctx.getVariable((String) key);
-            if(res != null) {
-              return res;
+            if (res != null) {
+                return res;
             }
-            
+
             return taskRegistry.getByKey((String) key);
         }
 

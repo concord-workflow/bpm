@@ -85,11 +85,7 @@ public class IndexedProcessDefinition extends ProcessDefinition {
                 continue;
             }
 
-            List<BoundaryEvent> l = accumulator.get(ev.getAttachedToRef());
-            if (l == null) {
-                l = new ArrayList<>();
-                accumulator.put(ev.getAttachedToRef(), l);
-            }
+            List<BoundaryEvent> l = accumulator.computeIfAbsent(ev.getAttachedToRef(), k -> new ArrayList<>());
             l.add(ev);
         }
     }

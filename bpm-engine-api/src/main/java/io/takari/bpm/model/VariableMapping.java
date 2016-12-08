@@ -1,12 +1,11 @@
 package io.takari.bpm.model;
 
 import java.io.Serializable;
-import java.util.Objects;
 
 public class VariableMapping implements Serializable {
-	
-	private static final long serialVersionUID = 1L;
-    
+
+    private static final long serialVersionUID = 1L;
+
     private final String source;
     private final String sourceExpression;
     private final Object sourceValue;

@@ -12,17 +12,16 @@ import io.takari.bpm.leveldb.LevelDbPersistenceManager;
 import io.takari.bpm.lock.StripedLockManagerImpl;
 import io.takari.bpm.model.ProcessDefinition;
 import io.takari.bpm.xml.Parser;
-import java.io.InputStream;
-import java.lang.reflect.Method;
-import java.util.Map;
-import java.util.UUID;
-
-import io.takari.bpm.xml.ParserException;
 import org.iq80.leveldb.DBFactory;
 import org.iq80.leveldb.impl.Iq80DBFactory;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
+
+import java.io.InputStream;
+import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.UUID;
 
 public class EngineRule implements TestRule {
 
@@ -66,9 +65,9 @@ public class EngineRule implements TestRule {
             Configuration cfg = new Configuration();
             cfg.setExecutionPath("/tmp/bpm/" + System.currentTimeMillis());
             DBFactory f = new Iq80DBFactory();
-            LevelDbPersistenceManager levelDbPersistenceManager = new LevelDbPersistenceManager(cfg, f	);
+            LevelDbPersistenceManager levelDbPersistenceManager = new LevelDbPersistenceManager(cfg, f);
             levelDbPersistenceManager.init();
-            
+
             engine = new EngineBuilder()
                     .withDefinitionProvider(processDefinitionProvider)
                     .withTaskRegistry(new Mocks.Registry())

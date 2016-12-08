@@ -49,10 +49,10 @@ public class EventGatewayReducer implements Reducer {
 
             // create the event processing action
             stack = stack.push(new PerformActionsCommand(new CreateEventAction(a.getDefinitionId(), e.getId())))
-                    .push(new PerformActionsCommand(new ActivateElementAction(a.getDefinitionId(), e.getId())));
+                    .push(new PerformActionsCommand(new ActivateElementAction(a.getDefinitionId(), e.getId(), 1)));
 
             // manually activate the flow
-            stack = stack.push(new PerformActionsCommand(new ActivateElementAction(a.getDefinitionId(), f.getId())));
+            stack = stack.push(new PerformActionsCommand(new ActivateElementAction(a.getDefinitionId(), f.getId(), 1)));
         }
 
         // start a new scope

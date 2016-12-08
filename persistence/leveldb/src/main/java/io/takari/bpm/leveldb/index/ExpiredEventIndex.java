@@ -39,8 +39,7 @@ public class ExpiredEventIndex {
         }
 
         byte[] key = marshallKey(e.getId(), expiredAt.getTime());
-        byte[] value = DUMMY;
-        db.put(key, value);
+        db.put(key, DUMMY);
     }
 
     public void onRemove(Event e) {
