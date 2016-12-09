@@ -9,5 +9,5 @@ public interface EventService {
      * @param processBusinessKey external business key of a process instance.
      * @return collection of events.
      */
-    Collection getEvents(String processBusinessKey);
+    Collection<Event> getEvents(String processBusinessKey);
 }
