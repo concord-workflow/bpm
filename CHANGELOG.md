@@ -6,6 +6,10 @@
 
 - initial implementation of the `EventService` API.
 
+
+
+## [0.10.3] - 2016-12-08
+
 ### Changed
 
 - fixed the bug, preventing processes with multiple calls to a same activity from working with parallel or
