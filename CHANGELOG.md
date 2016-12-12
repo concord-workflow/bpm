@@ -1,10 +1,14 @@
 # Change Log
 
-## [Unreleased]
+## [0.11.0] - 2016-12-12
 
 ### Added
 
 - initial implementation of the `EventService` API.
+
+### Changed
+
+- serialization is working again (including the serialization benchmark).
 
 
 
@@ -15,7 +19,6 @@
 - fixed the bug, preventing processes with multiple calls to a same activity from working with parallel or
 inclusive gateways.
 - memory footprint optimizations.
-- serialization is working again (including the serialization benchmark).
 
 
 
