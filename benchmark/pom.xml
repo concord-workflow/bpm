@@ -15,6 +15,10 @@
     <properties>
         <jmh.version>1.12</jmh.version>
         <uberjar.name>benchmarks</uberjar.name>
+        <takari.annotationProcessing>proc</takari.annotationProcessing>
+        <takari.compilerId>javac</takari.compilerId>
+        <takari.transitiveDependencyReference>ignore</takari.transitiveDependencyReference>
+        <takari.privatePackageReference>ignore</takari.privatePackageReference>
     </properties>
 
     <dependencies>
@@ -73,10 +77,6 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>

@@ -4,7 +4,7 @@
 
 # BPM Engine
 
-A simple implementation of an BPM engine, designed to mimic Activiti's behaviour. Optimized for high performance
+A simple implementation of a BPM engine, designed to mimic Activiti's behaviour. Optimized for high performance
 (rather than strict following of the BPMN specification).
 
 ## Main features
