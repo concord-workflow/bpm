@@ -15,6 +15,7 @@
 - fixed the bug, preventing processes with multiple calls to a same activity from working with parallel or
 inclusive gateways.
 - memory footprint optimizations.
+- serialization is working again (including the serialization benchmark).
 
 
 

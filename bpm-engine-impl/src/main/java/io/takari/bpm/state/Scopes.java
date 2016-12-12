@@ -7,7 +7,7 @@ import org.pcollections.PMap;
 import java.io.Serializable;
 import java.util.*;
 
-public class Scopes {
+public class Scopes implements Serializable {
 
     private final UUID currentId;
     private final PMap<UUID, Scope> scopes;

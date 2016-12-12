@@ -1,70 +1,100 @@
-$ java -jar target/benchmarks.jar -wi 5 -i 5 -t max -f 1 -jvmArgsAppend="-Djava.security.egd=file:/dev/./urandom" > RESULTS.txt
-
-# Detecting actual CPU count: 4 detected
-# JMH 1.12 (released 53 days ago)
-# VM version: JDK 1.8.0_77, VM 25.77-b03
-# VM invoker: /home/ibodrov/opt/jdk/jdk1.8.0_77/jre/bin/java
+# Detecting actual CPU count: 8 detected
+# JMH 1.12 (released 255 days ago, please consider updating!)
+# VM version: JDK 1.8.0_111, VM 25.111-b14
+# VM invoker: /home/ibodrov/opt/jdk/jdk1.8.0_111/jre/bin/java
 # VM options: -Djava.security.egd=file:/dev/./urandom
 # Warmup: 5 iterations, 1 s each
 # Measurement: 5 iterations, 1 s each
 # Timeout: 10 min per iteration
-# Threads: 4 threads, will synchronize iterations
+# Threads: 8 threads, will synchronize iterations
 # Benchmark mode: Throughput, ops/time
-# Benchmark: jet.bpm.benchmark.Linear10DelegateBenchmark.test
+# Benchmark: io.takari.bpm.benchmark.Linear10DelegateBenchmark.test
 
-# Run progress: 0.00% complete, ETA 00:00:20
+# Run progress: 0.00% complete, ETA 00:00:30
 # Fork: 1 of 1
-# Warmup Iteration   1: 71482.580 ops/s
-# Warmup Iteration   2: 223419.985 ops/s
-# Warmup Iteration   3: 229647.874 ops/s
-# Warmup Iteration   4: 243939.319 ops/s
-# Warmup Iteration   5: 241126.761 ops/s
-Iteration   1: 239938.779 ops/s
-Iteration   2: 233579.539 ops/s
-Iteration   3: 244356.635 ops/s
-Iteration   4: 241677.864 ops/s
-Iteration   5: 244260.851 ops/s
+# Warmup Iteration   1: 17998.209 ops/s
+# Warmup Iteration   2: 55733.317 ops/s
+# Warmup Iteration   3: 84072.872 ops/s
+# Warmup Iteration   4: 86838.957 ops/s
+# Warmup Iteration   5: 86690.733 ops/s
+Iteration   1: 87245.713 ops/s
+Iteration   2: 86333.031 ops/s
+Iteration   3: 86308.487 ops/s
+Iteration   4: 86100.848 ops/s
+Iteration   5: 86031.075 ops/s
 
 
 Result "test":
-  240762.733 ±(99.9%) 17033.127 ops/s [Average]
-  (min, avg, max) = (233579.539, 240762.733, 244356.635), stdev = 4423.449
-  CI (99.9%): [223729.606, 257795.861] (assumes normal distribution)
+  86403.831 ±(99.9%) 1880.139 ops/s [Average]
+  (min, avg, max) = (86031.075, 86403.831, 87245.713), stdev = 488.266
+  CI (99.9%): [84523.692, 88283.969] (assumes normal distribution)
 
 
-# JMH 1.12 (released 53 days ago)
-# VM version: JDK 1.8.0_77, VM 25.77-b03
-# VM invoker: /home/ibodrov/opt/jdk/jdk1.8.0_77/jre/bin/java
+# JMH 1.12 (released 255 days ago, please consider updating!)
+# VM version: JDK 1.8.0_111, VM 25.111-b14
+# VM invoker: /home/ibodrov/opt/jdk/jdk1.8.0_111/jre/bin/java
 # VM options: -Djava.security.egd=file:/dev/./urandom
 # Warmup: 5 iterations, 1 s each
 # Measurement: 5 iterations, 1 s each
 # Timeout: 10 min per iteration
-# Threads: 4 threads, will synchronize iterations
+# Threads: 8 threads, will synchronize iterations
 # Benchmark mode: Throughput, ops/time
-# Benchmark: jet.bpm.benchmark.Linear10JuelInMemBenchmark.test
+# Benchmark: io.takari.bpm.benchmark.Linear10JuelInMemBenchmark.test
 
-# Run progress: 50.00% complete, ETA 00:00:10
+# Run progress: 33.33% complete, ETA 00:00:21
 # Fork: 1 of 1
-# Warmup Iteration   1: 103359.743 ops/s
-# Warmup Iteration   2: 240293.675 ops/s
-# Warmup Iteration   3: 264518.066 ops/s
-# Warmup Iteration   4: 266069.162 ops/s
-# Warmup Iteration   5: 269610.535 ops/s
-Iteration   1: 266628.965 ops/s
-Iteration   2: 271101.905 ops/s
-Iteration   3: 262275.264 ops/s
-Iteration   4: 262790.210 ops/s
-Iteration   5: 269843.225 ops/s
+# Warmup Iteration   1: 21793.799 ops/s
+# Warmup Iteration   2: 62090.981 ops/s
+# Warmup Iteration   3: 81776.682 ops/s
+# Warmup Iteration   4: 84493.917 ops/s
+# Warmup Iteration   5: 85237.942 ops/s
+Iteration   1: 83520.386 ops/s
+Iteration   2: 84334.911 ops/s
+Iteration   3: 85166.964 ops/s
+Iteration   4: 84146.320 ops/s
+Iteration   5: 84205.603 ops/s
 
 
 Result "test":
-  266527.914 ±(99.9%) 15399.970 ops/s [Average]
-  (min, avg, max) = (262275.264, 266527.914, 271101.905), stdev = 3999.323
-  CI (99.9%): [251127.944, 281927.884] (assumes normal distribution)
+  84274.837 ±(99.9%) 2269.925 ops/s [Average]
+  (min, avg, max) = (83520.386, 84274.837, 85166.964), stdev = 589.492
+  CI (99.9%): [82004.911, 86544.762] (assumes normal distribution)
 
 
-# Run complete. Total time: 00:00:21
+# JMH 1.12 (released 255 days ago, please consider updating!)
+# VM version: JDK 1.8.0_111, VM 25.111-b14
+# VM invoker: /home/ibodrov/opt/jdk/jdk1.8.0_111/jre/bin/java
+# VM options: -Djava.security.egd=file:/dev/./urandom
+# Warmup: 5 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 8 threads, will synchronize iterations
+# Benchmark mode: Throughput, ops/time
+# Benchmark: io.takari.bpm.benchmark.PersistenceBenchmark.test
 
-Benchmark                         Mode  Cnt       Score       Error  Units
-Linear10DelegateBenchmark.test   thrpt    5  240762.733 ± 17033.127  ops/s
-Linear10JuelInMemBenchmark.test  thrpt    5  266527.914 ± 15399.970  ops/s
+# Run progress: 66.67% complete, ETA 00:00:10
+# Fork: 1 of 1
+# Warmup Iteration   1: 368.989 ops/s
+# Warmup Iteration   2: 680.332 ops/s
+# Warmup Iteration   3: 684.527 ops/s
+# Warmup Iteration   4: 674.867 ops/s
+# Warmup Iteration   5: 681.819 ops/s
+Iteration   1: 400.192 ops/s
+Iteration   2: 234.774 ops/s
+Iteration   3: 684.591 ops/s
+Iteration   4: 673.429 ops/s
+Iteration   5: 684.370 ops/s
+
+
+Result "test":
+  535.471 ±(99.9%) 798.855 ops/s [Average]
+  (min, avg, max) = (234.774, 535.471, 684.591), stdev = 207.460
+  CI (99.9%): [≈ 0, 1334.326] (assumes normal distribution)
+
+
+# Run complete. Total time: 00:00:34
+
+Benchmark                         Mode  Cnt      Score      Error  Units
+Linear10DelegateBenchmark.test   thrpt    5  86403.831 ± 1880.139  ops/s
+Linear10JuelInMemBenchmark.test  thrpt    5  84274.837 ± 2269.925  ops/s
+PersistenceBenchmark.test        thrpt    5    535.471 ±  798.855  ops/s

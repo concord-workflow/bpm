@@ -18,9 +18,9 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.pcollections</groupId>
+            <groupId>io.takari.pcollections</groupId>
             <artifactId>pcollections</artifactId>
-            <version>2.1.2</version>
+            <version>2.1.3</version>
         </dependency>
         <dependency>
             <groupId>de.odysseus.juel</groupId>
