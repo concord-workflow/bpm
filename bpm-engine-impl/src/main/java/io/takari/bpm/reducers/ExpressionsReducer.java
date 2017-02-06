@@ -13,8 +13,11 @@ import io.takari.bpm.commands.PerformActionsCommand;
 import io.takari.bpm.context.ExecutionContextImpl;
 import io.takari.bpm.el.ExpressionManager;
 import io.takari.bpm.model.ExpressionType;
+import io.takari.bpm.model.VariableMapping;
 import io.takari.bpm.state.BpmnErrorHelper;
 import io.takari.bpm.state.ProcessInstance;
+import io.takari.bpm.state.Variables;
+import io.takari.bpm.state.VariablesHelper;
 import io.takari.bpm.utils.Timeout;
 import io.takari.bpm.utils.TimeoutCallable;
 import org.slf4j.Logger;
@@ -23,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import javax.el.ELException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
@@ -45,7 +49,9 @@ public class ExpressionsReducer implements Reducer {
         }
 
         final EvalExpressionAction a = (EvalExpressionAction) action;
-        final ExecutionContextImpl ctx = new ExecutionContextImpl(expressionManager, state.getVariables());
+
+        Variables vars = applyInVariables(state.getVariables(), a.getIn());
+        final ExecutionContextImpl ctx = new ExecutionContextImpl(expressionManager, vars);
 
         Callable<Command> fn = new DelegateFn(expressionManager, ctx, a.getType(), a.getExpression(), a.getDefaultCommand());
 
@@ -79,15 +85,31 @@ public class ExpressionsReducer implements Reducer {
         // we apply new state of variables regardless of whether the call was
         // successful or not
         // TODO think about it
-        state = applyVariablesChanges(state, ctx);
+        state = applyOutVariables(state, ctx, a.getOut());
 
         return state;
     }
 
-    private ProcessInstance applyVariablesChanges(ProcessInstance state, ExecutionContextImpl ctx) {
+    private Variables applyInVariables(Variables src, Set<VariableMapping> in) throws ExecutionException {
+        if (in == null) {
+            // if there is no IN variables, we will use the orinal process-level variables
+            return src;
+        }
+        return VariablesHelper.copyVariables(expressionManager, src, new Variables(), in);
+    }
+
+    private ProcessInstance applyOutVariables(ProcessInstance state, ExecutionContextImpl ctx, Set<VariableMapping> out) throws ExecutionException {
+        if (out != null) {
+            // we need to apply actions immediately and filter the result according to
+            // the supplied out variables mapping
+            Variables src = ctx.toVariables();
+            Variables dst = VariablesHelper.copyVariables(expressionManager, src, state.getVariables(), out);
+            return state.setVariables(dst);
+        }
+
         List<Action> actions = ctx.toActions();
         if (actions == null || actions.isEmpty()) {
-            return  state;
+            return state;
         }
 
         Command cmd = new PerformActionsCommand(actions);

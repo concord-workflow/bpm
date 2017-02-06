@@ -3,10 +3,12 @@ package io.takari.bpm.actions;
 import io.takari.bpm.commands.Command;
 import io.takari.bpm.misc.CoverageIgnore;
 import io.takari.bpm.model.ExpressionType;
+import io.takari.bpm.model.VariableMapping;
 import io.takari.bpm.utils.Timeout;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class EvalExpressionAction implements Action {
 
@@ -20,9 +22,11 @@ public class EvalExpressionAction implements Action {
     private final List<Timeout<Command>> timeouts;
     private final Command defaultError;
     private final Map<String, Command> errors;
+    private final Set<VariableMapping> in;
+    private final Set<VariableMapping> out;
 
     private EvalExpressionAction(String definitionId, String elementId, ExpressionType type, String expression,
-                                 Command defaultCommand, List<Timeout<Command>> timeouts, Command defaultError, Map<String, Command> errors) {
+                                 Command defaultCommand, List<Timeout<Command>> timeouts, Command defaultError, Map<String, Command> errors, Set<VariableMapping> in, Set<VariableMapping> out) {
         this.definitionId = definitionId;
         this.elementId = elementId;
         this.type = type;
@@ -31,6 +35,8 @@ public class EvalExpressionAction implements Action {
         this.timeouts = timeouts;
         this.defaultError = defaultError;
         this.errors = errors;
+        this.in = in;
+        this.out = out;
     }
 
     public String getDefinitionId() {
@@ -65,12 +71,29 @@ public class EvalExpressionAction implements Action {
         return errors;
     }
 
+    public Set<VariableMapping> getIn() {
+        return in;
+    }
+
+    public Set<VariableMapping> getOut() {
+        return out;
+    }
+
     @Override
     @CoverageIgnore
     public String toString() {
-        return "EvalExpressionAction [definitionId=" + definitionId + ", elementId=" + elementId + ", type=" + type + ", expression="
-                + expression + ", defaultCommand=" + defaultCommand + ", timeouts=" + timeouts + ", defaultError=" + defaultError
-                + ", errors=" + errors + "]";
+        return "EvalExpressionAction [" +
+                "definitionId=" + definitionId +
+                ", elementId=" + elementId +
+                ", type=" + type +
+                ", expression=" + expression +
+                ", defaultCommand=" + defaultCommand +
+                ", timeouts=" + timeouts +
+                ", defaultError=" + defaultError +
+                ", errors=" + errors +
+                ", in=" + in +
+                ", out=" + out +
+                ']';
     }
 
     public static class Builder {
@@ -84,6 +107,8 @@ public class EvalExpressionAction implements Action {
         private List<Timeout<Command>> timeouts;
         private Command defaultError;
         private Map<String, Command> errors;
+        private Set<VariableMapping> in;
+        private Set<VariableMapping> out;
 
         public Builder(String definitionId, String elementId, ExpressionType type, String expression, Command defaultCommand) {
             this.definitionId = definitionId;
@@ -108,8 +133,18 @@ public class EvalExpressionAction implements Action {
             return this;
         }
 
+        public Builder withInVariables(Set<VariableMapping> in) {
+            this.in = in;
+            return this;
+        }
+
+        public Builder withOutVariables(Set<VariableMapping> out) {
+            this.out = out;
+            return this;
+        }
+
         public EvalExpressionAction build() {
-            return new EvalExpressionAction(definitionId, elementId, type, expression, defaultCommand, timeouts, defaultError, errors);
+            return new EvalExpressionAction(definitionId, elementId, type, expression, defaultCommand, timeouts, defaultError, errors, in, out);
         }
     }
 }

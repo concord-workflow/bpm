@@ -1,5 +1,13 @@
 # Change Log
 
+## [Unreleased]
+
+### Added
+
+- basic support for in/out variables in `ServiceTask` elements.
+
+
+
 ## [0.11.0] - 2016-12-12
 
 ### Added

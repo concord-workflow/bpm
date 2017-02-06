@@ -19,9 +19,9 @@ public class ExecutionContextImpl implements ExecutionContext {
         this.exprManager = exprManager;
         this.source = source;
     }
-    
+
     public <T> T eval(String expr, Class<T> type) {
-      return exprManager.eval(this, expr, type);
+        return exprManager.eval(this, expr, type);
     }
 
     @Override
@@ -63,12 +63,12 @@ public class ExecutionContextImpl implements ExecutionContext {
         Change c = changes.get(key);
         if (c != null) {
             switch (c.getType()) {
-            case SET: {
-                return c.getValue();
-            }
-            case UNSET: {
-                return null;
-            }
+                case SET: {
+                    return c.getValue();
+                }
+                case UNSET: {
+                    return null;
+                }
             }
         }
 
@@ -86,12 +86,26 @@ public class ExecutionContextImpl implements ExecutionContext {
                 actions.add(new SetVariableAction(key, c.getValue()));
             } else if (c.getType() == ChangeType.UNSET) {
                 actions.add(new UnsetVariableAction(key));
-            } else {
-                // TODO better exception type
-                throw new RuntimeException("Unsupported change type: " + c.getType());
             }
         }
 
         return actions;
+    }
+
+    public Variables toVariables() {
+        Variables dst = source;
+
+        for (Map.Entry<String, Change> e : changes.entrySet()) {
+            String key = e.getKey();
+            Change c = e.getValue();
+
+            if (c.getType() == ChangeType.SET) {
+                dst = dst.setVariable(key, c.getValue());
+            } else if (c.getType() == ChangeType.UNSET) {
+                dst = dst.removeVariable(key);
+            }
+        }
+
+        return dst;
     }
 }

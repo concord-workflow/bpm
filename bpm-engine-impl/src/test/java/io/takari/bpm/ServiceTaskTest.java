@@ -8,13 +8,11 @@ import io.takari.bpm.model.*;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.*;
 
 public class ServiceTaskTest extends AbstractEngineTest {
@@ -289,6 +287,70 @@ public class ServiceTaskTest extends AbstractEngineTest {
         // ---
 
         verify(t, times(1)).doIt(eq(123L));
+    }
+
+    /**
+     * start --> t1 --> t2 --> end
+     */
+    @Test
+    public void testInOut() throws Exception {
+        String outerKey = "outerKey_" + System.currentTimeMillis();
+        String outerVal = "outerVal_" + System.currentTimeMillis();
+
+        String outerKey2 = "outerKey2_" + System.currentTimeMillis();
+        String outerVal2 = "outerVal2_" + System.currentTimeMillis();
+
+        String innerKey = "innerKey_" + System.currentTimeMillis();
+        String innerVal = "innerVal_" + System.currentTimeMillis();
+
+        String outKey = "outKey_" + System.currentTimeMillis();
+
+        JavaDelegate t1 = spy(new JavaDelegate() {
+
+            @Override
+            public void execute(ExecutionContext ctx) throws ExecutionException {
+                assertNull(ctx.getVariable(outerKey2));
+                assertEquals(outerVal, ctx.getVariable(innerKey));
+                ctx.setVariable(innerKey, innerVal);
+            }
+        });
+        getServiceTaskRegistry().register("t1", t1);
+
+        JavaDelegate t2 = spy(new JavaDelegate() {
+            @Override
+            public void execute(ExecutionContext ctx) throws Exception {
+                assertEquals(innerVal, ctx.getVariable(outKey));
+            }
+        });
+        getServiceTaskRegistry().register("t2", t2);
+
+        // ---
+
+        String processId = "test";
+        deploy(new ProcessDefinition(processId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "t1"),
+                new ServiceTask("t1", ExpressionType.DELEGATE, "${t1}",
+                        Collections.singleton(new VariableMapping(null, "${" + outerKey + "}", innerKey)),
+                        Collections.singleton(new VariableMapping(null, "${" + innerKey + "}", outKey))),
+                new SequenceFlow("f2", "t1", "t2"),
+                new ServiceTask("t2", ExpressionType.DELEGATE, "${t2}"),
+                new SequenceFlow("f3", "t2", "end"),
+                new EndEvent("end")
+        )));
+
+        // ---
+
+        String key = UUID.randomUUID().toString();
+        Map<String, Object> vars = new HashMap<>();
+        vars.put(outerKey, outerVal);
+        vars.put(outerKey2, outerVal2);
+        getEngine().start(key, processId, vars);
+
+        // ---
+
+        verify(t1, times(1)).execute(any(ExecutionContext.class));
+        verify(t2, times(1)).execute(any(ExecutionContext.class));
     }
 
     public interface SampleTask {

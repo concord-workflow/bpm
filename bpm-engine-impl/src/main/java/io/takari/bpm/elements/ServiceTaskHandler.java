@@ -9,10 +9,7 @@ import io.takari.bpm.actions.PopCommandAction;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.commands.Command;
 import io.takari.bpm.commands.ProcessElementCommand;
-import io.takari.bpm.model.BoundaryEvent;
-import io.takari.bpm.model.ExpressionType;
-import io.takari.bpm.model.SequenceFlow;
-import io.takari.bpm.model.ServiceTask;
+import io.takari.bpm.model.*;
 import io.takari.bpm.state.ProcessInstance;
 import io.takari.bpm.utils.Timeout;
 import org.joda.time.Duration;
@@ -55,6 +52,8 @@ public class ServiceTaskHandler implements ElementHandler {
                     .withTimeouts(timeouts)
                     .withDefaultError(defaultError)
                     .withErrors(errors)
+                    .withInVariables(notEmpty(t.getIn()))
+                    .withOutVariables(notEmpty(t.getOut()))
                     .build());
 
             log.debug("handle ['{}', '{}', {}, '{}'] -> done", state.getBusinessKey(), cmd.getElementId(), type, expr);
@@ -64,6 +63,13 @@ public class ServiceTaskHandler implements ElementHandler {
         }
 
         return actions;
+    }
+
+    private static Set<VariableMapping> notEmpty(Set<VariableMapping> s) {
+        if (s == null || s.isEmpty()) {
+            return null;
+        }
+        return s;
     }
 
     private static List<Timeout<Command>> findTimers(IndexedProcessDefinition pd, ProcessElementCommand cmd) throws ExecutionException {
