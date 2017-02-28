@@ -5,6 +5,7 @@
 ### Added
 
 - basic support for in/out variables in `ServiceTask` elements.
+- new `ProcessDefinitionBuilder`.
 
 
 

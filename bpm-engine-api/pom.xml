@@ -11,6 +11,14 @@
     <artifactId>bpm-engine-api</artifactId>
     <packaging>takari-jar</packaging>
 
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
     <build>
         <plugins>
             <plugin>
