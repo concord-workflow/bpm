@@ -47,8 +47,10 @@ public class EventGatewayReducer implements Reducer {
                 throw new ExecutionException("Invalid process definition '%s': event gateway '%s' must contain only intermediate catch events", a.getDefinitionId(), a.getElementId());
             }
 
+            IntermediateCatchEvent ice = (IntermediateCatchEvent) e;
+
             // create the event processing action
-            stack = stack.push(new PerformActionsCommand(new CreateEventAction(a.getDefinitionId(), e.getId())))
+            stack = stack.push(new PerformActionsCommand(new CreateEventAction(a.getDefinitionId(), ice)))
                     .push(new PerformActionsCommand(new ActivateElementAction(a.getDefinitionId(), e.getId(), 1)));
 
             // manually activate the flow

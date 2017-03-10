@@ -1,31 +1,18 @@
 package io.takari.bpm.elements;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.takari.bpm.IndexedProcessDefinition;
 import io.takari.bpm.ProcessDefinitionUtils;
 import io.takari.bpm.actions.Action;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.commands.ProcessElementCommand;
-import io.takari.bpm.model.AbstractElement;
-import io.takari.bpm.model.BoundaryEvent;
-import io.takari.bpm.model.CallActivity;
-import io.takari.bpm.model.EndEvent;
-import io.takari.bpm.model.EventBasedGateway;
-import io.takari.bpm.model.ExclusiveGateway;
-import io.takari.bpm.model.InclusiveGateway;
-import io.takari.bpm.model.IntermediateCatchEvent;
-import io.takari.bpm.model.ParallelGateway;
-import io.takari.bpm.model.SequenceFlow;
-import io.takari.bpm.model.ServiceTask;
-import io.takari.bpm.model.StartEvent;
-import io.takari.bpm.model.SubProcess;
+import io.takari.bpm.model.*;
 import io.takari.bpm.state.ProcessInstance;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DelegatingElementHandler implements ElementHandler {
 
@@ -46,6 +33,7 @@ public class DelegatingElementHandler implements ElementHandler {
         delegates.put(ExclusiveGateway.class, new ExclusiveGatewayHandler());
         delegates.put(ParallelGateway.class, new ParallelGatewayHandler());
         delegates.put(InclusiveGateway.class, new InclusiveGatewayHandler());
+        delegates.put(UserTask.class, new UserTaskElementHandler());
     }
 
     @Override

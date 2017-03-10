@@ -12,6 +12,7 @@ import io.takari.bpm.lock.LockManager;
 import io.takari.bpm.persistence.PersistenceManager;
 import io.takari.bpm.planner.Planner;
 import io.takari.bpm.state.*;
+import io.takari.bpm.task.UserTaskHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +42,8 @@ public abstract class AbstractEngine implements Engine {
     protected abstract EventPersistenceManager getEventManager();
 
     protected abstract LockManager getLockManager();
+
+    protected abstract UserTaskHandler getUserTaskHandler();
 
     protected abstract Configuration getConfiguration();
 

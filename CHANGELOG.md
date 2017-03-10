@@ -1,5 +1,15 @@
 # Change Log
 
+## [Unreleased]
+
+### Added
+
+- new element: `UserTask`;
+- new extension point: `UserTaskHandler` interface to handle `UserTask` elements. Default implementation
+will simply skip those elements.
+
+
+
 ## [0.12.0] - 2017-02-28
 
 ### Added

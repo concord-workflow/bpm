@@ -80,6 +80,16 @@ public final class StateHelper {
         return state.setVariables(vars);
     }
 
+    public static ProcessInstance push(ProcessInstance state, ProcessElementCommand cmd) {
+        CommandStack stack = state.getStack();
+        return state.setStack(stack.push(cmd));
+    }
+
+    public static ProcessInstance push(ProcessInstance state, Action... actions) {
+        CommandStack stack = state.getStack();
+        return state.setStack(stack.push(new PerformActionsCommand(Arrays.asList(actions))));
+    }
+
     @CoverageIgnore
     public static void dump(ProcessInstance state) {
         StringBuilder b = new StringBuilder();

@@ -27,7 +27,8 @@ A simple implementation of a BPM engine, designed to mimic Activiti's behaviour.
 - sequence flow;
 - service task;
 - start event;
-- subprocess.
+- subprocess;
+- user task.
 
 ## Limitations
 - tasks with TimerBoundaryEvents executed in a separate thread inside of an unbounded Executor.

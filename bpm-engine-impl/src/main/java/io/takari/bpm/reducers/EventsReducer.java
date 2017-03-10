@@ -17,7 +17,6 @@ import io.takari.bpm.context.ExecutionContextImpl;
 import io.takari.bpm.el.ExpressionManager;
 import io.takari.bpm.event.Event;
 import io.takari.bpm.event.EventPersistenceManager;
-import io.takari.bpm.model.IntermediateCatchEvent;
 import io.takari.bpm.model.SequenceFlow;
 import io.takari.bpm.state.Events;
 import io.takari.bpm.state.ProcessInstance;
@@ -67,36 +66,35 @@ public class EventsReducer implements Reducer {
         // evaluate the following element after the event
         cmds.add(new ProcessElementCommand(pd.getId(), next.getId()));
 
+        // restore the scope on resume
         cmds.add(new PerformActionsCommand(new SetCurrentScopeAction(scope.getId())));
 
         // create and save an event
         Events events = state.getEvents();
-        Event ev = makeEvent(state, a.getDefinitionId(), a.getElementId());
+        Event ev = makeEvent(state, a);
         state = state.setEvents(events.addEvent(ev.getScopeId(), ev.getId(), ev.getName(), cmds.toArray(new Command[cmds.size()])));
         eventManager.add(ev);
 
         return state;
     }
 
-    private Event makeEvent(ProcessInstance state, String definitionId, String elementId)
+    private Event makeEvent(ProcessInstance state, CreateEventAction action)
             throws ExecutionException {
 
-        IndexedProcessDefinition pd = state.getDefinition(definitionId);
-        IntermediateCatchEvent ice = (IntermediateCatchEvent) ProcessDefinitionUtils.findElement(pd, elementId);
         ExecutionContextImpl ctx = new ExecutionContextImpl(expressionManager, state.getVariables());
 
         UUID id = uuidGenerator.generate();
-        String name = getEventName(ice, ctx, expressionManager);
+        String name = getEventName(action, ctx, expressionManager);
 
-        Date timeDate = parseTimeDate(state, ctx, expressionManager, definitionId, elementId, ice.getTimeDate());
-        Date timeDuration = parseExpiredAt(state, expressionManager, definitionId, elementId, ice.getTimeDuration());
+        Date timeDate = parseTimeDate(state, ctx, expressionManager, action);
+        Date timeDuration = parseExpiredAt(state, expressionManager, action);
         Date expiredAt = timeDate != null ? timeDate : timeDuration;
 
         Scope s = state.getScopes().peek();
         UUID scopeId = s.getId();
         boolean exclusive = s.isExclusive();
 
-        return new Event(id, state.getId(), pd.getId(), scopeId, name, state.getBusinessKey(), exclusive, expiredAt);
+        return new Event(id, state.getId(), action.getDefinitionId(), scopeId, name, state.getBusinessKey(), exclusive, expiredAt);
     }
 
     private static void addScopeClosingActions(Collection<Command> cmds, List<Scope> currentStack) {
@@ -111,15 +109,23 @@ public class EventsReducer implements Reducer {
         }
     }
 
-    private static String getEventName(IntermediateCatchEvent e, ExecutionContext ctx, ExpressionManager em) {
-        if (e.getMessageRefExpression() != null) {
-            return em.eval(ctx, e.getMessageRefExpression(), String.class);
+    private static String getEventName(CreateEventAction a, ExecutionContext ctx, ExpressionManager em) {
+        String msgRefExpr = a.getMessageRefExpression();
+
+        if (msgRefExpr != null) {
+            return em.eval(ctx, msgRefExpr, String.class);
         }
-        return e.getMessageRef() != null ? e.getMessageRef() : e.getId();
+
+        String msgRef = a.getMessageRef();
+        return msgRef != null ? msgRef : a.getElementId();
     }
 
-    private static Date parseTimeDate(ProcessInstance state, ExecutionContextImpl ctx, ExpressionManager em, String definitionId, String elementId, String s)
+    private static Date parseTimeDate(ProcessInstance state, ExecutionContextImpl ctx, ExpressionManager em, CreateEventAction a)
             throws ExecutionException {
+
+        String definitionId = a.getDefinitionId();
+        String elementId = a.getElementId();
+        String s = a.getTimeDate();
 
         Object v = eval(s, ctx, em, Object.class);
 
@@ -143,8 +149,12 @@ public class EventsReducer implements Reducer {
         }
     }
 
-    private static Date parseExpiredAt(ProcessInstance state, ExpressionManager em, String definitionId, String elementId, String s)
+    private static Date parseExpiredAt(ProcessInstance state, ExpressionManager em, CreateEventAction a)
             throws ExecutionException {
+
+        String definitionId = a.getDefinitionId();
+        String elementId = a.getElementId();
+        String s = a.getTimeDuration();
 
         ExecutionContextImpl ctx = new ExecutionContextImpl(em, state.getVariables());
         Object v = eval(s, ctx, em, Object.class);

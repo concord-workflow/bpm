@@ -11,7 +11,9 @@ import io.takari.bpm.persistence.InMemPersistenceManager;
 import io.takari.bpm.persistence.PersistenceManager;
 import io.takari.bpm.planner.DefaultPlanner;
 import io.takari.bpm.planner.Planner;
+import io.takari.bpm.task.NoopUserTaskHandler;
 import io.takari.bpm.task.ServiceTaskRegistry;
+import io.takari.bpm.task.UserTaskHandler;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -35,6 +37,7 @@ public final class EngineBuilder {
     private ServiceTaskRegistry taskRegistry;
     private UuidGenerator uuidGenerator;
     private Function<Executor, Executor> executorWrappingFn;
+    private UserTaskHandler userTaskHandler;
     private Configuration configuration;
 
     public EngineBuilder withDefinitionProvider(ProcessDefinitionProvider definitionProvider) {
@@ -102,6 +105,11 @@ public final class EngineBuilder {
         return this;
     }
 
+    public EngineBuilder withUserTaskHandler(UserTaskHandler userTaskHandler) {
+        this.userTaskHandler = userTaskHandler;
+        return this;
+    }
+
     public Engine build() {
         if (configuration == null) {
             configuration = new Configuration();
@@ -160,9 +168,14 @@ public final class EngineBuilder {
             indexedDefinitionProvider = new IndexedProcessDefinitionProvider(definitionProvider);
         }
 
+        if (userTaskHandler == null) {
+            userTaskHandler = new NoopUserTaskHandler();
+        }
+
         if (executor == null) {
             executor = new DefaultExecutor(configuration, expressionManager, threadPool, interceptors,
-                    indexedDefinitionProvider, uuidGenerator, eventManager, persistenceManager);
+                    indexedDefinitionProvider, uuidGenerator, eventManager, persistenceManager,
+                    userTaskHandler);
         }
 
         if (executorWrappingFn != null) {
@@ -173,7 +186,7 @@ public final class EngineBuilder {
                 eventStorage, eventManager,
                 persistenceManager, lockManager, uuidGenerator,
                 executor, planner,
-                configuration, interceptors);
+                userTaskHandler, configuration, interceptors);
     }
 
     public static final class EngineImpl extends AbstractEngine {
@@ -185,6 +198,7 @@ public final class EngineBuilder {
         private final UuidGenerator uuidGenerator;
         private final Executor executor;
         private final Planner planner;
+        private final UserTaskHandler userTaskHandler;
         private final Configuration configuration;
         private final ExecutionInterceptorHolder interceptors;
 
@@ -199,7 +213,7 @@ public final class EngineBuilder {
                 UuidGenerator uuidGenerator,
                 Executor executor,
                 Planner planner,
-                Configuration configuration,
+                UserTaskHandler userTaskHandler, Configuration configuration,
                 ExecutionInterceptorHolder interceptors) {
 
             this.definitionProvider = definitionProvider;
@@ -210,6 +224,7 @@ public final class EngineBuilder {
 
             this.executor = executor;
             this.planner = planner;
+            this.userTaskHandler = userTaskHandler;
             this.configuration = configuration;
 
             this.interceptors = interceptors;
@@ -265,6 +280,11 @@ public final class EngineBuilder {
         @Override
         public EventService getEventService() {
             return eventService;
+        }
+
+        @Override
+        public UserTaskHandler getUserTaskHandler() {
+            return userTaskHandler;
         }
     }
 }
