@@ -26,9 +26,19 @@ public abstract class ProcessDefinitionBuilder {
         Seq task(ExpressionType expType, String expr);
 
         /**
+         * Adds a ServiceTask element with in/out mappings
+         */
+        Seq task(ExpressionType expType, String expr, Set<VariableMapping> in, Set<VariableMapping> out);
+
+        /**
          * Adds a simple ServiceTask element
          */
         Seq task(String expr);
+
+        /**
+         * Adds a simple ServiceTask with in/out mappings
+         */
+        Seq task(String expr, Set<VariableMapping> in, Set<VariableMapping> out);
 
         /**
          * Adds a delegate ServiceTask element
@@ -358,12 +368,20 @@ public abstract class ProcessDefinitionBuilder {
 
         @Override
         default T task(ExpressionType expType, String expr) {
-            return add(new ServiceTask(nextStepId(), expType, expr));
+            return task(expType, expr, null, null);
+        }
+
+        default T task(ExpressionType expType, String expr, Set<VariableMapping> in, Set<VariableMapping> out) {
+            return add(new ServiceTask(nextStepId(), expType, expr, in, out));
         }
 
         @Override
         default T task(String expr) {
             return task(ExpressionType.SIMPLE, expr);
+        }
+
+        default T task(String expr, Set<VariableMapping> in, Set<VariableMapping> out) {
+            return task(ExpressionType.SIMPLE, expr, in, out);
         }
 
         @Override
