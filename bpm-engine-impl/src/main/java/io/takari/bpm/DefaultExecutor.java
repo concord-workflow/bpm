@@ -6,6 +6,7 @@ import io.takari.bpm.el.ExpressionManager;
 import io.takari.bpm.event.EventPersistenceManager;
 import io.takari.bpm.persistence.PersistenceManager;
 import io.takari.bpm.reducers.*;
+import io.takari.bpm.resource.ResourceResolver;
 import io.takari.bpm.state.ProcessInstance;
 import io.takari.bpm.task.UserTaskHandler;
 
@@ -16,10 +17,16 @@ public class DefaultExecutor implements Executor {
 
     private final Reducer reducer;
 
-    public DefaultExecutor(Configuration cfg, ExpressionManager expressionManager, ExecutorService executor,
-                           ExecutionInterceptorHolder interceptors, IndexedProcessDefinitionProvider definitionProvider,
-                           UuidGenerator uuidGenerator, EventPersistenceManager eventManager,
-                           PersistenceManager persistenceManager, UserTaskHandler userTaskHandler) {
+    public DefaultExecutor(Configuration cfg,
+                           ExpressionManager expressionManager,
+                           ExecutorService executor,
+                           ExecutionInterceptorHolder interceptors,
+                           IndexedProcessDefinitionProvider definitionProvider,
+                           UuidGenerator uuidGenerator,
+                           EventPersistenceManager eventManager,
+                           PersistenceManager persistenceManager,
+                           UserTaskHandler userTaskHandler,
+                           ResourceResolver resourceResolver) {
 
         this.reducer = new CombiningReducer(
                 new ForkReducer(expressionManager),
@@ -38,7 +45,8 @@ public class DefaultExecutor implements Executor {
                 new FlowListenerReducer(expressionManager),
                 new ScopeReducer(uuidGenerator),
                 new EventGatewayReducer(),
-                new UserTaskReducer(userTaskHandler));
+                new UserTaskReducer(userTaskHandler),
+                new ScriptReducer(resourceResolver, expressionManager));
     }
 
     @Override

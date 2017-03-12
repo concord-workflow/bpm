@@ -1,12 +1,16 @@
 package io.takari.bpm.state;
 
-import java.util.Set;
-
+import io.takari.bpm.actions.Action;
 import io.takari.bpm.api.ExecutionException;
+import io.takari.bpm.commands.Command;
+import io.takari.bpm.commands.PerformActionsCommand;
 import io.takari.bpm.context.ExecutionContextImpl;
 import io.takari.bpm.el.ExpressionManager;
 import io.takari.bpm.misc.CoverageIgnore;
 import io.takari.bpm.model.VariableMapping;
+
+import java.util.List;
+import java.util.Set;
 
 public final class VariablesHelper {
 
@@ -45,6 +49,37 @@ public final class VariablesHelper {
             dst = dst.setVariable(k, v);
         }
         return dst;
+    }
+
+    public static Variables applyInVariables(ExpressionManager expressionManager, Variables src,
+                                             Set<VariableMapping> in) throws ExecutionException {
+
+        if (in == null) {
+            // if there is no IN variables, we will use the original process-level variables
+            return src;
+        }
+        return copyVariables(expressionManager, src, new Variables(), in);
+    }
+
+    public static ProcessInstance applyOutVariables(ExpressionManager expressionManager, ProcessInstance state,
+                                                    ExecutionContextImpl ctx, Set<VariableMapping> out) throws ExecutionException {
+
+        if (out != null) {
+            // we need to apply actions immediately and filter the result according to
+            // the supplied out variables mapping
+            Variables src = ctx.toVariables();
+            Variables dst = copyVariables(expressionManager, src, state.getVariables(), out);
+            return state.setVariables(dst);
+        }
+
+        // otherwise, we just queue the necessary changes on the stack
+        List<Action> actions = ctx.toActions();
+        if (actions == null || actions.isEmpty()) {
+            return state;
+        }
+
+        Command cmd = new PerformActionsCommand(actions);
+        return state.setStack(state.getStack().push(cmd));
     }
 
     @CoverageIgnore

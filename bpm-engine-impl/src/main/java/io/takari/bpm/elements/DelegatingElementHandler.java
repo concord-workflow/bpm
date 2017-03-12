@@ -34,6 +34,7 @@ public class DelegatingElementHandler implements ElementHandler {
         delegates.put(ParallelGateway.class, new ParallelGatewayHandler());
         delegates.put(InclusiveGateway.class, new InclusiveGatewayHandler());
         delegates.put(UserTask.class, new UserTaskElementHandler());
+        delegates.put(ScriptTask.class, new ScriptTaskHandler());
     }
 
     @Override

@@ -1,5 +1,14 @@
 # Change Log
 
+## [Unreleased]
+
+### Added
+
+- new element: `ScriptTask`. Allows execution of JSR-223 compatible scripts;
+- new extension point: `ResourceResolver`. Used for resolving external resources (e.g. scripts).
+
+
+
 ## [0.13.0] - 2017-03-10
 
 ### Added

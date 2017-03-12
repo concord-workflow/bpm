@@ -24,6 +24,7 @@ A simple implementation of a BPM engine, designed to mimic Activiti's behaviour.
 - inclusive gateway;
 - intermediate catch event;
 - parallel gateway;
+- script task (JSR-223);
 - sequence flow;
 - service task;
 - start event;
