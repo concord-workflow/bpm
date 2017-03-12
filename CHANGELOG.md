@@ -6,6 +6,8 @@
 
 - evaluation results of `ExpressionType.SIMPLE` tasks now are stored with the
 `ServiceTask.EXPRESSION_RESULT_VAR` key in the context.
+- new methods in `ProcessDefinitionBuilder` to add tasks with IN/OUT variables mapping;
+- small improvements for `ProcessDefinitionHelper#dump`.
 
 
 
