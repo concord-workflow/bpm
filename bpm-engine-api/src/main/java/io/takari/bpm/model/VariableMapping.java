@@ -61,4 +61,14 @@ public class VariableMapping implements Serializable {
         result = 31 * result + target.hashCode();
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "VariableMapping [" +
+                "source=" + source +
+                ", sourceExpression=" + sourceExpression +
+                ", sourceValue=" + sourceValue +
+                ", target=" + target +
+                ']';
+    }
 }

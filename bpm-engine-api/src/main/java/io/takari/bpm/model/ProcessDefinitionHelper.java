@@ -31,6 +31,18 @@ public final class ProcessDefinitionHelper {
             if (e instanceof SequenceFlow) {
                 SequenceFlow f = (SequenceFlow) e;
                 b.append(" ").append(f.getFrom()).append(" -> ").append(f.getTo());
+                if (f.getExpression() != null) {
+                    b.append(" ").append(f.getExpression());
+                }
+            } else if (e instanceof ServiceTask) {
+                ServiceTask t = (ServiceTask) e;
+                b.append(" ").append(t.getType()).append(" ").append(t.getExpression());
+                if (t.getIn() != null) {
+                    pad(b.append("\n"), level + 1).append("IN: ").append(t.getIn());
+                }
+                if (t.getOut() != null) {
+                    pad(b.append("\n"), level + 1).append("OUT: ").append(t.getOut());
+                }
             }
 
             b.append("\n");
