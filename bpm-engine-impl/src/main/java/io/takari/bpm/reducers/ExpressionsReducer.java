@@ -13,6 +13,7 @@ import io.takari.bpm.commands.PerformActionsCommand;
 import io.takari.bpm.context.ExecutionContextImpl;
 import io.takari.bpm.el.ExpressionManager;
 import io.takari.bpm.model.ExpressionType;
+import io.takari.bpm.model.ServiceTask;
 import io.takari.bpm.state.BpmnErrorHelper;
 import io.takari.bpm.state.ProcessInstance;
 import io.takari.bpm.state.Variables;
@@ -155,10 +156,13 @@ public class ExpressionsReducer implements Reducer {
             if (type == ExpressionType.DELEGATE) {
                 if (v instanceof JavaDelegate) {
                     ((JavaDelegate) v).execute(ctx);
+                    ctx.setVariable(ServiceTask.EXPRESSION_RESULT_VAR, null);
                 } else {
                     throw new ExecutionException("Unexpected result type: " + v + ". Was expecting an instance of JavaDelegate");
                 }
             }
+
+            ctx.setVariable(ServiceTask.EXPRESSION_RESULT_VAR, v);
 
             return defaultCommand;
         }

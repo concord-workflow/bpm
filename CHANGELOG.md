@@ -1,5 +1,14 @@
 # Change Log
 
+## [Unreleased]
+
+### Added
+
+- evaluation results of `ExpressionType.SIMPLE` tasks now are stored with the
+`ServiceTask.EXPRESSION_RESULT_VAR` key in the context.
+
+
+
 ## [0.14.0] - 2017-03-11
 
 ### Added

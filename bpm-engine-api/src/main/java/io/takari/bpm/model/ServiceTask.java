@@ -5,6 +5,11 @@ import java.util.Set;
 public class ServiceTask extends AbstractElement {
 	
 	private static final long serialVersionUID = 1L;
+
+    /**
+     * The variable which contains the result of expression evaluation.
+     */
+	public static final String EXPRESSION_RESULT_VAR = "__exprResult";
     
     private String name;
     private final String expression;

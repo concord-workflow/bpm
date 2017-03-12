@@ -10,9 +10,7 @@ import org.junit.Test;
 
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 public class ServiceTaskTest extends AbstractEngineTest {
@@ -350,6 +348,58 @@ public class ServiceTaskTest extends AbstractEngineTest {
         // ---
 
         verify(t1, times(1)).execute(any(ExecutionContext.class));
+        verify(t2, times(1)).execute(any(ExecutionContext.class));
+    }
+
+    /**
+     * start --> t1 --> t2 --> end
+     */
+    @Test
+    public void testEvalResult() throws Exception {
+        String val = "val#" + System.currentTimeMillis();
+
+        JavaDelegate t2 = spy(new JavaDelegate() {
+
+            @Override
+            public void execute(ExecutionContext ctx) throws ExecutionException {
+                Object v = ctx.getVariable(ServiceTask.EXPRESSION_RESULT_VAR);
+                assertEquals(val, v);
+            }
+        });
+        getServiceTaskRegistry().register("t2", t2);
+
+        // ---
+
+        String processId = "test";
+        deploy(new ProcessDefinition(processId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "t1"),
+                new ServiceTask("t1", ExpressionType.SIMPLE, "${'" + val + "'}"),
+                new SequenceFlow("f2", "t1", "t2"),
+                new ServiceTask("t2", ExpressionType.DELEGATE, "${t2}"),
+                new SequenceFlow("f3", "t2", "end"),
+                new EndEvent("end")
+        )));
+
+        // ---
+
+        String key = UUID.randomUUID().toString();
+        getEngine().start(key, processId, null);
+
+        // ---
+
+        assertActivations(key, processId,
+                "start",
+                "f1",
+                "t1",
+                "f2",
+                "t2",
+                "f3",
+                "end");
+        assertNoMoreActivations();
+
+        // ---
+
         verify(t2, times(1)).execute(any(ExecutionContext.class));
     }
 
