@@ -5,9 +5,14 @@
 ### Added
 
 - evaluation results of `ExpressionType.SIMPLE` tasks now are stored with the
-`ServiceTask.EXPRESSION_RESULT_VAR` key in the context.
+`ServiceTask.EXPRESSION_RESULT_VAR` key in the context. This can be turned off by
+setting `Configuration#setStoreExpressionEvalResultsInContext(false)`;
 - new methods in `ProcessDefinitionBuilder` to add tasks with IN/OUT variables mapping;
 - small improvements for `ProcessDefinitionHelper#dump`.
+
+### Changed
+
+- `DefaultExpressionManager` now logs evaluation errors using `WARN` level.
 
 
 

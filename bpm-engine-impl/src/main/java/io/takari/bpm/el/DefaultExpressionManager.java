@@ -53,7 +53,7 @@ public class DefaultExpressionManager implements ExpressionManager {
 
             return type.cast(v);
         } catch (Exception e) {
-            log.error("eval ['{}'] -> error", expr, e);
+            log.warn("eval ['{}'] -> error: ", expr, e.getMessage());
             throw e;
         }
     }

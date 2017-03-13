@@ -35,7 +35,7 @@ public class DefaultExecutor implements Executor {
                 new FlowsReducer(),
                 new VariablesReducer(expressionManager),
                 new RaiseErrorReducer(expressionManager),
-                new ExpressionsReducer(expressionManager, executor),
+                new ExpressionsReducer(cfg, expressionManager, executor),
                 new InterceptorEventsReducer(interceptors),
                 new CallActivityReducer(definitionProvider, cfg),
                 new EventsReducer(uuidGenerator, expressionManager, eventManager),

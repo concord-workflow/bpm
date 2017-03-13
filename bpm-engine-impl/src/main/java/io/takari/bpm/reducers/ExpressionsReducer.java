@@ -1,5 +1,6 @@
 package io.takari.bpm.reducers;
 
+import io.takari.bpm.Configuration;
 import io.takari.bpm.actions.Action;
 import io.takari.bpm.actions.EvalExpressionAction;
 import io.takari.bpm.actions.SetVariableAction;
@@ -33,10 +34,12 @@ public class ExpressionsReducer implements Reducer {
 
     private static final Logger log = LoggerFactory.getLogger(ExpressionsReducer.class);
 
+    private final Configuration cfg;
     private final ExpressionManager expressionManager;
     private final ExecutorService executor;
 
-    public ExpressionsReducer(ExpressionManager expressionManager, ExecutorService executor) {
+    public ExpressionsReducer(Configuration cfg, ExpressionManager expressionManager, ExecutorService executor) {
+        this.cfg = cfg;
         this.expressionManager = expressionManager;
         this.executor = executor;
     }
@@ -52,7 +55,8 @@ public class ExpressionsReducer implements Reducer {
         Variables vars = VariablesHelper.applyInVariables(expressionManager, state.getVariables(), a.getIn());
         final ExecutionContextImpl ctx = new ExecutionContextImpl(expressionManager, vars);
 
-        Callable<Command> fn = new DelegateFn(expressionManager, ctx, a.getType(), a.getExpression(), a.getDefaultCommand());
+        boolean storeResult = cfg.isStoreExpressionEvalResultsInContext();
+        Callable<Command> fn = new DelegateFn(expressionManager, ctx, a.getType(), a.getExpression(), a.getDefaultCommand(), storeResult);
 
         List<Timeout<Command>> timeouts = a.getTimeouts();
         if (timeouts != null && !timeouts.isEmpty()) {
@@ -139,14 +143,16 @@ public class ExpressionsReducer implements Reducer {
         private final ExpressionType type;
         private final String expression;
         private final Command defaultCommand;
+        private final boolean storeResult;
 
-        public DelegateFn(ExpressionManager expressionManager, ExecutionContext ctx, ExpressionType type, String expression,
-                          Command defaultCommand) {
+        public DelegateFn(ExpressionManager expressionManager, ExecutionContext ctx, ExpressionType type,
+                          String expression, Command defaultCommand, boolean storeResult) {
             this.expressionManager = expressionManager;
             this.ctx = ctx;
             this.type = type;
             this.expression = expression;
             this.defaultCommand = defaultCommand;
+            this.storeResult = storeResult;
         }
 
         @Override
@@ -156,13 +162,18 @@ public class ExpressionsReducer implements Reducer {
             if (type == ExpressionType.DELEGATE) {
                 if (v instanceof JavaDelegate) {
                     ((JavaDelegate) v).execute(ctx);
-                    ctx.setVariable(ServiceTask.EXPRESSION_RESULT_VAR, null);
+
+                    if (storeResult) {
+                        ctx.setVariable(ServiceTask.EXPRESSION_RESULT_VAR, null);
+                    }
                 } else {
                     throw new ExecutionException("Unexpected result type: " + v + ". Was expecting an instance of JavaDelegate");
                 }
             }
 
-            ctx.setVariable(ServiceTask.EXPRESSION_RESULT_VAR, v);
+            if (storeResult) {
+                ctx.setVariable(ServiceTask.EXPRESSION_RESULT_VAR, v);
+            }
 
             return defaultCommand;
         }

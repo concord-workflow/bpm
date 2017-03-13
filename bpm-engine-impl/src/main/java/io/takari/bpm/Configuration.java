@@ -6,6 +6,7 @@ public class Configuration implements Serializable {
 
     private boolean avoidDefinitionReloadingOnCall = true;
     private UnhandledBpmnErrorStrategy unhandledBpmnErrorStrategy = UnhandledBpmnErrorStrategy.PROPAGATE;
+    private boolean storeExpressionEvalResultsInContext = true;
 
     public boolean isThrowExceptionOnUnhandledBpmnError() {
         return unhandledBpmnErrorStrategy == UnhandledBpmnErrorStrategy.EXCEPTION;
@@ -49,6 +50,20 @@ public class Configuration implements Serializable {
      */
     public void setAvoidDefinitionReloadingOnCall(boolean avoidDefinitionReloadingOnCall) {
         this.avoidDefinitionReloadingOnCall = avoidDefinitionReloadingOnCall;
+    }
+
+    /**
+     * If {@code true}, then results of expression evaluation will be stored in current context.
+     *
+     * @param storeExpressionEvalResultsInContext
+     * @see io.takari.bpm.model.ServiceTask#EXPRESSION_RESULT_VAR
+     */
+    public void setStoreExpressionEvalResultsInContext(boolean storeExpressionEvalResultsInContext) {
+        this.storeExpressionEvalResultsInContext = storeExpressionEvalResultsInContext;
+    }
+
+    public boolean isStoreExpressionEvalResultsInContext() {
+        return storeExpressionEvalResultsInContext;
     }
 
     public enum UnhandledBpmnErrorStrategy {
