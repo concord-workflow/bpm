@@ -101,9 +101,9 @@ public class ScriptTaskTest extends AbstractEngineTest {
         // --
 
         Set<VariableMapping> in = new HashSet<>();
-        in.add(new VariableMapping("outerA", null, "innerA"));
-        in.add(new VariableMapping(null, null, innerB, "innerB"));
-        Set<VariableMapping> out = Collections.singleton(new VariableMapping("innerC", null, "outerC"));
+        in.add(VariableMapping.copy("outerA", "innerA"));
+        in.add(VariableMapping.set(innerB, "innerB"));
+        Set<VariableMapping> out = Collections.singleton(VariableMapping.copy("innerC", "outerC"));
 
         String processId = "test";
         deploy(new ProcessDefinition(processId, Arrays.asList(

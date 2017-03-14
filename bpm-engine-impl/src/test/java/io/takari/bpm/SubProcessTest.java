@@ -382,7 +382,7 @@ public class SubProcessTest extends AbstractEngineTest {
       final Object v = "v" + System.currentTimeMillis();
 
       Set<VariableMapping> outs = new HashSet<>();
-      outs.add(new VariableMapping(null, "${" + beforeSub + "}", afterSub));
+      outs.add(VariableMapping.eval("${" + beforeSub + "}", afterSub));
 
       String processId = "test";
       deploy(new ProcessDefinition(processId, Arrays.asList(

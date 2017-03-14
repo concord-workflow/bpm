@@ -1,5 +1,14 @@
 # Change Log
 
+## [Unreleased]
+
+- support for values interpolation in in/out variable mappings. Any string in source values
+(including in deeply-nested collections) can be treated as an expression and eval'ed with
+the current process context. This feature available only on the model API level for now:
+see `VariableMapping#interpolateValue`.
+
+
+
 ## [0.14.1] - 2017-03-12
 
 ### Added

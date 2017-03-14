@@ -4,7 +4,6 @@ import io.takari.bpm.api.BpmnError;
 import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.JavaDelegate;
 import io.takari.bpm.model.*;
-import io.takari.bpm.state.Variables;
 import org.junit.Test;
 
 import java.util.*;
@@ -88,13 +87,13 @@ public class CallActivityTest extends AbstractEngineTest {
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "gw"),
                 new EventBasedGateway("gw"),
-                    new SequenceFlow("f2", "gw", ev1),
-                    new IntermediateCatchEvent(ev1, ev1),
-                    new SequenceFlow("f3", ev1, "end"),
+                new SequenceFlow("f2", "gw", ev1),
+                new IntermediateCatchEvent(ev1, ev1),
+                new SequenceFlow("f3", ev1, "end"),
 
-                    new SequenceFlow("f4", "gw", ev2),
-                    new IntermediateCatchEvent(ev2, ev2),
-                    new SequenceFlow("f5", ev2, "end"),
+                new SequenceFlow("f4", "gw", ev2),
+                new IntermediateCatchEvent(ev2, ev2),
+                new SequenceFlow("f5", ev2, "end"),
                 new EndEvent("end")
         )));
 
@@ -148,10 +147,10 @@ public class CallActivityTest extends AbstractEngineTest {
         final Object v = "v" + System.currentTimeMillis();
 
         Set<VariableMapping> ins = new HashSet<>();
-        ins.add(new VariableMapping(null, "${" + beforeK + "}", insideK));
+        ins.add(VariableMapping.eval("${" + beforeK + "}", insideK));
 
         Set<VariableMapping> outs = new HashSet<>();
-        outs.add(new VariableMapping(null, "${" + insideK + "}", outsidek));
+        outs.add(VariableMapping.eval("${" + insideK + "}", outsidek));
 
         deploy(new ProcessDefinition(aId, Arrays.asList(
                 new StartEvent("start"),
@@ -210,7 +209,8 @@ public class CallActivityTest extends AbstractEngineTest {
 
         verify(t1Task, times(1)).execute(any(ExecutionContext.class));
     }
-/**
+
+    /**
      * start --> call                             t1 --> end
      *               \                           /
      *                start --> gw --> ev --> end
@@ -224,7 +224,7 @@ public class CallActivityTest extends AbstractEngineTest {
         Object varVal = "val_" + System.currentTimeMillis();
 
         Set<VariableMapping> outs = new HashSet<>();
-        outs.add(new VariableMapping(varKey, null, varKey));
+        outs.add(VariableMapping.copy(varKey, varKey));
 
         deploy(new ProcessDefinition(aId, Arrays.asList(
                 new StartEvent("start"),
@@ -340,7 +340,6 @@ public class CallActivityTest extends AbstractEngineTest {
      *                       start --> end ---error1-----> gw --> end
      *                                     \          /
      *                                      --error2--
-     *
      */
     @Test
     public void testMultipleErrorTypesGw() throws Exception {
@@ -468,6 +467,7 @@ public class CallActivityTest extends AbstractEngineTest {
 
         assertNoMoreActivations();
     }
+
     /**
      * start --> call                                               --------------> t1 --> end
      *                \                                            /                      /
@@ -505,13 +505,13 @@ public class CallActivityTest extends AbstractEngineTest {
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "gw1"),
                 new InclusiveGateway("gw1"),
-                    new SequenceFlow("f2", "gw1", "ev1"),
-                    new IntermediateCatchEvent("ev1", "ev1"),
-                    new SequenceFlow("f3", "ev1", "gw2"),
+                new SequenceFlow("f2", "gw1", "ev1"),
+                new IntermediateCatchEvent("ev1", "ev1"),
+                new SequenceFlow("f3", "ev1", "gw2"),
 
-                    new SequenceFlow("f4", "gw1", "call"),
-                    new CallActivity("call", deeplyNestedProcId),
-                    new SequenceFlow("f5", "call", "gw2"),
+                new SequenceFlow("f4", "gw1", "call"),
+                new CallActivity("call", deeplyNestedProcId),
+                new SequenceFlow("f5", "call", "gw2"),
 
                 new InclusiveGateway("gw2"),
                 new SequenceFlow("f6", "gw2", "t2"),
@@ -523,13 +523,13 @@ public class CallActivityTest extends AbstractEngineTest {
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "gw1"),
                 new InclusiveGateway("gw1"),
-                    new SequenceFlow("f2", "gw1", "ev2"),
-                    new IntermediateCatchEvent("ev2", "ev2"),
-                    new SequenceFlow("f3", "ev2", "gw2"),
+                new SequenceFlow("f2", "gw1", "ev2"),
+                new IntermediateCatchEvent("ev2", "ev2"),
+                new SequenceFlow("f3", "ev2", "gw2"),
 
-                    new SequenceFlow("f4", "gw1", "ev3"),
-                    new IntermediateCatchEvent("ev3", "ev3"),
-                    new SequenceFlow("f5", "ev3", "gw2"),
+                new SequenceFlow("f4", "gw1", "ev3"),
+                new IntermediateCatchEvent("ev3", "ev3"),
+                new SequenceFlow("f5", "ev3", "gw2"),
 
                 new InclusiveGateway("gw2"),
                 new SequenceFlow("f6", "gw2", "t3"),
@@ -779,23 +779,23 @@ public class CallActivityTest extends AbstractEngineTest {
         String cId = "testC";
 
         Set<VariableMapping> inVars = new HashSet<>();
-        inVars.add(new VariableMapping(argKey, null, outKey));
+        inVars.add(VariableMapping.copy(argKey, outKey));
 
         Set<VariableMapping> outVars = new HashSet<>();
-        outVars.add(new VariableMapping(outKey, null, outKey));
+        outVars.add(VariableMapping.copy(outKey, outKey));
 
         deploy(new ProcessDefinition(aId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "gw1"),
 
                 new ParallelGateway("gw1"),
-                    new SequenceFlow("f2", "gw1", "call1"),
-                    new CallActivity("call1", bId, inVars, outVars),
-                    new SequenceFlow("f3", "call1", "gw2"),
+                new SequenceFlow("f2", "gw1", "call1"),
+                new CallActivity("call1", bId, inVars, outVars),
+                new SequenceFlow("f3", "call1", "gw2"),
 
-                    new SequenceFlow("f4", "gw1", "call2"),
-                    new CallActivity("call2", cId, inVars, outVars),
-                    new SequenceFlow("f5", "call2", "gw2"),
+                new SequenceFlow("f4", "gw1", "call2"),
+                new CallActivity("call2", cId, inVars, outVars),
+                new SequenceFlow("f5", "call2", "gw2"),
 
                 new ParallelGateway("gw2"),
                 new SequenceFlow("f6", "gw2", "t1"),
@@ -915,5 +915,69 @@ public class CallActivityTest extends AbstractEngineTest {
         getEngine().resume(key, ev, null);
 
         verifyZeroInteractions(getProcessDefinitionProvider());
+    }
+
+    /**
+     * start --> call                      end
+     *               \                    /
+     *                start --> t1 --> end
+     */
+    @Test
+    public void testVariableInterpolationValues() throws Exception {
+        int inputVal = 1000;
+
+        JavaDelegate t1 = spy(new JavaDelegate() {
+
+            @Override
+            public void execute(ExecutionContext ctx) throws Exception {
+                Object v1 = ctx.getVariable("a");
+                assertEquals("test: 1001", v1);
+
+                Object v2 = ctx.getVariable("b");
+                Map<Object, Object> m = (Map<Object, Object>) v2;
+                assertEquals("test: 1002", ((List) m.get("x")).get(0));
+            }
+        });
+        getServiceTaskRegistry().register("t1", t1);
+
+        // ---
+
+        Set<VariableMapping> inVars = new HashSet<>();
+        inVars.add(new VariableMapping(null, "test: ${inputVar + 1}", null, "a", true));
+
+        Map<Object, Object> stuff = new HashMap<>();
+        stuff.put("x", Arrays.asList("test: ${inputVar + 2}"));
+        inVars.add(new VariableMapping(null, null, stuff, "b", true));
+
+        // ---
+
+        String aId = "testA";
+        String bId = "testB";
+
+
+        deploy(new ProcessDefinition(aId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "call"),
+                new CallActivity("call", bId, inVars, null),
+                new SequenceFlow("f2", "call", "end"),
+                new EndEvent("end"))));
+
+        deploy(new ProcessDefinition(bId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "t1"),
+                new ServiceTask("t1", ExpressionType.DELEGATE, "${t1}"),
+                new SequenceFlow("f2", "t1", "end"),
+                new EndEvent("end"))));
+
+        // ---
+
+        String key = UUID.randomUUID().toString();
+        Map<String, Object> args = new HashMap<>();
+        args.put("inputVar", inputVal);
+        getEngine().start(key, aId, args);
+
+        // ---
+
+        verify(t1, times(1)).execute(any(ExecutionContext.class));
     }
 }

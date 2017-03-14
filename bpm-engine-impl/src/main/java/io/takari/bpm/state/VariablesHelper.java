@@ -28,7 +28,12 @@ public final class VariablesHelper {
 
             Object v = null;
             if (sourceValue != null) {
-                v = sourceValue;
+                if (m.isInterpolateValue()) {
+                    ExecutionContextImpl ctx = new ExecutionContextImpl(em, src);
+                    v = em.interpolate(ctx, sourceValue);
+                } else {
+                    v = sourceValue;
+                }
             } else if (source != null) {
                 v = src.getVariable(source);
             } else if (sourceExpression != null) {

@@ -1,10 +1,5 @@
 package io.takari.bpm.elements;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import io.takari.bpm.IndexedProcessDefinition;
 import io.takari.bpm.ProcessDefinitionUtils;
 import io.takari.bpm.actions.*;
@@ -14,6 +9,11 @@ import io.takari.bpm.commands.*;
 import io.takari.bpm.model.CallActivity;
 import io.takari.bpm.model.VariableMapping;
 import io.takari.bpm.state.ProcessInstance;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class CallActivityHandler implements ElementHandler {
 
@@ -36,7 +36,7 @@ public class CallActivityHandler implements ElementHandler {
         if (inVariables == null) {
             inVariables = new HashSet<>();
         }
-        inVariables.add(new VariableMapping(ExecutionContext.PROCESS_BUSINESS_KEY, null, ExecutionContext.PROCESS_BUSINESS_KEY));
+        inVariables.add(VariableMapping.copy(ExecutionContext.PROCESS_BUSINESS_KEY, ExecutionContext.PROCESS_BUSINESS_KEY));
 
         Set<VariableMapping> outVariables = a.getOut();
 
