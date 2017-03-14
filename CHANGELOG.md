@@ -1,6 +1,6 @@
 # Change Log
 
-## [Unreleased]
+## [0.14.2] - 2017-03-14
 
 - support for values interpolation in in/out variable mappings. Any string in source values
 (including in deeply-nested collections) can be treated as an expression and eval'ed with
