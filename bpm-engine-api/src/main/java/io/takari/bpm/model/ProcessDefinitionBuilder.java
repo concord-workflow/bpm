@@ -46,6 +46,11 @@ public abstract class ProcessDefinitionBuilder {
         Seq taskDelegate(String expr);
 
         /**
+         * Adds a ScriptTask element.
+         */
+        Seq script(ScriptTask.Type type, String language, String content);
+
+        /**
          * Adds a CallActivity element
          */
         Seq call(String calledElement);
@@ -387,6 +392,11 @@ public abstract class ProcessDefinitionBuilder {
         @Override
         default T taskDelegate(String expr) {
             return task(ExpressionType.DELEGATE, expr);
+        }
+
+        @Override
+        default T script(ScriptTask.Type type, String language, String content) {
+            return add(new ScriptTask(nextStepId(), type, language, content));
         }
 
         @Override

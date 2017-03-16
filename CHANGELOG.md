@@ -1,6 +1,16 @@
 # Change Log
 
+## [Unreleased]
+
+### Added
+
+- `ProcessDefinitionBuilder#script` method for adding `ScriptTask` elements.
+
+
+
 ## [0.14.2] - 2017-03-14
+
+### Added
 
 - support for values interpolation in in/out variable mappings. Any string in source values
 (including in deeply-nested collections) can be treated as an expression and eval'ed with
