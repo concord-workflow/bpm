@@ -45,6 +45,8 @@ public abstract class ProcessDefinitionBuilder {
          */
         Seq taskDelegate(String expr);
 
+        Seq userTask(List<UserTask.Extension> extensions);
+
         /**
          * Adds a ScriptTask element.
          */
@@ -392,6 +394,11 @@ public abstract class ProcessDefinitionBuilder {
         @Override
         default T taskDelegate(String expr) {
             return task(ExpressionType.DELEGATE, expr);
+        }
+
+        @Override
+        default Seq userTask(List<UserTask.Extension> extensions) {
+            return add(new UserTask(nextStepId(), extensions));
         }
 
         @Override

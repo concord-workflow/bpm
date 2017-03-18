@@ -4,7 +4,8 @@
 
 ### Added
 
-- `ProcessDefinitionBuilder#script` method for adding `ScriptTask` elements.
+- `ProcessDefinitionBuilder#script` method for adding `ScriptTask` elements;
+- new method in `ProcessDefinitionBuilder` to add user tasks.
 
 
 
