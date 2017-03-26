@@ -13,6 +13,7 @@ A simple implementation of a BPM engine, designed to mimic Activiti's behaviour.
 - event scheduling (e.g. "timers");
 - supports Activiti's XML format (both process and visual elements);
 - supports JUEL in flow expressions, task delegates, etc;
+- form service API for creating form-based user tasks;
 - JUnit support (and easy unit testing in general).
 
 ## Supported elements:

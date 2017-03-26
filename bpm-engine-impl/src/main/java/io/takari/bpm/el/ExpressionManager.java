@@ -11,6 +11,7 @@ public interface ExpressionManager {
 
     <T> T eval(ExecutionContext ctx, String expr, Class<T> type);
 
+    @SuppressWarnings("unchecked")
     default Object interpolate(ExecutionContextImpl ctx, Object v) {
         if (v instanceof String) {
             return eval(ctx, (String) v, Object.class);

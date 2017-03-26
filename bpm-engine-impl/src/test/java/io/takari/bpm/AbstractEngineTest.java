@@ -50,6 +50,10 @@ public class AbstractEngineTest {
         return engineHolder.getUserTaskHandler();
     }
 
+    protected UuidGenerator getUuidGenerator() {
+        return engineHolder.getUuidGenerator();
+    }
+
     protected void deploy(ProcessDefinition pd) {
         engineHolder.deploy(pd);
     }

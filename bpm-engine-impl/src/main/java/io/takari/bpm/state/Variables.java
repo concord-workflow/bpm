@@ -5,6 +5,7 @@ import org.pcollections.PMap;
 
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -18,12 +19,17 @@ public class Variables implements Serializable {
     private final PMap<String, Object> values;
 
     public Variables() {
-        this(null);
+        this((Variables) null);
     }
 
     public Variables(Variables parent) {
         this.parent = parent;
         this.values = HashTreePMap.empty();
+    }
+
+    public Variables(Map<String, Object> values) {
+        this.parent = null;
+        this.values = HashTreePMap.from(values);
     }
 
     private Variables(Variables parent, PMap<String, Object> values) {

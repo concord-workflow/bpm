@@ -6,6 +6,7 @@
 
 - `ProcessDefinitionBuilder#script` method for adding `ScriptTask` elements;
 - new method in `ProcessDefinitionBuilder` to add user tasks.
+- support for form-based user tasks, a new `UserTask.Extension` and forms API.
 
 
 
