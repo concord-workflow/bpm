@@ -139,4 +139,34 @@ public class ScriptTaskTest extends AbstractEngineTest {
 
         verify(t2, times(1)).execute(any(ExecutionContext.class));
     }
+
+    /**
+     * start --> t1 --> end
+     */
+    @Test
+    public void testExternalJs() throws Exception {
+        String processId = "test";
+        deploy(new ProcessDefinition(processId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "t1"),
+                new ScriptTask("t1", ScriptTask.Type.REFERENCE, "javascript", "test.js"),
+                new SequenceFlow("f2", "t1", "end"),
+                new EndEvent("end")
+        )));
+
+        // ---
+
+        String key = UUID.randomUUID().toString();
+        getEngine().start(key, processId, null);
+
+        // ---
+
+        assertActivations(key, processId,
+                "start",
+                "f1",
+                "t1",
+                "f2",
+                "end");
+        assertNoMoreActivations();
+    }
 }

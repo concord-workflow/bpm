@@ -40,10 +40,6 @@ public class PersistentStack<T extends Serializable> implements Serializable {
         return stack;
     }
 
-    public boolean isEmpty() {
-        return stack.isEmpty();
-    }
-
     @Override
     public String toString() {
         return "PersistentStack[" +

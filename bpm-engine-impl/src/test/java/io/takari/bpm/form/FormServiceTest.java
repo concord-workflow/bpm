@@ -203,17 +203,24 @@ public class FormServiceTest {
     }
 
     @Test
-    public void testValidIntegerList() throws Exception {
-        FormSubmitResult r = submit(new FormField[]{intList("a", 0, 5)},
+    public void testValidIntegerArray() throws Exception {
+        FormSubmitResult r = submit(new FormField[]{intList("a", 0, 4)},
                 "a", new int[] { 0, 1, 2, 3, 4 });
         assertTrue(r.isValid());
     }
 
     @Test
-    public void testInvalidIntegerList() throws Exception {
+    public void testInvalidIntegerArray() throws Exception {
         FormSubmitResult r = submit(new FormField[]{intList("a", 0, 5)},
                 "a", new int[] { 2, 3, 4, 5, 6 });
         assertFalse(r.isValid());
+    }
+
+    @Test
+    public void testValidIntegerList() throws Exception {
+        FormSubmitResult r = submit(new FormField[]{intList("a", 0, 5)},
+                "a", Arrays.asList(0, 1, 2, 3, 4, 5));
+        assertTrue(r.isValid());
     }
 
     @Test

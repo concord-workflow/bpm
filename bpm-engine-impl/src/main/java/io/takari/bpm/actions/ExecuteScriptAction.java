@@ -1,5 +1,7 @@
 package io.takari.bpm.actions;
 
+import io.takari.bpm.misc.CoverageIgnore;
+
 public class ExecuteScriptAction implements Action {
 
     private final String definitionId;
@@ -19,6 +21,7 @@ public class ExecuteScriptAction implements Action {
     }
 
     @Override
+    @CoverageIgnore
     public String toString() {
         return "ExecuteScriptAction [" +
                 "definitionId=" + definitionId +

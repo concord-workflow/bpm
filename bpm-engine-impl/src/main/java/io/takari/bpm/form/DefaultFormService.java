@@ -7,6 +7,7 @@ import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.context.ExecutionContextImpl;
 import io.takari.bpm.el.ExpressionManager;
 import io.takari.bpm.form.FormSubmitResult.ValidationError;
+import io.takari.bpm.misc.CoverageIgnore;
 import io.takari.bpm.model.form.FormDefinition;
 import io.takari.bpm.model.form.FormField;
 import io.takari.bpm.state.Variables;
@@ -144,6 +145,7 @@ public class DefaultFormService implements FormService {
     public static class NoopResumeHandler implements ResumeHandler {
 
         @Override
+        @CoverageIgnore
         public void resume(Form form, Map<String, Object> args) throws ExecutionException {
         }
     }

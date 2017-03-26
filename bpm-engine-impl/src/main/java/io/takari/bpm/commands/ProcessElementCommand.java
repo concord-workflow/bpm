@@ -1,5 +1,7 @@
 package io.takari.bpm.commands;
 
+import io.takari.bpm.misc.CoverageIgnore;
+
 public class ProcessElementCommand implements Command {
 
     private static final long serialVersionUID = 1L;
@@ -21,6 +23,7 @@ public class ProcessElementCommand implements Command {
     }
 
     @Override
+    @CoverageIgnore
     public String toString() {
         return "ProcessElementCommand [" +
                 "definitionId='" + definitionId + '\'' +

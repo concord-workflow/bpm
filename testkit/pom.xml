@@ -39,6 +39,12 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>activiti-compat</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

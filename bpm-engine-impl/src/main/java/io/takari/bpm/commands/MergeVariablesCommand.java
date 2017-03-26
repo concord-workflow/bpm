@@ -2,6 +2,7 @@ package io.takari.bpm.commands;
 
 import java.util.Set;
 
+import io.takari.bpm.misc.CoverageIgnore;
 import io.takari.bpm.model.VariableMapping;
 import io.takari.bpm.state.Variables;
 
@@ -26,6 +27,7 @@ public class MergeVariablesCommand implements Command {
     }
 
     @Override
+    @CoverageIgnore
     public String toString() {
         return "MergeVariablesCommand [target=" + target + ", outVariables=" + outVariables + "]";
     }

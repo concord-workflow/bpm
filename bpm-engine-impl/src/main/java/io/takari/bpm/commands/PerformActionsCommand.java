@@ -1,6 +1,7 @@
 package io.takari.bpm.commands;
 
 import io.takari.bpm.actions.Action;
+import io.takari.bpm.misc.CoverageIgnore;
 
 import java.util.Collections;
 import java.util.List;
@@ -24,6 +25,7 @@ public class PerformActionsCommand implements Command {
     }
 
     @Override
+    @CoverageIgnore
     public String toString() {
         return "PerformActionsCommand [actions=" + actions + "]";
     }

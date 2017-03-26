@@ -8,6 +8,7 @@ import io.takari.bpm.el.DefaultExpressionManager;
 import io.takari.bpm.el.ExpressionManager;
 import io.takari.bpm.form.DefaultFormService.DirectResumeHandler;
 import io.takari.bpm.form.DefaultFormService.ResumeHandler;
+import io.takari.bpm.form.FormSubmitResult.ValidationError;
 import io.takari.bpm.model.*;
 import io.takari.bpm.model.form.DefaultFormFields.StringField;
 import io.takari.bpm.model.form.FormDefinition;
@@ -56,7 +57,9 @@ public class FormTest extends AbstractEngineTest {
         String testValue = "test#" + System.currentTimeMillis();
 
         formDefinitionProvider.deploy(new FormDefinition(formId,
-                new FormField.Builder(formField, StringField.TYPE).build()));
+                new FormField.Builder(formField, StringField.TYPE)
+                        .option(StringField.PATTERN, testValue)
+                        .build()));
 
         // ---
 
@@ -98,7 +101,18 @@ public class FormTest extends AbstractEngineTest {
         UUID formInstanceId = formRegistry.getForms().keySet().iterator().next();
         assertNotNull(formInstanceId);
 
-        FormSubmitResult r = formService.submit(formInstanceId, Collections.singletonMap("testValue", testValue));
+        FormSubmitResult r = formService.submit(formInstanceId, Collections.singletonMap(formField, "abc"));
+        assertFalse(r.isValid());
+        assertEquals(1, r.getErrors().size());
+
+        ValidationError e = r.getErrors().get(0);
+        assertEquals(formField, e.getFieldName());
+
+        verifyZeroInteractions(t2);
+
+        // --
+
+        r = formService.submit(formInstanceId, Collections.singletonMap("testValue", testValue));
         assertTrue(r.isValid());
 
         // ---
