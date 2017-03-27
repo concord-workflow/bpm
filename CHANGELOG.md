@@ -1,6 +1,14 @@
 # Change Log
 
-## [Unreleased]
+## [0.20.1] - 2017-03-27
+
+### Changed
+
+- new parent POM version.
+
+
+
+## [0.20.0] - 2017-03-26
 
 ### Added
 
