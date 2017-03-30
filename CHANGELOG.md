@@ -1,13 +1,25 @@
 # Change Log
 
+## Unreleased
+
+### Added
+
+- `FormField#allowedValue` allows to specify an allowed value for a field. The value
+can be of any (serializable) type, process using `ExpressionManager#interpolate` and
+can contain expressions.
+
+### Breaking
+
+- `FormField#valueExpr` replaced with `FormField#defaultValue`. This value will be
+processed using `ExpressionManager#interpolate` and can contain expressions.
+
+
+
 ## [0.20.1] - 2017-03-27
 
 ### Changed
 
 - new parent POM version;
-- `FormValidator#validate` now accepts validation options;
-- `DefaultFormService#prepare` ignores the cardinality of a default value to support
-fields with a single or multiple values choice.
 
 
 

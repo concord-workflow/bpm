@@ -5,7 +5,6 @@ import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.context.ExecutionContextImpl;
 import io.takari.bpm.el.ExpressionManager;
-import io.takari.bpm.form.DefaultFormValidator.ValidationOption;
 import io.takari.bpm.form.FormSubmitResult.ValidationError;
 import io.takari.bpm.misc.CoverageIgnore;
 import io.takari.bpm.model.form.FormDefinition;
@@ -40,7 +39,7 @@ public class DefaultFormService implements FormService {
     public void create(String processBusinessKey, UUID formInstanceId, String eventName,
                        FormDefinition formDefinition, Map<String, Object> env) throws ExecutionException {
 
-        Form f = new Form(processBusinessKey, formInstanceId, eventName, formDefinition, env);
+        Form f = new Form(processBusinessKey, formInstanceId, eventName, formDefinition, env, Collections.emptyMap());
         f = prepare(expresssionManager, validator, f);
         formStorage.save(f);
     }
@@ -85,25 +84,40 @@ public class DefaultFormService implements FormService {
 
         // fill the form's values either using provided defaults or by eval'ing field expressions
         Map<String, Object> values = new HashMap<>();
+
+        // calculate and store allowed values for the form's fields
+        Map<String, Object> allowedValues = form.getAllowedValues();
+        allowedValues = new HashMap<>(allowedValues != null ? allowedValues : Collections.emptyMap());
+
         for (FormField f : fd.getFields()) {
             String k = f.getName();
             Object v = defaults.get(k);
 
-            String expr = f.getValueExpr();
-            if (expr != null) {
+            Object defaultValue = f.getDefaultValue();
+            if (defaultValue != null) {
                 // create a new evaluation context for every expression - results should be independent
                 Variables vars = new Variables(env);
                 ExecutionContext ctx = new ExecutionContextImpl(em, vars);
-                v = em.eval(ctx, expr, Object.class);
+                v = em.interpolate(ctx, defaultValue);
+            }
+
+            Object allowedValue = f.getAllowedValue();
+            if (allowedValue != null) {
+                // same deal: use a new context every time
+                Variables vars = new Variables(env);
+                ExecutionContext ctx = new ExecutionContextImpl(em, vars);
+                allowedValue = em.interpolate(ctx, allowedValue);
+                if (allowedValue != null) {
+                    allowedValues.put(f.getName(), allowedValue);
+                }
             }
 
             // validate the value we've got, just in case if the default value or the expression's value are
             // incompatible. Skip null values, they indicate empty (not yet filled) fields.
             if (v != null) {
-                // ignore the cardinality to allow "choice-like" fields
-                ValidationError e = validator.validate(formName, f, v, ValidationOption.IGNORE_CARDINALITY);
+                ValidationError e = validator.validate(formName, f, v, allowedValue);
                 if (e != null) {
-                    throw new ExecutionException("Got an incompatible default value '%s' for field '%s': %s", v, k, e.getError());
+                    throw new ExecutionException("Got an incompatible default value '%s'. %s", v, e.getError());
                 }
             }
 
@@ -113,7 +127,7 @@ public class DefaultFormService implements FormService {
         // use the form's name to store its values
         env.put(formName, values);
 
-        return new Form(form, env);
+        return new Form(form, env, allowedValues);
     }
 
     public static FormSubmitResult submit(ResumeHandler resumeHandler,

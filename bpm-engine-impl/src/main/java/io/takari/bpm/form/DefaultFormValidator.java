@@ -52,9 +52,16 @@ public class DefaultFormValidator implements FormValidator {
             values = Collections.emptyMap();
         }
 
+        Map<String, Object> allowedValues = form.getAllowedValues();
+        if (allowedValues == null) {
+            allowedValues = Collections.emptyMap();
+        }
+
         for (FormField f : fields) {
             Object v = values.get(f.getName());
-            ValidationError e = validate(formId, f, v);
+            Object allowed = allowedValues.get(f.getName());
+
+            ValidationError e = validate(formId, f, v, allowed);
             if (e != null) {
                 errors.add(e);
             }
@@ -64,21 +71,16 @@ public class DefaultFormValidator implements FormValidator {
     }
 
     @Override
-    public ValidationError validate(String formId, FormField f, Object v, Object... options) throws ExecutionException {
-        Set<Object> opts = options != null ? new HashSet<>(Arrays.asList(options)) : Collections.emptySet();
-        boolean ignoreCardinality = opts.contains(ValidationOption.IGNORE_CARDINALITY);
-
+    public ValidationError validate(String formId, FormField f, Object v, Object allowed) throws ExecutionException {
         String fieldName = f.getName();
 
-        if (!ignoreCardinality) {
-            Cardinality expectedCardinality = f.getCardinality();
-            if (expectedCardinality == null) {
-                throw new ExecutionException("Field without a cardinality parameter: " + fieldName);
-            }
+        Cardinality expectedCardinality = f.getCardinality();
+        if (expectedCardinality == null) {
+            throw new ExecutionException("Field without a cardinality parameter: " + fieldName);
+        }
 
-            if (!checkCardinality(v, expectedCardinality)) {
-                return new ValidationError(fieldName, locale.invalidCardinality(formId, fieldName, expectedCardinality, v));
-            }
+        if (!checkCardinality(v, expectedCardinality)) {
+            return new ValidationError(fieldName, locale.invalidCardinality(formId, fieldName, expectedCardinality, v));
         }
 
         if (v == null) {
@@ -86,12 +88,13 @@ public class DefaultFormValidator implements FormValidator {
         }
 
         v = box(v);
+        allowed = box(allowed);
 
         if (v instanceof Collection) {
             Collection<Object> vs = (Collection<Object>) v;
             int idx = 0;
             for (Object vv : vs) {
-                ValidationError e = validateSingleValue(formId, f, idx++, vv);
+                ValidationError e = validateSingleValue(formId, f, idx++, vv, allowed);
                 if (e != null) {
                     return e;
                 }
@@ -99,22 +102,30 @@ public class DefaultFormValidator implements FormValidator {
         } else if (v instanceof Object[]) {
             Object[] vs = (Object[]) v;
             for (int i = 0; i < vs.length; i++) {
-                ValidationError e = validateSingleValue(formId, f, i, vs[i]);
+                ValidationError e = validateSingleValue(formId, f, i, vs[i], allowed);
                 if (e != null) {
                     return e;
                 }
             }
         } else {
-            return validateSingleValue(formId, f, null, v);
+            return validateSingleValue(formId, f, null, v, allowed);
         }
 
         return null;
     }
 
-    private ValidationError validateSingleValue(String formId, FormField f, Integer idx, Object v) throws ExecutionException {
+    private ValidationError validateSingleValue(String formId, FormField f, Integer idx, Object v, Object allowed) throws ExecutionException {
         String type = f.getType();
         if (type == null) {
             throw new ExecutionException("Field '%s', unknown type", f.getName());
+        }
+
+        String fieldName = f.getName();
+
+        if (allowed != null) {
+            if (!checkAllowedValue(v, allowed)) {
+                return new ValidationError(fieldName, locale.valueNotAllowed(formId, fieldName, idx, allowed, v));
+            }
         }
 
         boolean validated = false;
@@ -136,6 +147,26 @@ public class DefaultFormValidator implements FormValidator {
         }
 
         return null;
+    }
+
+    private static boolean checkAllowedValue(Object v, Object allowed) {
+        if (v.equals(allowed)) {
+            return true;
+        }
+
+        if (allowed instanceof Collection) {
+            Collection<Object> aa = (Collection<Object>) allowed;
+            return aa.contains(v);
+        } else if (allowed instanceof Object[]) {
+            Object[] as = (Object[]) allowed;
+            for (Object aa : as) {
+                if (v.equals(aa)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     private static boolean checkCardinality(Object v, Cardinality required) {
@@ -455,19 +486,10 @@ public class DefaultFormValidator implements FormValidator {
                     return new ValidationError(fieldName, locale.decimalRangeError(formId, fieldName, idx, min, max, v));
                 }
             } else {
-                return new ValidationError(fieldName, locale.expectedInteger(formId, fieldName, idx, v));
+                return new ValidationError(fieldName, locale.expectedDecimal(formId, fieldName, idx, v));
             }
 
             return null;
         }
-    }
-
-
-    public enum ValidationOption {
-
-        /**
-         * Skip cardinality check.
-         */
-        IGNORE_CARDINALITY
     }
 }

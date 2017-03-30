@@ -13,17 +13,19 @@ public class Form implements Serializable {
     private final String eventName;
     private final FormDefinition formDefinition;
     private final Map<String, Object> env;
+    private final Map<String, Object> allowedValues;
 
-    public Form(Form prev, Map<String, Object> env) {
-        this(prev.processBusinessKey, prev.formInstanceId, prev.eventName, prev.formDefinition, env);
+    public Form(Form prev, Map<String, Object> env, Map<String, Object> allowedValues) {
+        this(prev.processBusinessKey, prev.formInstanceId, prev.eventName, prev.formDefinition, env, allowedValues);
     }
 
-    public Form(String processBusinessKey, UUID formInstanceId, String eventName, FormDefinition formDefinition, Map<String, Object> env) {
+    public Form(String processBusinessKey, UUID formInstanceId, String eventName, FormDefinition formDefinition, Map<String, Object> env, Map<String, Object> allowedValues) {
         this.processBusinessKey = processBusinessKey;
         this.formInstanceId = formInstanceId;
         this.eventName = eventName;
         this.formDefinition = formDefinition;
         this.env = env;
+        this.allowedValues = allowedValues;
     }
 
     public String getProcessBusinessKey() {
@@ -44,5 +46,9 @@ public class Form implements Serializable {
 
     public Map<String, Object> getEnv() {
         return env;
+    }
+
+    public Map<String, Object> getAllowedValues() {
+        return allowedValues;
     }
 }

@@ -27,15 +27,17 @@ public class FormField implements Serializable {
     private final String name;
     private final String type;
     private final String label;
-    private final String valueExpr;
+    private final Object defaultValue;
+    private final Object allowedValue;
     private final Cardinality cardinality;
     private final Map<String, Object> options;
 
-    public FormField(String name, String type, String label, String valueExpr, Cardinality cardinality, Map<String, Object> options) {
+    public FormField(String name, String type, String label, Object defaultValue, Object allowedValue, Cardinality cardinality, Map<String, Object> options) {
         this.name = name;
         this.type = type;
         this.label = label;
-        this.valueExpr = valueExpr;
+        this.defaultValue = defaultValue;
+        this.allowedValue = allowedValue;
         this.cardinality = cardinality;
         this.options = options;
     }
@@ -52,8 +54,12 @@ public class FormField implements Serializable {
         return label;
     }
 
-    public String getValueExpr() {
-        return valueExpr;
+    public Object getDefaultValue() {
+        return defaultValue;
+    }
+
+    public Object getAllowedValue() {
+        return allowedValue;
     }
 
     public Cardinality getCardinality() {
@@ -201,7 +207,8 @@ public class FormField implements Serializable {
         private final String type;
 
         private String label;
-        private String valueExpr;
+        private Object defaultValue;
+        private Object allowedValue;
         private Cardinality cardinality;
         private Map<String, Object> options;
 
@@ -215,8 +222,13 @@ public class FormField implements Serializable {
             return this;
         }
 
-        public Builder valueExpr(String valueExpr) {
-            this.valueExpr = valueExpr;
+        public Builder defaultValue(Object defaultValue) {
+            this.defaultValue = defaultValue;
+            return this;
+        }
+
+        public Builder allowedValue(Object allowedValue) {
+            this.allowedValue = allowedValue;
             return this;
         }
 
@@ -266,7 +278,7 @@ public class FormField implements Serializable {
                 cardinality = Cardinality.ONE_AND_ONLY_ONE;
             }
 
-            return new FormField(name, type, label, valueExpr, cardinality, options);
+            return new FormField(name, type, label, defaultValue, allowedValue, cardinality, options);
         }
     }
 }

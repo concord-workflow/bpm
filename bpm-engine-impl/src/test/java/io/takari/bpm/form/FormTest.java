@@ -17,6 +17,7 @@ import io.takari.bpm.model.form.FormField;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.UUID;
 
@@ -118,5 +119,48 @@ public class FormTest extends AbstractEngineTest {
         // ---
 
         verify(t2, times(1)).execute(any(ExecutionContext.class));
+    }
+
+    /**
+     * start --> t1 --> end
+     */
+    @Test
+    public void testDefaultValue() throws Exception {
+        String formId = "testForm";
+        String formField = "testValue";
+
+        formDefinitionProvider.deploy(new FormDefinition(formId,
+                new FormField.Builder(formField, StringField.TYPE)
+                        .allowedValue(Arrays.asList("a", "b", "c"))
+                        .build()));
+
+        // ---
+
+        String processId = "test";
+        deploy(new ProcessDefinition(processId,
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "t1"),
+                new UserTask("t1", new FormExtension(formId)),
+                new SequenceFlow("f2", "t1", "end"),
+                new EndEvent("end")
+        ));
+
+        // ---
+
+        String key = UUID.randomUUID().toString();
+        getEngine().start(key, processId, null);
+
+        assertActivations(key, processId,
+                "start",
+                "f1",
+                "t1");
+
+        // ---
+
+        UUID formInstanceId = formRegistry.getForms().keySet().iterator().next();
+        assertNotNull(formInstanceId);
+
+        FormSubmitResult r = formService.submit(formInstanceId, Collections.singletonMap(formField, "b"));
+        assertTrue(r.isValid());
     }
 }

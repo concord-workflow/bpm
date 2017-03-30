@@ -1,7 +1,6 @@
 package io.takari.bpm.el;
 
 import io.takari.bpm.api.ExecutionContext;
-import io.takari.bpm.context.ExecutionContextImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +11,7 @@ public interface ExpressionManager {
     <T> T eval(ExecutionContext ctx, String expr, Class<T> type);
 
     @SuppressWarnings("unchecked")
-    default Object interpolate(ExecutionContextImpl ctx, Object v) {
+    default Object interpolate(ExecutionContext ctx, Object v) {
         if (v instanceof String) {
             return eval(ctx, (String) v, Object.class);
         } else if (v instanceof Map) {
@@ -38,6 +37,15 @@ public interface ExpressionManager {
             }
 
             return dst;
+        } else if (v instanceof Object[]) {
+            Object[] src = (Object[]) v;
+            if (src.length == 0) {
+                return v;
+            }
+
+            for (int i = 0; i < src.length; i++) {
+                src[i] = interpolate(ctx, src[i]);
+            }
         }
 
         return v;

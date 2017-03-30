@@ -94,4 +94,16 @@ public interface FormValidatorLocale {
      * @return
      */
     String decimalRangeError(String formId, String fieldName, Integer idx, Double min, Double max, Object value);
+
+    /**
+     * Value is not allowed.
+     *
+     * @param formId
+     * @param fieldName
+     * @param idx
+     * @param allowed
+     * @param value
+     * @return
+     */
+    String valueNotAllowed(String formId, String fieldName, Integer idx, Object allowed, Object value);
 }

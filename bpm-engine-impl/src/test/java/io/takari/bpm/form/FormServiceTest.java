@@ -60,6 +60,13 @@ public class FormServiceTest {
                 .build();
     }
 
+    private static FormField stringOneOrMore(String fieldName, Object defaultValue) {
+        return new FormField.Builder(fieldName, StringField.TYPE)
+                .cardinality(Cardinality.AT_LEAST_ONE)
+                .defaultValue(defaultValue)
+                .build();
+    }
+
     private static FormField stringPattern(String fieldName, String pattern) {
         return new FormField.Builder(fieldName, StringField.TYPE)
                 .cardinality(Cardinality.ONE_OR_NONE)
@@ -136,6 +143,12 @@ public class FormServiceTest {
     }
 
     @Test
+    public void testValidDefaultArrayOfStrings() throws Exception {
+        FormSubmitResult r = submit(new FormField[]{stringOneOrMore("a", new Object[] {"a", "b", "c"})});
+        assertTrue(r.isValid());
+    }
+
+    @Test
     public void testInvalidArrayOfMixedTypes() throws Exception {
         FormSubmitResult r = submit(new FormField[]{stringOneOrMore("a")},
                 "a", new Object[]{"a", 1, false});
@@ -176,7 +189,7 @@ public class FormServiceTest {
         Map<String, Object> env = Collections.singletonMap("b", "abc");
 
         FormField f = new FormField.Builder("a", StringField.TYPE)
-                .valueExpr("${b}")
+                .defaultValue("${b}")
                 .build();
 
         FormSubmitResult r = submit(new FormField[]{f}, env);
@@ -188,7 +201,7 @@ public class FormServiceTest {
         Map<String, Object> env = Collections.singletonMap("b", 123);
 
         FormField f = new FormField.Builder("a", StringField.TYPE)
-                .valueExpr("${b}")
+                .defaultValue("${b}")
                 .build();
 
         FormSubmitResult r = submit(new FormField[]{f}, env);

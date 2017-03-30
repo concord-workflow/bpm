@@ -44,6 +44,11 @@ public class DefaultFormValidatorLocale implements FormValidatorLocale {
         return String.format("Field %s: value '%s' must be %s", fieldName(fieldName, idx), value, bounds(min, max));
     }
 
+    @Override
+    public String valueNotAllowed(String formId, String fieldName, Integer idx, Object allowed, Object value) {
+        return String.format("Field %s: value '%s' is not allowed, valid values: %s", fieldName(fieldName, idx), value, allowed);
+    }
+
     private static String fieldName(String fieldName, Integer idx) {
         String s = fieldName;
         if (idx != null) {
