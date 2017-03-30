@@ -4,7 +4,10 @@
 
 ### Changed
 
-- new parent POM version.
+- new parent POM version;
+- `FormValidator#validate` now accepts validation options;
+- `DefaultFormService#prepare` ignores the cardinality of a default value to support
+fields with a single or multiple values choice.
 
 
 

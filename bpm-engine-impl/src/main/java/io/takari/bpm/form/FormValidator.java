@@ -11,5 +11,5 @@ public interface FormValidator {
 
     List<ValidationError> validate(Form form, Map<String, Object> data) throws ExecutionException;
 
-    ValidationError validate(String formId, FormField f, Object v) throws ExecutionException;
+    ValidationError validate(String formId, FormField f, Object v, Object... options) throws ExecutionException;
 }

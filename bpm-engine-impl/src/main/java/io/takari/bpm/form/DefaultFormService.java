@@ -1,11 +1,11 @@
 package io.takari.bpm.form;
 
-import com.sun.org.apache.regexp.internal.RE;
 import io.takari.bpm.api.Engine;
 import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.context.ExecutionContextImpl;
 import io.takari.bpm.el.ExpressionManager;
+import io.takari.bpm.form.DefaultFormValidator.ValidationOption;
 import io.takari.bpm.form.FormSubmitResult.ValidationError;
 import io.takari.bpm.misc.CoverageIgnore;
 import io.takari.bpm.model.form.FormDefinition;
@@ -21,18 +21,18 @@ public class DefaultFormService implements FormService {
     private final ExpressionManager expresssionManager;
     private final FormValidator validator;
 
-    public DefaultFormService(ResumeHandler resumeHandler, FormStorage formStorage, ExpressionManager expresssionManager) {
-        this(resumeHandler, formStorage, expresssionManager, new DefaultFormValidator());
+    public DefaultFormService(ResumeHandler resumeHandler, FormStorage formStorage, ExpressionManager expressionManager) {
+        this(resumeHandler, formStorage, expressionManager, new DefaultFormValidator());
     }
 
     public DefaultFormService(ResumeHandler resumeHandler,
                               FormStorage formStorage,
-                              ExpressionManager expresssionManager,
+                              ExpressionManager expressionManager,
                               FormValidator validator) {
 
         this.resumeHandler = resumeHandler;
         this.formStorage = formStorage;
-        this.expresssionManager = expresssionManager;
+        this.expresssionManager = expressionManager;
         this.validator = validator;
     }
 
@@ -97,10 +97,11 @@ public class DefaultFormService implements FormService {
                 v = em.eval(ctx, expr, Object.class);
             }
 
-            // validate the value we got, just in case if the default value or the expression value are incompatible
-            // skip null values, they indicate empty (not filled) fields
+            // validate the value we've got, just in case if the default value or the expression's value are
+            // incompatible. Skip null values, they indicate empty (not yet filled) fields.
             if (v != null) {
-                ValidationError e = validator.validate(formName, f, v);
+                // ignore the cardinality to allow "choice-like" fields
+                ValidationError e = validator.validate(formName, f, v, ValidationOption.IGNORE_CARDINALITY);
                 if (e != null) {
                     throw new ExecutionException("Got an incompatible default value '%s' for field '%s': %s", v, k, e.getError());
                 }

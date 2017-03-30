@@ -34,6 +34,7 @@ public class DefaultFormValidator implements FormValidator {
         this.validators = vs;
     }
 
+    @Override
     public List<ValidationError> validate(Form form, Map<String, Object> data) throws ExecutionException {
         List<ValidationError> errors = new ArrayList<>();
 
@@ -62,16 +63,22 @@ public class DefaultFormValidator implements FormValidator {
         return errors;
     }
 
-    public ValidationError validate(String formId, FormField f, Object v) throws ExecutionException {
+    @Override
+    public ValidationError validate(String formId, FormField f, Object v, Object... options) throws ExecutionException {
+        Set<Object> opts = options != null ? new HashSet<>(Arrays.asList(options)) : Collections.emptySet();
+        boolean ignoreCardinality = opts.contains(ValidationOption.IGNORE_CARDINALITY);
+
         String fieldName = f.getName();
 
-        Cardinality expectedCardinality = f.getCardinality();
-        if (expectedCardinality == null) {
-            throw new ExecutionException("Field without a cardinality parameter: " + fieldName);
-        }
+        if (!ignoreCardinality) {
+            Cardinality expectedCardinality = f.getCardinality();
+            if (expectedCardinality == null) {
+                throw new ExecutionException("Field without a cardinality parameter: " + fieldName);
+            }
 
-        if (!checkCardinality(v, expectedCardinality)) {
-            return new ValidationError(fieldName, locale.invalidCardinality(formId, fieldName, expectedCardinality, v));
+            if (!checkCardinality(v, expectedCardinality)) {
+                return new ValidationError(fieldName, locale.invalidCardinality(formId, fieldName, expectedCardinality, v));
+            }
         }
 
         if (v == null) {
@@ -453,5 +460,14 @@ public class DefaultFormValidator implements FormValidator {
 
             return null;
         }
+    }
+
+
+    public enum ValidationOption {
+
+        /**
+         * Skip cardinality check.
+         */
+        IGNORE_CARDINALITY
     }
 }
