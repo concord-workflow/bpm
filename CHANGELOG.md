@@ -1,5 +1,13 @@
 # Change Log
 
+## [0.21.1] - 2017-04-02
+
+### Changed
+
+- fix form defaults: copy existing values before calculating default field values.
+
+
+
 ## [0.21.0] - 2017-03-30
 
 ### Added

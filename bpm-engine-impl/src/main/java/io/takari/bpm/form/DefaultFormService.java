@@ -83,7 +83,7 @@ public class DefaultFormService implements FormService {
         }
 
         // fill the form's values either using provided defaults or by eval'ing field expressions
-        Map<String, Object> values = new HashMap<>();
+        Map<String, Object> values = new HashMap<>(defaults);
 
         // calculate and store allowed values for the form's fields
         Map<String, Object> allowedValues = form.getAllowedValues();
@@ -112,13 +112,15 @@ public class DefaultFormService implements FormService {
                 }
             }
 
+            if (v == null) {
+                continue;
+            }
+
             // validate the value we've got, just in case if the default value or the expression's value are
             // incompatible. Skip null values, they indicate empty (not yet filled) fields.
-            if (v != null) {
-                ValidationError e = validator.validate(formName, f, v, allowedValue);
-                if (e != null) {
-                    throw new ExecutionException("Got an incompatible default value '%s'. %s", v, e.getError());
-                }
+            ValidationError e = validator.validate(formName, f, v, allowedValue);
+            if (e != null) {
+                throw new ExecutionException("Got an incompatible default value '%s'. %s", v, e.getError());
             }
 
             values.put(k, v);
