@@ -45,6 +45,10 @@ public class Variables implements Serializable {
         return new Variables(parent, values.plus(key, value));
     }
 
+    public Variables setVariables(Map<String, Object> m) {
+        return new Variables(parent, values.plusAll(m));
+    }
+
     public Object getVariable(String key) {
         if (values.containsKey(key)) {
             return values.get(key);

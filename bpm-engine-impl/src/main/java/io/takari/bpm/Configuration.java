@@ -1,12 +1,14 @@
 package io.takari.bpm;
 
 import java.io.Serializable;
+import java.util.Map;
 
 public class Configuration implements Serializable {
 
     private boolean avoidDefinitionReloadingOnCall = true;
     private UnhandledBpmnErrorStrategy unhandledBpmnErrorStrategy = UnhandledBpmnErrorStrategy.PROPAGATE;
     private boolean storeExpressionEvalResultsInContext = true;
+    private boolean interpolateInputVariables = false;
 
     public boolean isThrowExceptionOnUnhandledBpmnError() {
         return unhandledBpmnErrorStrategy == UnhandledBpmnErrorStrategy.EXCEPTION;
@@ -64,6 +66,21 @@ public class Configuration implements Serializable {
 
     public boolean isStoreExpressionEvalResultsInContext() {
         return storeExpressionEvalResultsInContext;
+    }
+
+    public boolean isInterpolateInputVariables() {
+        return interpolateInputVariables;
+    }
+
+    /**
+     * If {@code true}, then values of input variables will be interpolated using a configured
+     * {@link io.takari.bpm.el.ExpressionManager}.
+     *
+     * @param interpolateInputVariables
+     * @see io.takari.bpm.api.Engine#start(String, String, Map)
+     */
+    public void setInterpolateInputVariables(boolean interpolateInputVariables) {
+        this.interpolateInputVariables = interpolateInputVariables;
     }
 
     public enum UnhandledBpmnErrorStrategy {

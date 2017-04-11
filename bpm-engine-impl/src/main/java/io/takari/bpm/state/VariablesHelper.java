@@ -9,7 +9,9 @@ import io.takari.bpm.el.ExpressionManager;
 import io.takari.bpm.misc.CoverageIgnore;
 import io.takari.bpm.model.VariableMapping;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public final class VariablesHelper {
@@ -85,6 +87,18 @@ public final class VariablesHelper {
 
         Command cmd = new PerformActionsCommand(actions);
         return state.setStack(state.getStack().push(cmd));
+    }
+
+    public static ProcessInstance interpolate(ExpressionManager expressionManager, ProcessInstance state) {
+        Variables vars = state.getVariables();
+
+        ExecutionContextImpl ctx = new ExecutionContextImpl(expressionManager, vars);
+
+        Map<String, Object> m = new HashMap<>(vars.asMap());
+        m = (Map<String, Object>) expressionManager.interpolate(ctx, m);
+
+        Variables interpolated = new Variables(vars.getParent()).setVariables(m);
+        return state.setVariables(interpolated);
     }
 
     @CoverageIgnore

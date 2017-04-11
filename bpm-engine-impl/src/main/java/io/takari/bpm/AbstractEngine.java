@@ -11,9 +11,7 @@ import io.takari.bpm.event.EventPersistenceManager;
 import io.takari.bpm.lock.LockManager;
 import io.takari.bpm.persistence.PersistenceManager;
 import io.takari.bpm.planner.Planner;
-import io.takari.bpm.resource.ResourceResolver;
 import io.takari.bpm.state.*;
-import io.takari.bpm.task.UserTaskHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,6 +56,10 @@ public abstract class AbstractEngine implements Engine {
 
         LockManager lm = getLockManager();
         lm.lock(processBusinessKey);
+
+        if (getConfiguration().isInterpolateInputVariables()) {
+            state = StateHelper.push(state, new InterpolateCurrentVariablesAction());
+        }
 
         try {
             runLockSafe(state);

@@ -1,5 +1,15 @@
 # Change Log
 
+## Unreleased
+
+### Added
+
+- new configuration parameter: `Configuration#interpolateInputVariables`. If
+set to `true`, then values of input variables (`Engine#start`) will be evaluated
+using a configured `ExpressionManager`.
+
+
+
 ## [0.21.1] - 2017-04-02
 
 ### Changed

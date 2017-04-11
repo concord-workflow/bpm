@@ -52,6 +52,8 @@ public class VariablesReducer implements Reducer {
 
             dst = VariablesHelper.copyVariables(expressionManager, src, dst, a.getInVariables());
             return state.setVariables(dst);
+        } else if (action instanceof InterpolateCurrentVariablesAction) {
+            return VariablesHelper.interpolate(expressionManager, state);
         }
 
         return state;
