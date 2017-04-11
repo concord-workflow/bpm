@@ -54,7 +54,7 @@ public abstract class AbstractEngine implements Engine {
         UuidGenerator idg = getUuidGenerator();
         UUID instanceId = idg.generate();
 
-        ProcessInstance state = StateHelper.createInitialState(getExecutor(), instanceId, processBusinessKey, pd, variables);
+        ProcessInstance state = StateHelper.createInitialState(instanceId, processBusinessKey, pd, variables);
 
         LockManager lm = getLockManager();
         lm.lock(processBusinessKey);

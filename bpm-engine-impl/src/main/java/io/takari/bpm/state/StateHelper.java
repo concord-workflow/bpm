@@ -1,6 +1,5 @@
 package io.takari.bpm.state;
 
-import io.takari.bpm.Executor;
 import io.takari.bpm.IndexedProcessDefinition;
 import io.takari.bpm.ProcessDefinitionUtils;
 import io.takari.bpm.actions.Action;
@@ -29,32 +28,28 @@ public final class StateHelper {
     private static final Logger log = LoggerFactory.getLogger(StateHelper.class);
     private static final boolean PRINT_ACTIVATIONS = false;
 
-    public static ProcessInstance createInitialState(Executor executor, UUID id, String businessKey,
-                                                     IndexedProcessDefinition pd, Map<String, Object> args) throws ExecutionException {
+    public static ProcessInstance createInitialState(UUID id,
+                                                     String businessKey,
+                                                     IndexedProcessDefinition pd,
+                                                     Map<String, Object> args) throws ExecutionException {
 
         ProcessInstance state = new ProcessInstance(id, businessKey, pd);
         StartEvent start = ProcessDefinitionUtils.findStartEvent(pd);
 
-        CommandStack stack = state.getStack();
-
         // initial scope removal
-        stack = stack.push(new PerformActionsCommand(new PopScopeAction()));
+        state = push(state, new PerformActionsCommand(new PopScopeAction()));
 
         // add the first process command to the stack
-        stack = stack.push(new ProcessElementCommand(pd.getId(), start.getId()));
+        state = push(state, new ProcessElementCommand(pd.getId(), start.getId()));
 
         // initial scope creation
-        stack = stack.push(new PerformActionsCommand(new PushScopeAction(pd.getId(), start.getId(), false)));
-
-        state = state.setStack(stack);
+        state = push(state, new PerformActionsCommand(new PushScopeAction(pd.getId(), start.getId(), false)));
 
         // set external variables
         state = applyVariables(state, pd.getAttributes(), args);
 
         // fire interceptors
-        // TODO add to stack?
-        Action a = new FireOnStartInterceptorsAction(pd.getId());
-        state = executor.eval(state, Collections.singletonList(a));
+        state = push(state, new FireOnStartInterceptorsAction(pd.getId()));
 
         return state;
     }
@@ -80,7 +75,7 @@ public final class StateHelper {
         return state.setVariables(vars);
     }
 
-    public static ProcessInstance push(ProcessInstance state, ProcessElementCommand cmd) {
+    public static ProcessInstance push(ProcessInstance state, Command cmd) {
         CommandStack stack = state.getStack();
         return state.setStack(stack.push(cmd));
     }
