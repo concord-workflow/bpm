@@ -28,4 +28,6 @@ public interface ExecutionContext {
     Set<String> getVariableNames();
 
     <T> T eval(String expr, Class<T> type);
+
+    Map<String, Object> toMap();
 }

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Added
+
+- `ExecutionContext#toMap` method. It returns all variables defined in the
+specified context with changes applied and preserving shadowed values.
+
 ### Changed
 
 - upgrade Maven wrapper to 3.5.0;

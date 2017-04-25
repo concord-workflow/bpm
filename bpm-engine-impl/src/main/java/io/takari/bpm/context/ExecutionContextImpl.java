@@ -108,4 +108,44 @@ public class ExecutionContextImpl implements ExecutionContext {
 
         return dst;
     }
+
+    @Override
+    public Map<String, Object> toMap() {
+        Map<String, Object> m = new HashMap<>();
+
+        for (Variables v : stack(source)) {
+            m.putAll(v.asMap());
+        }
+
+        for (Map.Entry<String, Change> e : changes.entrySet()) {
+            String k = e.getKey();
+            Change c = e.getValue();
+
+            if (c.getType() == ChangeType.SET) {
+                m.put(k, c.getValue());
+            } else if (c.getType() == ChangeType.UNSET) {
+                m.remove(k);
+            }
+        }
+
+        return m;
+    }
+
+    private static List<Variables> stack(Variables tail) {
+        List<Variables> l = new ArrayList<>();
+
+        Variables v = tail;
+        while (true) {
+            if (v == null) {
+                break;
+            }
+
+            l.add(v);
+
+            v = v.getParent();
+        }
+        Collections.reverse(l);
+
+        return l;
+    }
 }
