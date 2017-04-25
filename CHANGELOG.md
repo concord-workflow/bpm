@@ -1,5 +1,14 @@
 # Change Log
 
+## Unreleased
+
+### Added
+
+- expose all context variables to a `ScriptTask`. Now those variables can be
+used directly, without the need in `execution.getVariable("myVar")`.
+
+
+
 ## [0.23.0] - 2017-04-25
 
 ### Added

@@ -22,7 +22,7 @@ public class ScriptTaskTest extends AbstractEngineTest {
         double a = System.currentTimeMillis();
         double b = 1234;
 
-        String script = "execution.setVariable('c', execution.getVariable('a') + execution.getVariable('b'))";
+        String script = "execution.setVariable('c', a + b)";
 
         // ---
 

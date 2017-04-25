@@ -54,8 +54,10 @@ public class ScriptReducer implements Reducer {
             Variables vars = VariablesHelper.applyInVariables(expressionManager, state.getVariables(), t.getIn());
             ExecutionContextImpl ctx = new ExecutionContextImpl(expressionManager, vars);
 
+            // expose all available variables plus the context
             Bindings b = engine.createBindings();
             b.put("execution", ctx);
+            b.putAll(ctx.toMap());
             engine.eval(input, b);
 
             // continue the process execution
