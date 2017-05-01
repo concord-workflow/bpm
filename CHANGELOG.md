@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## [0.25.0] - 2017-05-01
 
 ### Added
 
