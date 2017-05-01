@@ -1,5 +1,13 @@
 # Change Log
 
+## Unreleased
+
+### Added
+
+- `Form#options` to store additional metadata for a form call;
+
+
+
 ## [0.24.0] - 2017-04-25
 
 ### Added

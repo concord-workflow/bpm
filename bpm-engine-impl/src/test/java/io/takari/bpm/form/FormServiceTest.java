@@ -275,7 +275,7 @@ public class FormServiceTest {
         String key = UUID.randomUUID().toString();
         String eventName = UUID.randomUUID().toString();
         UUID formInstanceId = UUID.randomUUID();
-        formService.create(key, formInstanceId, eventName, fd, env);
+        formService.create(key, formInstanceId, eventName, fd, null, env);
 
         Form f = formService.get(formInstanceId);
         String dataKey = f.getFormDefinition().getName();

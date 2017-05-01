@@ -14,18 +14,27 @@ public class Form implements Serializable {
     private final FormDefinition formDefinition;
     private final Map<String, Object> env;
     private final Map<String, Object> allowedValues;
+    private final Map<String, Object> options;
 
     public Form(Form prev, Map<String, Object> env, Map<String, Object> allowedValues) {
-        this(prev.processBusinessKey, prev.formInstanceId, prev.eventName, prev.formDefinition, env, allowedValues);
+        this(prev.processBusinessKey, prev.formInstanceId, prev.eventName, prev.formDefinition, env, allowedValues, prev.options);
     }
 
-    public Form(String processBusinessKey, UUID formInstanceId, String eventName, FormDefinition formDefinition, Map<String, Object> env, Map<String, Object> allowedValues) {
+    public Form(String processBusinessKey, UUID formInstanceId, String eventName, FormDefinition formDefinition,
+                Map<String, Object> env, Map<String, Object> allowedValues) {
+        this(processBusinessKey, formInstanceId, eventName, formDefinition, env, allowedValues, null);
+    }
+
+    public Form(String processBusinessKey, UUID formInstanceId, String eventName, FormDefinition formDefinition,
+                Map<String, Object> env, Map<String, Object> allowedValues, Map<String, Object> options) {
+
         this.processBusinessKey = processBusinessKey;
         this.formInstanceId = formInstanceId;
         this.eventName = eventName;
         this.formDefinition = formDefinition;
         this.env = env;
         this.allowedValues = allowedValues;
+        this.options = options;
     }
 
     public String getProcessBusinessKey() {
@@ -50,5 +59,9 @@ public class Form implements Serializable {
 
     public Map<String, Object> getAllowedValues() {
         return allowedValues;
+    }
+
+    public Map<String, Object> getOptions() {
+        return options;
     }
 }

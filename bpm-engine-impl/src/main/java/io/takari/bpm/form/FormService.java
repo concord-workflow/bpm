@@ -17,11 +17,13 @@ public interface FormService {
      * @param formInstanceId ID of a new form instance.
      * @param eventName the name of an event, which can be used to resume the process.
      * @param formDefinition
-     * @param env process environment
+     * @param options form call options.
+     * @param env process environment.
      * @throws ExecutionException
      */
     void create(String processBusinessKey, UUID formInstanceId, String eventName,
-                FormDefinition formDefinition, Map<String, Object> env) throws ExecutionException;
+                FormDefinition formDefinition, Map<String, Object> options,
+                Map<String, Object> env) throws ExecutionException;
 
     /**
      * Retrieve a form.

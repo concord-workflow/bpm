@@ -37,9 +37,10 @@ public class DefaultFormService implements FormService {
 
     @Override
     public void create(String processBusinessKey, UUID formInstanceId, String eventName,
-                       FormDefinition formDefinition, Map<String, Object> env) throws ExecutionException {
+                       FormDefinition formDefinition, Map<String, Object> options,
+                       Map<String, Object> env) throws ExecutionException {
 
-        Form f = new Form(processBusinessKey, formInstanceId, eventName, formDefinition, env, Collections.emptyMap());
+        Form f = new Form(processBusinessKey, formInstanceId, eventName, formDefinition, env, Collections.emptyMap(), options);
         f = prepare(expresssionManager, validator, f);
         formStorage.save(f);
     }
@@ -129,6 +130,7 @@ public class DefaultFormService implements FormService {
         // use the form's name to store its values
         env.put(formName, values);
 
+        Map<String, Object> options = form.getOptions();
         return new Form(form, env, allowedValues);
     }
 

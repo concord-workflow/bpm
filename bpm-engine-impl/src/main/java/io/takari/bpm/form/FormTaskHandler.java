@@ -51,8 +51,9 @@ public class FormTaskHandler implements UserTaskHandler {
         String pk = state.getBusinessKey();
         UUID fId = UUID.randomUUID();
         String eventName = UUID.randomUUID().toString();
+        Map<String, Object> options = x.getOptions();
         Map<String, Object> env = state.getVariables().asMap();
-        formService.create(pk, fId, eventName, fd, env);
+        formService.create(pk, fId, eventName, fd, options, env);
 
         return StateHelper.push(state, new CreateEventAction(definitionId, elementId, eventName, null, null, null));
     }
