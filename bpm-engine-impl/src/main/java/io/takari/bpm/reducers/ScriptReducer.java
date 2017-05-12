@@ -45,7 +45,7 @@ public class ScriptReducer implements Reducer {
         ProcessDefinition pd = state.getDefinition(a.getDefinitionId());
         ScriptTask t = (ScriptTask) ProcessDefinitionUtils.findElement(pd, a.getElementId());
 
-        ScriptEngine engine = scriptEngineManager.getEngineByName(t.getLanguage());
+        ScriptEngine engine = getEngine(t);
         if (engine == null) {
             throw new ExecutionException("Script engine not found: " + t.getLanguage());
         }
@@ -72,6 +72,23 @@ public class ScriptReducer implements Reducer {
         return state;
     }
 
+    private ScriptEngine getEngine(ScriptTask t) throws ExecutionException {
+        if (t.getLanguage() != null) {
+            return scriptEngineManager.getEngineByName(t.getLanguage());
+        }
+
+        if (t.getContent() == null) {
+            throw new ExecutionException("Script task must have a language set or a path to an external script: " + t.getId());
+        }
+
+        String ext = getExtension(t.getContent());
+        if (ext == null) {
+            throw new ExecutionException("Unknown external script extension: " + t.getContent());
+        }
+
+        return scriptEngineManager.getEngineByExtension(ext);
+    }
+
     private Reader openReader(ScriptTask t) throws ExecutionException {
         Type type = t.getType();
 
@@ -80,6 +97,10 @@ public class ScriptReducer implements Reducer {
 
             try {
                 InputStream in = resourceResolver.getResourceAsStream(ref);
+                if (in == null) {
+                    throw new ExecutionException("Resource not found: " + ref);
+                }
+
                 return new InputStreamReader(in);
             } catch (IOException e) {
                 throw new ExecutionException("Can't open resource: " + ref);
@@ -89,5 +110,18 @@ public class ScriptReducer implements Reducer {
         } else {
             throw new ExecutionException("Unsupported script task type: " + type);
         }
+    }
+
+    private static String getExtension(String s) {
+        if (s == null) {
+            return null;
+        }
+
+        int i = s.lastIndexOf(".");
+        if (i < 0 || i + 1 >= s.length()) {
+            return null;
+        }
+
+        return s.substring(i + 1);
     }
 }

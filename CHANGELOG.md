@@ -1,5 +1,14 @@
 # Change Log
 
+## [Unreleased]
+
+### Added
+
+- script engine can now be selected based on an file extension of an external
+script used in a `ScriptTask`;
+
+
+
 ## [0.25.0] - 2017-05-01
 
 ### Added

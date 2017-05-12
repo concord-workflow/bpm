@@ -149,7 +149,7 @@ public class ScriptTaskTest extends AbstractEngineTest {
         deploy(new ProcessDefinition(processId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "t1"),
-                new ScriptTask("t1", ScriptTask.Type.REFERENCE, "javascript", "test.js"),
+                new ScriptTask("t1", ScriptTask.Type.REFERENCE, null, "test.js"),
                 new SequenceFlow("f2", "t1", "end"),
                 new EndEvent("end")
         )));
