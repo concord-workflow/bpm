@@ -127,8 +127,8 @@ public class ExpressionsReducer implements Reducer {
             // will follow its flow
 
             CommandStack stack = state.getStack()
-                    .push(new PerformActionsCommand(new SetVariableAction(ExecutionContext.LAST_ERROR_KEY, e)))
-                    .push(nextCmd);
+                    .push(nextCmd)
+                    .push(new PerformActionsCommand(new SetVariableAction(ExecutionContext.LAST_ERROR_KEY, e)));
             state = state.setStack(stack);
             log.debug("handleBpmnError ['{}', '{}'] -> next command is '{}'", state.getBusinessKey(), a.getElementId(), nextCmd);
         }

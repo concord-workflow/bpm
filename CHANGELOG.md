@@ -1,5 +1,13 @@
 # Change Log
 
+## [Unreleased]
+
+### Changed
+
+- now the last handled error available immediately in `ExecutionContext`.
+
+
+
 ## [0.26.0] - 2017-05-12
 
 ### Added
