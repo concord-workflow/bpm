@@ -10,7 +10,7 @@
 
     <groupId>io.takari.bpm</groupId>
     <artifactId>parent</artifactId>
-    <version>0.26.2-SNAPSHOT</version>
+    <version>0.27.0</version>
     <packaging>pom</packaging>
 
     <licenses>
@@ -182,6 +182,6 @@
 
     <scm>
         <developerConnection>scm:git:git@github.com:takari/bpm.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>0.27.0</tag>
     </scm>
 </project>
