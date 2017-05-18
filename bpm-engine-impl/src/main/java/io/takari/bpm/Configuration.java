@@ -6,9 +6,11 @@ import java.util.Map;
 public class Configuration implements Serializable {
 
     private boolean avoidDefinitionReloadingOnCall = true;
-    private UnhandledBpmnErrorStrategy unhandledBpmnErrorStrategy = UnhandledBpmnErrorStrategy.PROPAGATE;
     private boolean storeExpressionEvalResultsInContext = true;
     private boolean interpolateInputVariables = false;
+
+    private UnhandledBpmnErrorStrategy unhandledBpmnErrorStrategy = UnhandledBpmnErrorStrategy.PROPAGATE;
+    private boolean wrapAllExceptionsAsBpmnErrors = false;
 
     public boolean isThrowExceptionOnUnhandledBpmnError() {
         return unhandledBpmnErrorStrategy == UnhandledBpmnErrorStrategy.EXCEPTION;
@@ -81,6 +83,20 @@ public class Configuration implements Serializable {
      */
     public void setInterpolateInputVariables(boolean interpolateInputVariables) {
         this.interpolateInputVariables = interpolateInputVariables;
+    }
+
+    public boolean isWrapAllExceptionsAsBpmnErrors() {
+        return wrapAllExceptionsAsBpmnErrors;
+    }
+
+    /**
+     * If {@code true}, then any non {@link io.takari.bpm.api.BpmnError} exception will be wrapped
+     * as {@link io.takari.bpm.api.BpmnError} (with an empty error reference).
+     *
+     * @param wrapAllExceptionsAsBpmnErrors
+     */
+    public void setWrapAllExceptionsAsBpmnErrors(boolean wrapAllExceptionsAsBpmnErrors) {
+        this.wrapAllExceptionsAsBpmnErrors = wrapAllExceptionsAsBpmnErrors;
     }
 
     public enum UnhandledBpmnErrorStrategy {

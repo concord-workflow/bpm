@@ -46,7 +46,7 @@ public class DefaultExecutor implements Executor {
                 new ScopeReducer(uuidGenerator),
                 new EventGatewayReducer(),
                 new UserTaskReducer(userTaskHandler),
-                new ScriptReducer(resourceResolver, expressionManager));
+                new ScriptReducer(cfg, resourceResolver, expressionManager));
     }
 
     @Override

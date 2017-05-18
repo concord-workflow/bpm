@@ -3,19 +3,16 @@ package io.takari.bpm.reducers;
 import io.takari.bpm.Configuration;
 import io.takari.bpm.actions.Action;
 import io.takari.bpm.actions.EvalExpressionAction;
-import io.takari.bpm.actions.SetVariableAction;
 import io.takari.bpm.api.BpmnError;
 import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.api.JavaDelegate;
 import io.takari.bpm.commands.Command;
 import io.takari.bpm.commands.CommandStack;
-import io.takari.bpm.commands.PerformActionsCommand;
 import io.takari.bpm.context.ExecutionContextImpl;
 import io.takari.bpm.el.ExpressionManager;
 import io.takari.bpm.model.ExpressionType;
 import io.takari.bpm.model.ServiceTask;
-import io.takari.bpm.state.BpmnErrorHelper;
 import io.takari.bpm.state.ProcessInstance;
 import io.takari.bpm.state.Variables;
 import io.takari.bpm.state.VariablesHelper;
@@ -26,11 +23,10 @@ import org.slf4j.LoggerFactory;
 
 import javax.el.ELException;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
-public class ExpressionsReducer implements Reducer {
+public class ExpressionsReducer extends BpmnErrorHandlingReducer {
 
     private static final Logger log = LoggerFactory.getLogger(ExpressionsReducer.class);
 
@@ -39,6 +35,7 @@ public class ExpressionsReducer implements Reducer {
     private final ExecutorService executor;
 
     public ExpressionsReducer(Configuration cfg, ExpressionManager expressionManager, ExecutorService executor) {
+        super(cfg);
         this.cfg = cfg;
         this.expressionManager = expressionManager;
         this.executor = executor;
@@ -75,65 +72,29 @@ public class ExpressionsReducer implements Reducer {
             if (cause instanceof BpmnError) {
                 state = handleBpmnError(state, a, (BpmnError) cause);
             } else {
-                throw e;
+                state = handleException(state, a, e);
             }
         } catch (BpmnError e) {
             state = handleBpmnError(state, a, e);
         } catch (ExecutionException e) {
             throw e;
         } catch (Exception e) {
-            throw new ExecutionException("Unhandled execution exception: " + a.getExpression(), e);
+            state = handleException(state, a, e);
         }
 
         // we apply new state of variables regardless of whether the call was
         // successful or not
-        // TODO think about it
         state = VariablesHelper.applyOutVariables(expressionManager, state, ctx, a.getOut());
 
         return state;
     }
 
+    private ProcessInstance handleException(ProcessInstance state, EvalExpressionAction a, Exception e) throws ExecutionException {
+        return handleException(state, a.getDefinitionId(), a.getElementId(), e, a.getErrors(), a.getDefaultError());
+    }
+
     private ProcessInstance handleBpmnError(ProcessInstance state, EvalExpressionAction a, BpmnError e) throws ExecutionException {
-        Command nextCmd = null;
-
-        // add call point information to the error
-        if (e.getDefinitionId() == null) {
-            e = new BpmnError(a.getDefinitionId(), a.getElementId(), e.getErrorRef(), e.getCause());
-        }
-
-        String errorRef = e.getErrorRef();
-
-        if (errorRef != null) {
-            Map<String, Command> errors = a.getErrors();
-            if (errors != null) {
-                nextCmd = errors.get(errorRef);
-            }
-        }
-
-        if (nextCmd == null) {
-            nextCmd = a.getDefaultError();
-        }
-
-        if (nextCmd == null) {
-            // no boundary error events were found - an error will be raised to
-            // the parent execution
-
-            CommandStack stack = state.getStack()
-                    .push(new PerformActionsCommand(BpmnErrorHelper.raiseError(a.getDefinitionId(), a.getElementId(), errorRef, e.getCause())));
-            state = state.setStack(stack);
-            log.debug("handleBpmnError ['{}', '{}'] -> error will be raised", state.getBusinessKey(), a.getElementId());
-        } else {
-            // the element has an boundary error event - the process execution
-            // will follow its flow
-
-            CommandStack stack = state.getStack()
-                    .push(nextCmd)
-                    .push(new PerformActionsCommand(new SetVariableAction(ExecutionContext.LAST_ERROR_KEY, e)));
-            state = state.setStack(stack);
-            log.debug("handleBpmnError ['{}', '{}'] -> next command is '{}'", state.getBusinessKey(), a.getElementId(), nextCmd);
-        }
-
-        return state;
+        return handleBpmnError(state, a.getDefinitionId(), a.getElementId(), e, a.getErrors(), a.getDefaultError());
     }
 
     private static final class DelegateFn implements Callable<Command> {

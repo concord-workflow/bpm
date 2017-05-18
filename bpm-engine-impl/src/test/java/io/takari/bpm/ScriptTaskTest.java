@@ -1,5 +1,6 @@
 package io.takari.bpm;
 
+import io.takari.bpm.api.BpmnError;
 import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.JavaDelegate;
 import io.takari.bpm.model.*;
@@ -166,6 +167,55 @@ public class ScriptTaskTest extends AbstractEngineTest {
                 "f1",
                 "t1",
                 "f2",
+                "end");
+        assertNoMoreActivations();
+    }
+
+    /**
+     * start --> sub1 --------> end
+     *              \       /
+     *               bev1 --
+     */
+    @Test
+    public void testWrappedException() throws Exception {
+        getConfiguration().setWrapAllExceptionsAsBpmnErrors(true);
+
+        // ---
+
+        String script = "throw new io.takari.bpm.api.BpmnError('boom')";
+
+        String processId = "test";
+        deploy(new ProcessDefinition(processId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "sub1"),
+                new SubProcess("sub1",
+                    new StartEvent("substart"),
+                    new SequenceFlow("f2", "substart", "t1"),
+                    new ScriptTask("t1", ScriptTask.Type.CONTENT, "groovy", script),
+                    new SequenceFlow("f3", "t1", "subend"),
+                    new EndEvent("subend")),
+                new BoundaryEvent("bev1", "sub1", null),
+                new SequenceFlow("f4", "bev1", "end"),
+                new SequenceFlow("f5", "sub1", "end"),
+                new EndEvent("end")
+        )));
+
+        // ---
+
+        String key = UUID.randomUUID().toString();
+        getEngine().start(key, processId, null);
+
+        // ---
+
+        assertActivations(key, processId,
+                "start",
+                "f1",
+                "sub1",
+                "substart",
+                "f2",
+                "t1",
+                "bev1",
+                "f4",
                 "end");
         assertNoMoreActivations();
     }

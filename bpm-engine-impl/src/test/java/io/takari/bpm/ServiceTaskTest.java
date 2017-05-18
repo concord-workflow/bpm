@@ -99,6 +99,26 @@ public class ServiceTaskTest extends AbstractEngineTest {
         verify(t1, times(1)).doIt(anyLong());
     }
 
+    @Test
+    public void testWrappedException() throws Exception {
+        getConfiguration().setWrapAllExceptionsAsBpmnErrors(true);
+
+        // ---
+
+        SampleTask t1 = spy(new SampleTask() {
+
+            public void doIt(long i) {
+                throw new RuntimeException("Boom!");
+            }
+        });
+        getServiceTaskRegistry().register("t1", t1);
+
+        ServiceTask t = new ServiceTask("t1", ExpressionType.SIMPLE, "${t1.doIt(123)}");
+        testBoundaryError(t, null);
+
+        verify(t1, times(1)).doIt(anyLong());
+    }
+
     /**
      * start --> t1 ----------> end
      *             \        /

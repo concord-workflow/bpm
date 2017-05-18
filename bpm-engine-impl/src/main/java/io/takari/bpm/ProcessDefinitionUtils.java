@@ -1,12 +1,14 @@
 package io.takari.bpm;
 
 import io.takari.bpm.api.ExecutionException;
+import io.takari.bpm.commands.Command;
+import io.takari.bpm.commands.ProcessElementCommand;
 import io.takari.bpm.misc.CoverageIgnore;
 import io.takari.bpm.model.*;
+import io.takari.bpm.utils.Timeout;
+import org.joda.time.Duration;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public final class ProcessDefinitionUtils {
 
@@ -208,6 +210,46 @@ public final class ProcessDefinitionUtils {
             result.add(f);
         }
         return result;
+    }
+
+    public static List<Timeout<Command>> findTimers(IndexedProcessDefinition pd, ProcessElementCommand cmd) throws ExecutionException {
+        List<BoundaryEvent> events = ProcessDefinitionUtils.findOptionalBoundaryEvents(pd, cmd.getElementId());
+        List<Timeout<Command>> l = new ArrayList<>(events.size());
+        for (BoundaryEvent ev : events) {
+            if (ev.getTimeDuration() != null) {
+                Duration d = Duration.parse(ev.getTimeDuration());
+                Command c = new ProcessElementCommand(pd.getId(), ev.getId());
+                l.add(new Timeout<>(d.getMillis(), c));
+            }
+        }
+
+        l.sort((o1, o2) -> (int) (o1.getDuration() - o2.getDuration()));
+
+        return l;
+    }
+
+    public static Command findDefaultError(IndexedProcessDefinition pd, ProcessElementCommand cmd) throws ExecutionException {
+        List<BoundaryEvent> events = ProcessDefinitionUtils.findOptionalBoundaryEvents(pd, cmd.getElementId());
+        for (BoundaryEvent ev : events) {
+            if (ev.getErrorRef() == null && ev.getTimeDuration() == null) {
+                return new ProcessElementCommand(pd.getId(), ev.getId());
+            }
+        }
+
+        return null;
+    }
+
+    public static Map<String, Command> findErrors(IndexedProcessDefinition pd, ProcessElementCommand cmd) throws ExecutionException {
+        Map<String, Command> m = new HashMap<>();
+
+        List<BoundaryEvent> events = ProcessDefinitionUtils.findOptionalBoundaryEvents(pd, cmd.getElementId());
+        for (BoundaryEvent ev : events) {
+            if (ev.getErrorRef() != null && ev.getTimeDuration() == null) {
+                m.put(ev.getErrorRef(), new ProcessElementCommand(pd.getId(), ev.getId()));
+            }
+        }
+
+        return m;
     }
 
     @CoverageIgnore

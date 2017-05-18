@@ -1,5 +1,16 @@
 # Change Log
 
+## [Unreleased]
+
+### Added
+
+- handling of `BpmnError` thrown from a `ScriptTask`;
+- `Configuration#wrapAllExceptionsAsBpmnErrors`: if `true`, then any
+non-`BpmnError` exceptions will be wrapped as one (without
+an error reference).
+
+
+
 ## [0.26.1] - 2017-05-17
 
 ### Changed

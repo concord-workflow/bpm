@@ -1,9 +1,11 @@
 package io.takari.bpm.reducers;
 
+import io.takari.bpm.Configuration;
 import io.takari.bpm.ProcessDefinitionUtils;
 import io.takari.bpm.actions.Action;
 import io.takari.bpm.actions.ExecuteScriptAction;
 import io.takari.bpm.actions.FollowFlowsAction;
+import io.takari.bpm.api.BpmnError;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.context.ExecutionContextImpl;
 import io.takari.bpm.el.ExpressionManager;
@@ -22,13 +24,16 @@ import javax.script.ScriptEngineManager;
 import java.io.*;
 
 @Impure
-public class ScriptReducer implements Reducer {
+public class ScriptReducer extends BpmnErrorHandlingReducer {
 
+    private final Configuration cfg;
     private final ResourceResolver resourceResolver;
     private final ExpressionManager expressionManager;
     private final ScriptEngineManager scriptEngineManager;
 
-    public ScriptReducer(ResourceResolver resourceResolver, ExpressionManager expressionManager) {
+    public ScriptReducer(Configuration cfg, ResourceResolver resourceResolver, ExpressionManager expressionManager) {
+        super(cfg);
+        this.cfg = cfg;
         this.resourceResolver = resourceResolver;
         this.expressionManager = expressionManager;
         this.scriptEngineManager = new ScriptEngineManager();
@@ -50,24 +55,29 @@ public class ScriptReducer implements Reducer {
             throw new ExecutionException("Script engine not found: " + t.getLanguage());
         }
 
-        try (Reader input = openReader(t)) {
-            Variables vars = VariablesHelper.applyInVariables(expressionManager, state.getVariables(), t.getIn());
-            ExecutionContextImpl ctx = new ExecutionContextImpl(expressionManager, vars);
+        Variables vars = VariablesHelper.applyInVariables(expressionManager, state.getVariables(), t.getIn());
+        ExecutionContextImpl ctx = new ExecutionContextImpl(expressionManager, vars);
 
-            // expose all available variables plus the context
-            Bindings b = engine.createBindings();
-            b.put("execution", ctx);
-            b.putAll(ctx.toMap());
+        // expose all available variables plus the context
+        Bindings b = engine.createBindings();
+        b.put("execution", ctx);
+        b.putAll(ctx.toMap());
+
+        try (Reader input = openReader(t)) {
             engine.eval(input, b);
 
             // continue the process execution
             state = StateHelper.push(state, new FollowFlowsAction(a.getDefinitionId(), a.getElementId()));
-
-            // apply the changes before continuing the execution
-            state = VariablesHelper.applyOutVariables(expressionManager, state, ctx, t.getOut());
+        } catch (BpmnError e) {
+            state = handleBpmnError(state, a, e);
+        } catch (ExecutionException e) {
+            throw e;
         } catch (Exception e) {
-            throw new ExecutionException("Error while executing a script", e);
+            state = handleException(state, a, e);
         }
+
+        // apply the changes before continuing the execution
+        state = VariablesHelper.applyOutVariables(expressionManager, state, ctx, t.getOut());
 
         return state;
     }
@@ -110,6 +120,14 @@ public class ScriptReducer implements Reducer {
         } else {
             throw new ExecutionException("Unsupported script task type: " + type);
         }
+    }
+
+    private ProcessInstance handleException(ProcessInstance state, ExecuteScriptAction a, Exception e) throws ExecutionException {
+        return handleException(state, a.getDefinitionId(), a.getElementId(), e, null, null);
+    }
+
+    private ProcessInstance handleBpmnError(ProcessInstance state, ExecuteScriptAction a, BpmnError e) throws ExecutionException {
+        return handleBpmnError(state, a.getDefinitionId(), a.getElementId(), e, null, null);
     }
 
     private static String getExtension(String s) {
