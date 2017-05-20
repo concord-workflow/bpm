@@ -187,7 +187,7 @@ public final class EngineBuilder {
         if (executor == null) {
             executor = new DefaultExecutor(configuration, expressionManager, threadPool, interceptors,
                     indexedDefinitionProvider, uuidGenerator, eventManager, persistenceManager,
-                    userTaskHandler, resourceResolver);
+                    userTaskHandler, resourceResolver, taskRegistry);
         }
 
         if (executorWrappingFn != null) {

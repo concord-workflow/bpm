@@ -8,6 +8,7 @@ import io.takari.bpm.persistence.PersistenceManager;
 import io.takari.bpm.reducers.*;
 import io.takari.bpm.resource.ResourceResolver;
 import io.takari.bpm.state.ProcessInstance;
+import io.takari.bpm.task.ServiceTaskRegistry;
 import io.takari.bpm.task.UserTaskHandler;
 
 import java.util.List;
@@ -26,7 +27,8 @@ public class DefaultExecutor implements Executor {
                            EventPersistenceManager eventManager,
                            PersistenceManager persistenceManager,
                            UserTaskHandler userTaskHandler,
-                           ResourceResolver resourceResolver) {
+                           ResourceResolver resourceResolver,
+                           ServiceTaskRegistry taskRegistry) {
 
         this.reducer = new CombiningReducer(
                 new ForkReducer(expressionManager),
@@ -46,7 +48,7 @@ public class DefaultExecutor implements Executor {
                 new ScopeReducer(uuidGenerator),
                 new EventGatewayReducer(),
                 new UserTaskReducer(userTaskHandler),
-                new ScriptReducer(cfg, resourceResolver, expressionManager));
+                new ScriptReducer(cfg, resourceResolver, expressionManager, taskRegistry));
     }
 
     @Override

@@ -67,7 +67,7 @@ public class EngineHolder {
         resourceResolver = new ClassPathResourceResolver();
         executor = wrap(new DefaultExecutor(configuration, expressionManager, Executors.newCachedThreadPool(),
                 interceptorHolder, indexedProcessDefinitionProvider, uuidGenerator, eventManager, persistenceManager,
-                userTaskHandler, resourceResolver));
+                userTaskHandler, resourceResolver, serviceTaskRegistry));
 
         engine = new AbstractEngine() {
 

@@ -17,6 +17,7 @@ import io.takari.bpm.state.ProcessInstance;
 import io.takari.bpm.state.StateHelper;
 import io.takari.bpm.state.Variables;
 import io.takari.bpm.state.VariablesHelper;
+import io.takari.bpm.task.ServiceTaskRegistry;
 
 import javax.script.Bindings;
 import javax.script.ScriptEngine;
@@ -26,16 +27,18 @@ import java.io.*;
 @Impure
 public class ScriptReducer extends BpmnErrorHandlingReducer {
 
-    private final Configuration cfg;
     private final ResourceResolver resourceResolver;
     private final ExpressionManager expressionManager;
+    private final ServiceTaskRegistry taskRegistry;
     private final ScriptEngineManager scriptEngineManager;
 
-    public ScriptReducer(Configuration cfg, ResourceResolver resourceResolver, ExpressionManager expressionManager) {
+    public ScriptReducer(Configuration cfg, ResourceResolver resourceResolver,
+                         ExpressionManager expressionManager, ServiceTaskRegistry taskRegistry) {
+
         super(cfg);
-        this.cfg = cfg;
         this.resourceResolver = resourceResolver;
         this.expressionManager = expressionManager;
+        this.taskRegistry = taskRegistry;
         this.scriptEngineManager = new ScriptEngineManager();
     }
 
@@ -61,6 +64,7 @@ public class ScriptReducer extends BpmnErrorHandlingReducer {
         // expose all available variables plus the context
         Bindings b = engine.createBindings();
         b.put("execution", ctx);
+        b.put("tasks", new TaskAccessor(taskRegistry));
         b.putAll(ctx.toMap());
 
         try (Reader input = openReader(t)) {
@@ -141,5 +145,18 @@ public class ScriptReducer extends BpmnErrorHandlingReducer {
         }
 
         return s.substring(i + 1);
+    }
+
+    public static class TaskAccessor {
+
+        private final ServiceTaskRegistry taskRegistry;
+
+        public TaskAccessor(ServiceTaskRegistry taskRegistry) {
+            this.taskRegistry = taskRegistry;
+        }
+
+        public Object get(String key) {
+            return taskRegistry.getByKey(key);
+        }
     }
 }

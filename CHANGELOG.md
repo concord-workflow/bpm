@@ -1,5 +1,18 @@
 # Change Log
 
+## Unreleased
+
+### Added
+
+- expose available task beans to `ScriptTasks` using the provided
+`tasks` binding.
+
+### Changed
+
+- prevent errors from copying in another event's state.
+
+
+
 ## [0.27.0] - 2017-05-17
 
 ### Added

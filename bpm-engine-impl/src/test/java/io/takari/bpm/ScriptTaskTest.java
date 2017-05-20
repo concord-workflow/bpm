@@ -1,6 +1,5 @@
 package io.takari.bpm;
 
-import io.takari.bpm.api.BpmnError;
 import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.JavaDelegate;
 import io.takari.bpm.model.*;
@@ -173,8 +172,8 @@ public class ScriptTaskTest extends AbstractEngineTest {
 
     /**
      * start --> sub1 --------> end
-     *              \       /
-     *               bev1 --
+     * \       /
+     * bev1 --
      */
     @Test
     public void testWrappedException() throws Exception {
@@ -189,11 +188,11 @@ public class ScriptTaskTest extends AbstractEngineTest {
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "sub1"),
                 new SubProcess("sub1",
-                    new StartEvent("substart"),
-                    new SequenceFlow("f2", "substart", "t1"),
-                    new ScriptTask("t1", ScriptTask.Type.CONTENT, "groovy", script),
-                    new SequenceFlow("f3", "t1", "subend"),
-                    new EndEvent("subend")),
+                        new StartEvent("substart"),
+                        new SequenceFlow("f2", "substart", "t1"),
+                        new ScriptTask("t1", ScriptTask.Type.CONTENT, "groovy", script),
+                        new SequenceFlow("f3", "t1", "subend"),
+                        new EndEvent("subend")),
                 new BoundaryEvent("bev1", "sub1", null),
                 new SequenceFlow("f4", "bev1", "end"),
                 new SequenceFlow("f5", "sub1", "end"),
@@ -218,5 +217,62 @@ public class ScriptTaskTest extends AbstractEngineTest {
                 "f4",
                 "end");
         assertNoMoreActivations();
+    }
+
+    /**
+     * start --> t1 --> t2 --> end
+     */
+    @Test
+    public void testTasks() throws Exception {
+        double a = System.currentTimeMillis();
+
+        String script = "tasks.get('t1').doSomething(a)";
+
+        // ---
+
+        TestTask t1 = spy(new TestTask() {
+
+            @Override
+            public void doSomething(Object o) {
+                assertEquals(a, o);
+            }
+        });
+        getServiceTaskRegistry().register("t1", t1);
+
+        // --
+
+        String processId = "test";
+        deploy(new ProcessDefinition(processId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "t1"),
+                new ScriptTask("t1", ScriptTask.Type.CONTENT, "javascript", script),
+                new SequenceFlow("f2", "t1", "end"),
+                new EndEvent("end")
+        )));
+
+        // ---
+
+        String key = UUID.randomUUID().toString();
+
+        Map<String, Object> args = new HashMap<>();
+        args.put("a", a);
+        getEngine().start(key, processId, args);
+
+        // ---
+
+        assertActivations(key, processId,
+                "start",
+                "f1",
+                "t1",
+                "f2",
+                "end");
+        assertNoMoreActivations();
+
+        verify(t1, times(1)).doSomething(anyObject());
+    }
+
+    public interface TestTask {
+
+        void doSomething(Object o);
     }
 }
