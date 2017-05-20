@@ -43,6 +43,10 @@ public final class BpmnErrorHelper {
         return new UnsetVariableAction(KEY);
     }
 
+    public static Variables clear(Variables vars) {
+        return vars.removeVariable(KEY);
+    }
+
     private BpmnErrorHelper() {
     }
 }

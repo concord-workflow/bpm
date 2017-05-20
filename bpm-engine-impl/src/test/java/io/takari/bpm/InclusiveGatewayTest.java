@@ -89,7 +89,6 @@ public class InclusiveGatewayTest extends AbstractEngineTest {
         ));
     }
 
-
     @Test
     public void testDuoEvent() throws Exception {
         String processId = "test";
@@ -357,7 +356,7 @@ public class InclusiveGatewayTest extends AbstractEngineTest {
         getEngine().resume(key, "ev1", null);
         
         assertActivations(key, processId,
-            "f5", // resume ev1
+            "f5",
             "sub1_end");
         assertNoMoreActivations();
         
@@ -366,14 +365,12 @@ public class InclusiveGatewayTest extends AbstractEngineTest {
         getEngine().resume(key, "ev2", null);
         
         assertActivations(key, processId,
-            "f10", // resume ev2
+            "f10",
             "sub2_end",
-            "f11", // ???
+            "f11",
             "gw2",
             "f6",
-            "gw2",
-            "f13",
-            "end");
+            "gw2");
         assertNoMoreActivations();
     }
 }
