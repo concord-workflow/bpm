@@ -2,7 +2,9 @@ package io.takari.bpm;
 
 import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.JavaDelegate;
+import io.takari.bpm.model.BoundaryEvent;
 import io.takari.bpm.model.EndEvent;
+import io.takari.bpm.model.EventBasedGateway;
 import io.takari.bpm.model.ExpressionType;
 import io.takari.bpm.model.InclusiveGateway;
 import io.takari.bpm.model.IntermediateCatchEvent;
@@ -10,9 +12,12 @@ import io.takari.bpm.model.ProcessDefinition;
 import io.takari.bpm.model.SequenceFlow;
 import io.takari.bpm.model.ServiceTask;
 import io.takari.bpm.model.StartEvent;
+import io.takari.bpm.model.SubProcess;
+
 import java.util.Arrays;
 import java.util.UUID;
 import org.junit.Test;
+
 import static org.mockito.Mockito.*;
 
 public class InclusiveGatewayTest extends AbstractEngineTest {
@@ -267,6 +272,108 @@ public class InclusiveGatewayTest extends AbstractEngineTest {
                 "gw2",
                 "f8",
                 "end");
+        assertNoMoreActivations();
+    }
+    
+    /**
+     * start --> gw1 --> sub1 -> evgw1 -> ev1 -> end(err) ---> gw2 --> end
+     *              \                                         /
+     *               \--> sub2 -> evgw2 -> ev2 -> end ------>
+     *                                             \       /
+     *                                             boundary
+     */
+    @Test
+    public void testParallelSubEvents() throws Exception {
+        String processId = "test";
+        
+        deploy(new ProcessDefinition(processId, Arrays.asList(
+            new StartEvent("start"),
+            new SequenceFlow("f1", "start", "gw1"),
+            new InclusiveGateway("gw1"),
+
+                new SequenceFlow("f2", "gw1", "sub1"),
+                new SubProcess("sub1", Arrays.asList(
+                    new StartEvent("sub1_start"),
+                    new SequenceFlow("f3", "sub1_start", "sub1_gw"),
+                    new EventBasedGateway("sub1_gw"),
+                    new SequenceFlow("f4", "sub1_gw", "ev1"),
+                    new IntermediateCatchEvent("ev1", "ev1"),
+                    new SequenceFlow("f5", "ev1", "sub1_end"),
+                    new EndEvent("sub1_end", "err")
+                )),
+                new SequenceFlow("f6", "sub1", "gw2"),
+                
+                new SequenceFlow("f7", "gw1", "sub2"),
+                new SubProcess("sub2", Arrays.asList(
+                    new StartEvent("sub2_start"),
+                    new SequenceFlow("f8", "sub2_start", "sub2_gw"),
+                    new EventBasedGateway("sub2_gw"),
+                    new SequenceFlow("f9", "sub2_gw", "ev2"),
+                    new IntermediateCatchEvent("ev2", "ev2"),
+                    new SequenceFlow("f10", "ev2", "sub2_end"),
+                    new EndEvent("sub2_end")
+                )),
+                new SequenceFlow("f11", "sub2", "gw2"),
+                
+                new BoundaryEvent("b1", "sub2", null),
+                new SequenceFlow("f12", "b1", "gw2"),
+                
+            new InclusiveGateway("gw2"),
+            new SequenceFlow("f13", "gw2", "end"),
+            new EndEvent("end")
+        )));
+        
+        // ---
+
+        String key = UUID.randomUUID().toString();
+        getEngine().start(key, processId, null);
+
+        // ---
+        
+        assertActivations(key, processId,
+            "start",
+            "f1",
+            "gw1",
+            
+            "f2", // ev1
+            "sub1",
+            "sub1_start",
+            "f3",
+            "sub1_gw",
+            "f4",
+            "ev1",
+            
+            "f7", // ev2
+            "sub2",
+            "sub2_start",
+            "f8",
+            "sub2_gw",
+            "f9",
+            "ev2");
+        assertNoMoreActivations();
+        
+        // ---
+        
+        getEngine().resume(key, "ev1", null);
+        
+        assertActivations(key, processId,
+            "f5", // resume ev1
+            "sub1_end");
+        assertNoMoreActivations();
+        
+        // ---
+        
+        getEngine().resume(key, "ev2", null);
+        
+        assertActivations(key, processId,
+            "f10", // resume ev2
+            "sub2_end",
+            "f11", // ???
+            "gw2",
+            "f6",
+            "gw2",
+            "f13",
+            "end");
         assertNoMoreActivations();
     }
 }
