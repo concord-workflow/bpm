@@ -1,5 +1,16 @@
 # Change Log
 
+## [Unreleased]
+
+### Changed
+
+- `FormValidatorLocale` now accepts `FormField` objects instead of
+just field names;
+- `DefaultFormValidatorLocale` now uses form field labels (if
+available).
+
+
+
 ## [0.28.0] - 2017-05-20
 
 ### Added

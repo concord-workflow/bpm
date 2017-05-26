@@ -1,6 +1,6 @@
 package io.takari.bpm.form;
 
-import io.takari.bpm.model.form.FormField.Cardinality;
+import io.takari.bpm.model.form.FormField;
 
 public interface FormValidatorLocale {
 
@@ -16,94 +16,93 @@ public interface FormValidatorLocale {
      * Invalid cardinality of a value.
      *
      * @param formId
-     * @param fieldName
-     * @param requiredCardinality
+     * @param field
      * @param value
      * @return
      */
-    String invalidCardinality(String formId, String fieldName, Cardinality requiredCardinality, Object value);
+    String invalidCardinality(String formId, FormField field, Object value);
 
     /**
      * Expected a string value.
      *
      * @param formId
-     * @param fieldName
+     * @param field
      * @param idx
      * @param value
      * @return
      */
-    String expectedString(String formId, String fieldName, Integer idx, Object value);
+    String expectedString(String formId, FormField field, Integer idx, Object value);
 
     /**
      * Expected an integer value.
      *
      * @param formId
-     * @param fieldName
+     * @param field
      * @param idx
      * @param value
      * @return
      */
-    String expectedInteger(String formId, String fieldName, Integer idx, Object value);
+    String expectedInteger(String formId, FormField field, Integer idx, Object value);
 
     /**
      * Expected a decimal value.
      *
      * @param formId
-     * @param fieldName
+     * @param field
      * @param idx
      * @param value
      * @return
      */
-    String expectedDecimal(String formId, String fieldName, Integer idx, Object value);
+    String expectedDecimal(String formId, FormField field, Integer idx, Object value);
 
 
     /**
      * A string value doesn't match the specified pattern.
      *
      * @param formId
-     * @param fieldName
+     * @param field
      * @param idx
      * @param pattern
      * @param value
      * @return
      */
-    String doesntMatchPattern(String formId, String fieldName, Integer idx, String pattern, Object value);
+    String doesntMatchPattern(String formId, FormField field, Integer idx, String pattern, Object value);
 
     /**
      * Value must be within the specified range.
      *
      * @param formId
-     * @param fieldName
+     * @param field
      * @param idx
      * @param min
      * @param max
      * @param value
      * @return
      */
-    String integerRangeError(String formId, String fieldName, Integer idx, Long min, Long max, Object value);
+    String integerRangeError(String formId, FormField field, Integer idx, Long min, Long max, Object value);
 
     /**
      * Value must be within the specified range.
      *
      * @param formId
-     * @param fieldName
+     * @param field
      * @param idx
      * @param min
      * @param max
      * @param value
      * @return
      */
-    String decimalRangeError(String formId, String fieldName, Integer idx, Double min, Double max, Object value);
+    String decimalRangeError(String formId, FormField field, Integer idx, Double min, Double max, Object value);
 
     /**
      * Value is not allowed.
      *
      * @param formId
-     * @param fieldName
+     * @param field
      * @param idx
      * @param allowed
      * @param value
      * @return
      */
-    String valueNotAllowed(String formId, String fieldName, Integer idx, Object allowed, Object value);
+    String valueNotAllowed(String formId, FormField field, Integer idx, Object allowed, Object value);
 }

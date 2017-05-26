@@ -80,7 +80,7 @@ public class DefaultFormValidator implements FormValidator {
         }
 
         if (!checkCardinality(v, expectedCardinality)) {
-            return new ValidationError(fieldName, locale.invalidCardinality(formId, fieldName, expectedCardinality, v));
+            return new ValidationError(fieldName, locale.invalidCardinality(formId, f, v));
         }
 
         if (v == null) {
@@ -124,7 +124,7 @@ public class DefaultFormValidator implements FormValidator {
 
         if (allowed != null) {
             if (!checkAllowedValue(v, allowed)) {
-                return new ValidationError(fieldName, locale.valueNotAllowed(formId, fieldName, idx, allowed, v));
+                return new ValidationError(fieldName, locale.valueNotAllowed(formId, f, idx, allowed, v));
             }
         }
 
@@ -415,10 +415,10 @@ public class DefaultFormValidator implements FormValidator {
 
                 String sv = (String) v;
                 if (!sv.matches(pattern)) {
-                    return new ValidationError(fieldName, locale.doesntMatchPattern(formId, fieldName, idx, pattern, v));
+                    return new ValidationError(fieldName, locale.doesntMatchPattern(formId, f, idx, pattern, v));
                 }
             } else {
-                return new ValidationError(fieldName, locale.expectedString(formId, fieldName, idx, v));
+                return new ValidationError(fieldName, locale.expectedString(formId, f, idx, v));
             }
 
             return null;
@@ -449,10 +449,10 @@ public class DefaultFormValidator implements FormValidator {
                 Long max = f.getOption(IntegerField.MAX);
 
                 if (!withinBounds(v, min, max)) {
-                    return new ValidationError(fieldName, locale.integerRangeError(formId, fieldName, idx, min, max, v));
+                    return new ValidationError(fieldName, locale.integerRangeError(formId, f, idx, min, max, v));
                 }
             } else {
-                return new ValidationError(fieldName, locale.expectedInteger(formId, fieldName, idx, v));
+                return new ValidationError(fieldName, locale.expectedInteger(formId, f, idx, v));
             }
 
             return null;
@@ -483,10 +483,10 @@ public class DefaultFormValidator implements FormValidator {
                 Double max = f.getOption(DecimalField.MAX);
 
                 if (!withinBounds(v, min, max)) {
-                    return new ValidationError(fieldName, locale.decimalRangeError(formId, fieldName, idx, min, max, v));
+                    return new ValidationError(fieldName, locale.decimalRangeError(formId, f, idx, min, max, v));
                 }
             } else {
-                return new ValidationError(fieldName, locale.expectedDecimal(formId, fieldName, idx, v));
+                return new ValidationError(fieldName, locale.expectedDecimal(formId, f, idx, v));
             }
 
             return null;

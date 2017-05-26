@@ -1,5 +1,6 @@
 package io.takari.bpm.form;
 
+import io.takari.bpm.model.form.FormField;
 import io.takari.bpm.model.form.FormField.Cardinality;
 
 public class DefaultFormValidatorLocale implements FormValidatorLocale {
@@ -10,50 +11,55 @@ public class DefaultFormValidatorLocale implements FormValidatorLocale {
     }
 
     @Override
-    public String invalidCardinality(String formId, String fieldName, Cardinality requiredCardinality, Object value) {
-        return String.format("%s: Invalid cardinality, expected %s", fieldName, spell(requiredCardinality));
+    public String invalidCardinality(String formId, FormField field, Object value) {
+        return String.format("%s: Invalid cardinality, expected %s", fieldName(field, null), spell(field.getCardinality()));
     }
 
     @Override
-    public String expectedString(String formId, String fieldName, Integer idx, Object value) {
-        return String.format("Field %s: expected a string value, got %s", fieldName, idx, value);
+    public String expectedString(String formId, FormField field, Integer idx, Object value) {
+        return String.format("%s: expected a string value, got %s", field, idx, value);
     }
 
     @Override
-    public String expectedInteger(String formId, String fieldName, Integer idx, Object value) {
-        return String.format("Field %s: expected an integer value, got %s", fieldName(fieldName, idx), value);
+    public String expectedInteger(String formId, FormField field, Integer idx, Object value) {
+        return String.format("%s: expected an integer value, got %s", fieldName(field, idx), value);
     }
 
     @Override
-    public String expectedDecimal(String formId, String fieldName, Integer idx, Object value) {
-        return String.format("Field %s: expected a decimal value, got %s", fieldName(fieldName, idx), value);
+    public String expectedDecimal(String formId, FormField field, Integer idx, Object value) {
+        return String.format("%s: expected a decimal value, got %s", fieldName(field, idx), value);
     }
 
     @Override
-    public String doesntMatchPattern(String formId, String fieldName, Integer idx, String pattern, Object value) {
-        return String.format("Field %s: value '%s' doesn't match pattern '%s'", fieldName(fieldName, idx), pattern, value);
+    public String doesntMatchPattern(String formId, FormField field, Integer idx, String pattern, Object value) {
+        return String.format("%s: value '%s' doesn't match pattern '%s'", fieldName(field, idx), pattern, value);
     }
 
     @Override
-    public String integerRangeError(String formId, String fieldName, Integer idx, Long min, Long max, Object value) {
-        return String.format("Field %s: value '%s' must be %s", fieldName(fieldName, idx), value, bounds(min, max));
+    public String integerRangeError(String formId, FormField field, Integer idx, Long min, Long max, Object value) {
+        return String.format("%s: value '%s' must be %s", fieldName(field, idx), value, bounds(min, max));
     }
 
     @Override
-    public String decimalRangeError(String formId, String fieldName, Integer idx, Double min, Double max, Object value) {
-        return String.format("Field %s: value '%s' must be %s", fieldName(fieldName, idx), value, bounds(min, max));
+    public String decimalRangeError(String formId, FormField field, Integer idx, Double min, Double max, Object value) {
+        return String.format("%s: value '%s' must be %s", fieldName(field, idx), value, bounds(min, max));
     }
 
     @Override
-    public String valueNotAllowed(String formId, String fieldName, Integer idx, Object allowed, Object value) {
-        return String.format("Field %s: value '%s' is not allowed, valid values: %s", fieldName(fieldName, idx), value, allowed);
+    public String valueNotAllowed(String formId, FormField field, Integer idx, Object allowed, Object value) {
+        return String.format("%s: value '%s' is not allowed, valid values: %s", fieldName(field, idx), value, allowed);
     }
 
-    private static String fieldName(String fieldName, Integer idx) {
-        String s = fieldName;
-        if (idx != null) {
-            s = s + "[" + idx + "]";
+    private static String fieldName(FormField field, Integer idx) {
+        String s = field.getLabel();
+        if (s == null) {
+            s = field.getName();
         }
+
+        if (idx != null) {
+            s = s + " [" + idx + "]";
+        }
+
         return s;
     }
 

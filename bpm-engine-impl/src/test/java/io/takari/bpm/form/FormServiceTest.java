@@ -114,10 +114,11 @@ public class FormServiceTest {
 
     @Test
     public void testInvalidMissingString() throws Exception {
-        FormSubmitResult r = submit(new FormField[]{stringValue("a")});
+        FormField f = stringValue("a");
+        FormSubmitResult r = submit(new FormField[]{f});
         assertFalse(r.isValid());
 
-        verify(formLocale, times(1)).invalidCardinality(anyString(), eq("a"), any(Cardinality.class), anyObject());
+        verify(formLocale, times(1)).invalidCardinality(anyString(), eq(f), anyObject());
     }
 
     @Test
@@ -128,11 +129,12 @@ public class FormServiceTest {
 
     @Test
     public void testInvalidEmptyArrayOfStrings() throws Exception {
-        FormSubmitResult r = submit(new FormField[]{stringOneOrMore("a")},
+        FormField f = stringOneOrMore("a");
+        FormSubmitResult r = submit(new FormField[]{f},
                 "a", new String[0]);
         assertFalse(r.isValid());
 
-        verify(formLocale, times(1)).invalidCardinality(anyString(), eq("a"), any(Cardinality.class), anyObject());
+        verify(formLocale, times(1)).invalidCardinality(anyString(), eq(f), anyObject());
     }
 
     @Test
@@ -144,44 +146,48 @@ public class FormServiceTest {
 
     @Test
     public void testValidDefaultArrayOfStrings() throws Exception {
-        FormSubmitResult r = submit(new FormField[]{stringOneOrMore("a", new Object[] {"a", "b", "c"})});
+        FormSubmitResult r = submit(new FormField[]{stringOneOrMore("a", new Object[]{"a", "b", "c"})});
         assertTrue(r.isValid());
     }
 
     @Test
     public void testInvalidArrayOfMixedTypes() throws Exception {
-        FormSubmitResult r = submit(new FormField[]{stringOneOrMore("a")},
+        FormField f = stringOneOrMore("a");
+        FormSubmitResult r = submit(new FormField[]{f},
                 "a", new Object[]{"a", 1, false});
         assertFalse(r.isValid());
 
-        verify(formLocale, times(1)).expectedString(anyString(), eq("a"), eq(1), anyObject());
+        verify(formLocale, times(1)).expectedString(anyString(), eq(f), eq(1), anyObject());
     }
 
     @Test
     public void testInvalidCollectionOfMixedTypes() throws Exception {
-        FormSubmitResult r = submit(new FormField[]{stringOneOrMore("a")},
+        FormField f = stringOneOrMore("a");
+        FormSubmitResult r = submit(new FormField[]{f},
                 "a", Arrays.asList("a", "b", 123));
         assertFalse(r.isValid());
 
-        verify(formLocale, times(1)).expectedString(anyString(), eq("a"), eq(2), anyObject());
+        verify(formLocale, times(1)).expectedString(anyString(), eq(f), eq(2), anyObject());
     }
 
     @Test
     public void testInvalidStringPattern() throws Exception {
-        FormSubmitResult r = submit(new FormField[]{stringPattern("a", "[0-9]+")},
+        FormField f = stringPattern("a", "[0-9]+");
+        FormSubmitResult r = submit(new FormField[]{f},
                 "a", "abc");
         assertFalse(r.isValid());
 
-        verify(formLocale, times(1)).doesntMatchPattern(anyString(), eq("a"), any(Integer.class), anyString(), anyObject());
+        verify(formLocale, times(1)).doesntMatchPattern(anyString(), eq(f), any(Integer.class), anyString(), anyObject());
     }
 
     @Test
     public void testExpectedString() throws Exception {
-        FormSubmitResult r = submit(new FormField[]{stringPattern("a", "[0-9]+")},
+        FormField f = stringPattern("a", "[0-9]+");
+        FormSubmitResult r = submit(new FormField[]{f},
                 "a", 123);
         assertFalse(r.isValid());
 
-        verify(formLocale, times(1)).expectedString(anyString(), eq("a"), any(Integer.class), anyObject());
+        verify(formLocale, times(1)).expectedString(anyString(), eq(f), any(Integer.class), anyObject());
     }
 
     @Test
@@ -218,14 +224,14 @@ public class FormServiceTest {
     @Test
     public void testValidIntegerArray() throws Exception {
         FormSubmitResult r = submit(new FormField[]{intList("a", 0, 4)},
-                "a", new int[] { 0, 1, 2, 3, 4 });
+                "a", new int[]{0, 1, 2, 3, 4});
         assertTrue(r.isValid());
     }
 
     @Test
     public void testInvalidIntegerArray() throws Exception {
         FormSubmitResult r = submit(new FormField[]{intList("a", 0, 5)},
-                "a", new int[] { 2, 3, 4, 5, 6 });
+                "a", new int[]{2, 3, 4, 5, 6});
         assertFalse(r.isValid());
     }
 
@@ -245,11 +251,12 @@ public class FormServiceTest {
 
     @Test
     public void testInvalidDecimalRange() throws Exception {
-        FormSubmitResult r = submit(new FormField[]{decimalRange("a", 0.5, 0.52)},
+        FormField f = decimalRange("a", 0.5, 0.52);
+        FormSubmitResult r = submit(new FormField[]{f},
                 "a", 0.525);
         assertFalse(r.isValid());
 
-        verify(formLocale, times(1)).decimalRangeError(anyString(), eq("a"), any(Integer.class), any(Double.class), any(Double.class), anyObject());
+        verify(formLocale, times(1)).decimalRangeError(anyString(), eq(f), any(Integer.class), any(Double.class), any(Double.class), anyObject());
     }
 
     private FormSubmitResult submit(FormField[] fields, Object... values) throws ExecutionException {
