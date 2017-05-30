@@ -35,20 +35,14 @@
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <juel.version>2.2.7</juel.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>de.odysseus.juel</groupId>
-                <artifactId>juel-impl</artifactId>
-                <version>${juel.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>de.odysseus.juel</groupId>
-                <artifactId>juel-api</artifactId>
-                <version>${juel.version}</version>
+                <groupId>org.glassfish</groupId>
+                <artifactId>javax.el</artifactId>
+                <version>3.0.1-b08</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
