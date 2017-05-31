@@ -1,7 +1,5 @@
 package io.takari.bpm.el;
 
-import de.odysseus.el.ExpressionFactoryImpl;
-import de.odysseus.el.util.SimpleContext;
 import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.task.ServiceTaskRegistry;
 import io.takari.bpm.task.ServiceTaskResolver;
@@ -14,15 +12,11 @@ public class DefaultExpressionManager implements ExpressionManager {
 
     private static final Logger log = LoggerFactory.getLogger(DefaultExpressionManager.class);
 
-    private final ExpressionFactory expressionFactory = new ExpressionFactoryImpl();
+    private final ExpressionFactory expressionFactory = ExpressionFactory.newInstance();
     private final ELResolver[] resolvers;
 
     public DefaultExpressionManager(ServiceTaskRegistry serviceTaskRegistry) {
         this.resolvers = new ELResolver[]{
-                new ArrayELResolver(),
-                new ListELResolver(),
-                new MapELResolver(),
-                new BeanELResolver(),
                 new ServiceTaskResolver(serviceTaskRegistry)
         };
     }
@@ -44,13 +38,13 @@ public class DefaultExpressionManager implements ExpressionManager {
     public <T> T eval(ExecutionContext ctx, String expr, Class<T> type) {
         try {
             ELResolver r = createResolver(ctx);
-            SimpleContext sc = new SimpleContext(r);
-            sc.setVariable("execution", expressionFactory.createValueExpression(ctx, ExecutionContext.class));
+            StandardELContext sc = new StandardELContext(expressionFactory);
             sc.putContext(ExpressionFactory.class, expressionFactory);
+            sc.addELResolver(r);
+            sc.getVariableMapper().setVariable("execution", expressionFactory.createValueExpression(ctx, ExecutionContext.class));
 
             ValueExpression x = expressionFactory.createValueExpression(sc, expr, type);
             Object v = x.getValue(sc);
-
             return type.cast(v);
         } catch (Exception e) {
             log.warn("eval ['{}'] -> error: {}", expr, e.getMessage());
