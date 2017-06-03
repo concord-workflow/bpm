@@ -1,5 +1,14 @@
 # Change Log
 
+## [Unreleased]
+
+### Changed
+
+- default expression manager implementation switched to Glassfish
+EL 3.0.
+
+
+
 ## [0.29.0] - 2017-05-26
 
 ### Changed
