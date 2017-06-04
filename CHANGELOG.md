@@ -1,5 +1,18 @@
 # Change Log
 
+## [Unreleased]
+
+### Added
+
+- form option values are now interpolated and can contain
+expressions.
+
+### Changed
+
+- fixed an issue with interpolating immutable maps.
+
+
+
 ## [0.30.0] - 2017-06-03
 
 ### Changed

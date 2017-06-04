@@ -31,7 +31,7 @@ public class FormServiceTest {
     public void setUp() {
         Engine engine = mock(Engine.class);
 
-        ExpressionManager expresssionManager = new DefaultExpressionManager();
+        ExpressionManager expressionManager = new DefaultExpressionManager();
 
         formStorage = new InMemFormStorage();
 
@@ -40,7 +40,7 @@ public class FormServiceTest {
         formLocale = spy(new DefaultFormValidatorLocale());
         FormValidator validator = new DefaultFormValidator(formLocale);
 
-        formService = new DefaultFormService(resumeHandler, formStorage, expresssionManager, validator);
+        formService = new DefaultFormService(resumeHandler, formStorage, expressionManager, validator);
     }
 
     private static FormField stringValue(String fieldName) {

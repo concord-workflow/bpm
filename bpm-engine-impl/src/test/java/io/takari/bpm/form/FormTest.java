@@ -16,9 +16,11 @@ import io.takari.bpm.model.form.FormExtension;
 import io.takari.bpm.model.form.FormField;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.Assert.*;
@@ -34,7 +36,7 @@ public class FormTest extends AbstractEngineTest {
 
     @Before
     public void setUp() {
-        ExpressionManager expresssionManager = new DefaultExpressionManager();
+        ExpressionManager expressionManager = new DefaultExpressionManager();
 
         formRegistry = new InMemFormStorage();
 
@@ -42,10 +44,10 @@ public class FormTest extends AbstractEngineTest {
         FormValidator validator = new DefaultFormValidator(formLocale);
 
         ResumeHandler resumeHandler = new DirectResumeHandler(getEngine());
-        formService = new DefaultFormService(resumeHandler, formRegistry, expresssionManager, validator);
+        formService = spy(new DefaultFormService(resumeHandler, formRegistry, expressionManager, validator));
 
         formDefinitionProvider = new TestFormDefinitionProvider();
-        getUserTaskHandler().set(new FormTaskHandler(formDefinitionProvider, formService));
+        getUserTaskHandler().set(new FormTaskHandler(formDefinitionProvider, formService, expressionManager));
     }
 
     /**
@@ -162,5 +164,59 @@ public class FormTest extends AbstractEngineTest {
 
         FormSubmitResult r = formService.submit(formInstanceId, Collections.singletonMap(formField, "b"));
         assertTrue(r.isValid());
+    }
+
+    /**
+     * start --> t1 --> end
+     */
+    @Test
+    public void testOptionsInterpolation() throws Exception {
+        String inputVar = "var_" + System.currentTimeMillis();
+        String inputVal = "val_" + System.currentTimeMillis();
+
+        String formId = "testForm";
+
+        formDefinitionProvider.deploy(new FormDefinition(formId,
+                new FormField.Builder("testField", StringField.TYPE)
+                        .cardinality(FormField.Cardinality.ANY)
+                        .build()));
+
+        // ---
+
+        String processId = "test";
+        deploy(new ProcessDefinition(processId,
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "t1"),
+                new UserTask("t1", new FormExtension(formId, Collections.singletonMap("opt", "${" + inputVar + "}"))),
+                new SequenceFlow("f2", "t1", "end"),
+                new EndEvent("end")
+        ));
+
+        // ---
+
+        String key = UUID.randomUUID().toString();
+        getEngine().start(key, processId, Collections.singletonMap(inputVar, inputVal));
+
+        assertActivations(key, processId,
+                "start",
+                "f1",
+                "t1");
+
+        // ---
+
+        UUID formInstanceId = formRegistry.getForms().keySet().iterator().next();
+        assertNotNull(formInstanceId);
+
+        FormSubmitResult r = formService.submit(formInstanceId, Collections.emptyMap());
+        assertTrue(r.isValid());
+
+        // ---
+
+        ArgumentCaptor<Map> opts = ArgumentCaptor.forClass(Map.class);
+        verify(formService, times(1)).create(eq(key), any(UUID.class), anyString(), any(FormDefinition.class),
+                opts.capture(), any(Map.class));
+
+        Map m = opts.getValue();
+        assertEquals(inputVal, m.get("opt"));
     }
 }
