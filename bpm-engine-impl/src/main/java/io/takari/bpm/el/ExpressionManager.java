@@ -3,6 +3,7 @@ package io.takari.bpm.el;
 import io.takari.bpm.api.ExecutionContext;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,11 +21,12 @@ public interface ExpressionManager {
                 return v;
             }
 
+            Map<Object, Object> mm = new HashMap<>(m.size());
             for (Map.Entry<Object, Object> e : m.entrySet()) {
-                m.put(e.getKey(), interpolate(ctx, e.getValue()));
+                mm.put(e.getKey(), interpolate(ctx, e.getValue()));
             }
 
-            return m;
+            return mm;
         } else if (v instanceof List) {
             List src = (List) v;
             if (src.isEmpty()) {
