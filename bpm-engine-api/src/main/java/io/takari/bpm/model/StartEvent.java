@@ -7,4 +7,9 @@ public class StartEvent extends AbstractElement {
     public StartEvent(String id) {
         super(id);
     }
+
+    @Override
+    public String toString() {
+        return "StartEvent (" + getId() + ")";
+    }
 }

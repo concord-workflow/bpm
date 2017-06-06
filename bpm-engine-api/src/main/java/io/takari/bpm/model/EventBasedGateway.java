@@ -7,4 +7,9 @@ public class EventBasedGateway extends AbstractElement {
     public EventBasedGateway(String id) {
         super(id);
     }
+
+    @Override
+    public String toString() {
+        return "EventBasedGateway (" + getId() + ")";
+    }
 }

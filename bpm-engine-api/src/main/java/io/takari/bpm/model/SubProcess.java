@@ -46,4 +46,12 @@ public class SubProcess extends ProcessDefinition {
     public Set<VariableMapping> getOutVariables() {
         return outVariables;
     }
+
+    @Override
+    public String toString() {
+        return "SubProcess (" + getId() + ") {" +
+                "useSeparateContext=" + useSeparateContext +
+                ", outVariables=" + outVariables +
+                '}';
+    }
 }

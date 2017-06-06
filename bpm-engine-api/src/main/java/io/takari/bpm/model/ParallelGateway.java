@@ -7,4 +7,9 @@ public class ParallelGateway extends AbstractElement {
     public ParallelGateway(String id) {
         super(id);
     }
+
+    @Override
+    public String toString() {
+        return "ParallelGateway (" + getId() + ")";
+    }
 }

@@ -30,4 +30,13 @@ public class BoundaryEvent extends AbstractElement {
     public String getTimeDuration() {
         return timeDuration;
     }
+
+    @Override
+    public String toString() {
+        return "BoundaryEvent (" + getId() + ") {" +
+                "attachedToRef='" + attachedToRef + '\'' +
+                ", errorRef='" + errorRef + '\'' +
+                ", timeDuration='" + timeDuration + '\'' +
+                '}';
+    }
 }

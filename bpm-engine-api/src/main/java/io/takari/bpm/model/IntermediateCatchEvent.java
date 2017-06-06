@@ -60,4 +60,14 @@ public class IntermediateCatchEvent extends AbstractElement {
     public String getTimeDuration() {
         return timeDuration;
     }
+
+    @Override
+    public String toString() {
+        return "IntermediateCatchEvent (" + getId() + ") {" +
+                "messageRef='" + messageRef + '\'' +
+                ", messageRefExpression='" + messageRefExpression + '\'' +
+                ", timeDate='" + timeDate + '\'' +
+                ", timeDuration='" + timeDuration + '\'' +
+                '}';
+    }
 }

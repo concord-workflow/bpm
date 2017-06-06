@@ -1,5 +1,7 @@
 package io.takari.bpm.model;
 
+import java.util.Arrays;
+
 public class SequenceFlow extends AbstractElement {
 	
 	private static final long serialVersionUID = 1L;
@@ -77,5 +79,15 @@ public class SequenceFlow extends AbstractElement {
         public String getExpression() {
             return expression;
         }
+    }
+
+    @Override
+    public String toString() {
+        return "SequenceFlow (" + getId() + ") {" +
+                "name='" + name + '\'' +
+                ", " + from + " -> " + to + '\'' +
+                ", expression='" + expression + '\'' +
+                ", listeners=" + Arrays.toString(listeners) +
+                '}';
     }
 }

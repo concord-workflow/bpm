@@ -56,4 +56,15 @@ public class ServiceTask extends AbstractElement {
     public Set<VariableMapping> getOut() {
         return out;
     }
+
+    @Override
+    public String toString() {
+        return "ServiceTask (" + getId() + ") {" +
+                "name='" + name + '\'' +
+                ", expression='" + expression + '\'' +
+                ", type=" + type +
+                ", in=" + in +
+                ", out=" + out +
+                '}';
+    }
 }
