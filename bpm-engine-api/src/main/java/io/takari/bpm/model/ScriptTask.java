@@ -54,4 +54,15 @@ public class ScriptTask extends AbstractElement {
          */
         CONTENT
     }
+
+    @Override
+    public String toString() {
+        return "ScriptTask (" + getId() + ") {" +
+                "type=" + type +
+                ", language='" + language + '\'' +
+                ", in=" + in +
+                ", out=" + out +
+                ", content='" + content + '\'' +
+                '}';
+    }
 }

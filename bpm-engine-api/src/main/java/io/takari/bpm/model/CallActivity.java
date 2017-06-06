@@ -55,4 +55,15 @@ public class CallActivity extends AbstractElement {
     public boolean isCopyAllVariables() {
         return copyAllVariables;
     }
+
+    @Override
+    public String toString() {
+        return "CallActivity (" + getId() + ") {" +
+                "name='" + name + '\'' +
+                ", calledElement='" + calledElement + '\'' +
+                ", in=" + in +
+                ", out=" + out +
+                ", copyAllVariables=" + copyAllVariables +
+                '}';
+    }
 }

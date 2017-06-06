@@ -5,6 +5,7 @@ import io.takari.bpm.model.SourceMap.Significance;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public abstract class ProcessDefinitionBuilder {
 
@@ -334,6 +335,16 @@ public abstract class ProcessDefinitionBuilder {
         <E> Seq applyEach(Collection<? extends E> elements, BiFunction<? super Seq, E, ?> f);
 
         /**
+         * Adds an EndEvent
+         */
+        Object endEvent();
+
+        /**
+         * Adds an EndEvent with an errorRef
+         */
+        Object endEvent(String errorRef);
+
+        /**
          * Adds an EndEvent and completes current sequence
          */
         Object end();
@@ -623,11 +634,13 @@ public abstract class ProcessDefinitionBuilder {
         protected int stepCounter = 0;
         protected int endCounter = 0;
         protected String lastId;
+        protected AbstractElement lastElement;
+
         private FlowFactory flows = new FlowFactory(this);
 
-        private Map<String, JoinData> joins;
+        protected Map<String, JoinData> joins;
 
-        private String joinPoint;
+        protected String joinPoint;
         private boolean joinPointAll;
 
         SeqImpl(String prefix) {
@@ -736,12 +749,27 @@ public abstract class ProcessDefinitionBuilder {
             }
             addElement(elem);
             lastId = newId;
+            lastElement = elem;
 
             return ret();
         }
 
-        public P end() {
+        @Override
+        public T endEvent() {
             addEnd(null, null);
+            return ret();
+        }
+
+        @Override
+        public T endEvent(String errorRef) {
+            addEnd(errorRef, null);
+            return ret();
+        }
+
+        public P end() {
+            if(!(lastElement instanceof EndEvent)) {
+                addEnd(null, null);
+            }
             return done();
         }
 
@@ -778,7 +806,7 @@ public abstract class ProcessDefinitionBuilder {
         }
 
         public ForkImpl<T> fork() {
-            return new ForkImpl<T>(this, lastId);
+            return new ForkImpl<T>(this, lastId, lastElement);
         }
 
         public ForkImpl<T> boundaryEvent() {
@@ -812,18 +840,21 @@ public abstract class ProcessDefinitionBuilder {
             return ret();
         }
 
-        protected void doJoin(String joinName, String id) {
+        protected void doJoin(String joinName, String id, AbstractElement element, Set<String> additionalDanglingJoins) {
             JoinData j = getJoin(joinName);
-            j.danglingJoins.add(id);
+            if(!(element instanceof EndEvent)) {
+                if(additionalDanglingJoins.isEmpty()) {
+                    j.danglingJoins.add(id);
+                }
+
+                j.danglingJoins.addAll(additionalDanglingJoins);
+            }
             flushJoins(j);
         }
 
         protected void doJoinPoint(String id) {
             if (joinPoint != null) {
                 JoinData j = getJoin(joinPoint);
-                if (j.danglingJoins.isEmpty() && joinPointAll) {
-                    throw new IllegalStateException("Nothing to join into " + joinPoint);
-                }
                 if (j.target != null) {
                     throw new IllegalStateException("Join " + joinPoint + " target is already defined as " + j.target);
                 }
@@ -832,6 +863,7 @@ public abstract class ProcessDefinitionBuilder {
 
                 if (joinPointAll) {
                     lastId = null;
+                    lastElement = null;
                 }
                 joinPoint = null;
                 joinPointAll = false;
@@ -920,14 +952,15 @@ public abstract class ProcessDefinitionBuilder {
     private static class ForkImpl<P extends Seq> extends SeqImpl<Fork<P>, P> implements Fork<P> {
         private SeqImpl<?, ?> parent;
 
-        ForkImpl(SeqImpl<?, ?> parent, String lastId) {
+        ForkImpl(SeqImpl<?, ?> parent, String lastId, AbstractElement lastElement) {
             super(parent.prefix);
             this.parent = parent;
             this.lastId = lastId;
+            this.lastElement = lastElement;
         }
 
         ForkImpl(SeqImpl<?, ?> parent, AbstractElement start) {
-            this(parent, start.getId());
+            this(parent, start.getId(), start);
             addElement(start);
         }
 
@@ -954,7 +987,7 @@ public abstract class ProcessDefinitionBuilder {
 
         public P joinTo(String joinName) {
             P p = done();
-            parent.doJoin(joinName, lastId);
+            parent.doJoin(joinName, lastId, lastElement, getActiveDanglingItems());
             return p;
         }
 
@@ -968,6 +1001,17 @@ public abstract class ProcessDefinitionBuilder {
         protected P done() {
             parent.getElements().addAll(getElements());
             return (P) parent;
+        }
+
+        private Set<String> getActiveDanglingItems() {
+            if(joinPoint == null) {
+                return Collections.emptySet();
+            }
+            JoinData j = joins.get(joinPoint);
+            if(j == null) {
+                return Collections.emptySet();
+            }
+            return new HashSet<>(j.danglingJoins);
         }
 
         @Override

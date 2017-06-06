@@ -29,4 +29,11 @@ public class UserTask extends AbstractElement {
 
     public interface Extension extends Serializable {
     }
+
+    @Override
+    public String toString() {
+        return "UserTask (" + getId() + ") {" +
+                "extensions=" + extensions +
+                '}';
+    }
 }

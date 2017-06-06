@@ -7,4 +7,9 @@ public class InclusiveGateway extends ParallelGateway {
     public InclusiveGateway(String id) {
         super(id);
     }
+
+    @Override
+    public String toString() {
+        return "InclusiveGateway (" + getId() + ")";
+    }
 }

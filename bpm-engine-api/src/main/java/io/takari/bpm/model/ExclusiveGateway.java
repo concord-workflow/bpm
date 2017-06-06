@@ -18,4 +18,11 @@ public class ExclusiveGateway extends AbstractElement {
     public String getDefaultFlow() {
         return defaultFlow;
     }
+
+    @Override
+    public String toString() {
+        return "ExclusiveGateway (" + getId() + ") {" +
+                "defaultFlow='" + defaultFlow + '\'' +
+                '}';
+    }
 }

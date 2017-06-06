@@ -28,4 +28,12 @@ public class EndEvent extends AbstractElement {
     public String getCauseExpression() {
         return causeExpression;
     }
+
+    @Override
+    public String toString() {
+        return "EndEvent (" + getId() + ") {" +
+                "errorRef='" + errorRef + '\'' +
+                ", causeExpression='" + causeExpression + '\'' +
+                '}';
+    }
 }
