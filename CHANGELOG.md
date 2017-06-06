@@ -1,5 +1,13 @@
 # Change Log
 
+## [Unreleased]
+
+### Changed
+
+- fixed handling of end events in `ProcessDefinitionBuilder`.
+
+
+
 ## [0.31.0] - 2017-06-04
 
 ### Added
