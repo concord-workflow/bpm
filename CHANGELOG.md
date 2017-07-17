@@ -1,5 +1,14 @@
 # Change Log
 
+## [Unreleased]
+
+### Changed
+
+- forms are capturing only relevant environment values now;
+- fixed the issue with loops and parallel gateways.
+
+
+
 ## [0.31.1] - 2017-06-06
 
 ### Changed
