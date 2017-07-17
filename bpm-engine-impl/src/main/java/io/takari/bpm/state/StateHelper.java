@@ -16,6 +16,7 @@ import io.takari.bpm.misc.CoverageIgnore;
 import io.takari.bpm.model.ProcessDefinition;
 import io.takari.bpm.model.StartEvent;
 import io.takari.bpm.state.Activations.ActivationKey;
+import io.takari.bpm.state.Activations.Activation;
 import io.takari.bpm.state.Events.EventRecord;
 import io.takari.bpm.state.Scopes.Scope;
 import org.slf4j.Logger;
@@ -98,7 +99,7 @@ public final class StateHelper {
         printEvents(b, events);
 
         if (PRINT_ACTIVATIONS) {
-            Map<ActivationKey, Integer> activations = state.getActivations().values();
+            Map<ActivationKey, Activation> activations = state.getActivations().values();
             printActivations(b, activations);
         }
 
@@ -197,19 +198,19 @@ public final class StateHelper {
     }
 
     @CoverageIgnore
-    private static void printActivations(StringBuilder b, Map<ActivationKey, Integer> items) {
+    private static void printActivations(StringBuilder b, Map<ActivationKey, Activation> items) {
         b.append("\n=================================\n")
                 .append("\t").append("ACTIVATIONS").append(": ")
                 .append(items.size())
                 .append("\n");
 
-        for (Map.Entry<ActivationKey, Integer> e : items.entrySet()) {
+        for (Map.Entry<ActivationKey, Activation> e : items.entrySet()) {
             ActivationKey k = e.getKey();
-            Integer v = e.getValue();
+            Activation v = e.getValue();
 
             b.append("\t\t").append(k.getScopeId())
                     .append(" / ").append(k.getElementId())
-                    .append(" = ").append(v)
+                    .append(" = ").append(v.getReceived()).append("/").append(v.getExpected())
                     .append("\n");
         }
     }

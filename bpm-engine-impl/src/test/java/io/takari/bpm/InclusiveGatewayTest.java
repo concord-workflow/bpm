@@ -372,7 +372,9 @@ public class InclusiveGatewayTest extends AbstractEngineTest {
             "f11",
             "gw2",
             "f6",
-            "gw2");
+            "gw2",
+            "f13",
+            "end");
         assertNoMoreActivations();
     }
     
@@ -383,7 +385,7 @@ public class InclusiveGatewayTest extends AbstractEngineTest {
      * 
      */
     @Test
-    public void testLoopWithinInclusive() throws Exception {
+    public void testSelfAgitatingLoop() throws Exception {
 
         JavaDelegate t1 = spy(new JavaDelegate() {
             int x = 0;
@@ -445,7 +447,6 @@ public class InclusiveGatewayTest extends AbstractEngineTest {
             "fgw2", "gw2",
             
             // y == 1
-            // fend??
             "ft2", "t2",
             "fgw2", "gw2",
             
@@ -458,4 +459,5 @@ public class InclusiveGatewayTest extends AbstractEngineTest {
             );
         assertNoMoreActivations();
     }
+
 }

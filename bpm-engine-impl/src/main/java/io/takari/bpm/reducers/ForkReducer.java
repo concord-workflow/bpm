@@ -3,9 +3,13 @@ package io.takari.bpm.reducers;
 import io.takari.bpm.IndexedProcessDefinition;
 import io.takari.bpm.ProcessDefinitionUtils;
 import io.takari.bpm.actions.Action;
+import io.takari.bpm.actions.ActivateFlowsAction;
+import io.takari.bpm.actions.CommenceForkAction;
 import io.takari.bpm.actions.FollowFlowsAction;
 import io.takari.bpm.actions.InclusiveForkAction;
 import io.takari.bpm.actions.ParallelForkAction;
+import io.takari.bpm.actions.PopScopeAction;
+import io.takari.bpm.actions.PushScopeAction;
 import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.commands.CommandStack;
@@ -13,12 +17,16 @@ import io.takari.bpm.commands.PerformActionsCommand;
 import io.takari.bpm.context.ExecutionContextImpl;
 import io.takari.bpm.el.ExpressionManager;
 import io.takari.bpm.model.SequenceFlow;
-import io.takari.bpm.state.Activations;
+import io.takari.bpm.state.Forks;
+import io.takari.bpm.state.Forks.Fork;
 import io.takari.bpm.state.ProcessInstance;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -43,7 +51,7 @@ public class ForkReducer implements Reducer {
             IndexedProcessDefinition pd = state.getDefinition(a.getDefinitionId());
             List<SequenceFlow> out = ProcessDefinitionUtils.findOutgoingFlows(pd, a.getElementId());
 
-            return follow(state, a.getDefinitionId(), a.getElementId(), out);
+            return follow(pd, state, a.getDefinitionId(), a.getElementId(), out, null);
         } else if (action instanceof InclusiveForkAction) {
             InclusiveForkAction a = (InclusiveForkAction) action;
 
@@ -57,41 +65,91 @@ public class ForkReducer implements Reducer {
 
             // TODO refactor into an utility fn?
             if (!ctx.toActions().isEmpty()) {
-                log.warn("reduce ['{}', '{}'] -> variables changes in the execution context will be ignored", state.getBusinessKey(),
-                        a.getElementId());
+                log.warn("reduce ['{}', '{}'] -> variables changes in the execution context will be ignored", state.getBusinessKey(), a.getElementId());
             }
 
             List<SequenceFlow> inactive = new ArrayList<>(out);
             inactive.removeAll(filtered);
-            if (!inactive.isEmpty()) {
-                String gwId = ProcessDefinitionUtils.findNextGatewayId(pd, a.getElementId());
-                int count = inactive.size();
 
-                // directly activate the unused flows, so they will be visible
-                // for the next commands on the stack
-                Activations acts = state.getActivations();
-                UUID scopeId = state.getScopes().getCurrentId();
-                state = state.setActivations(acts.inc(scopeId, gwId, count));
+            return follow(pd, state, a.getDefinitionId(), a.getElementId(), filtered, inactive);
+        } else if (action instanceof CommenceForkAction) {
+            CommenceForkAction a = (CommenceForkAction) action;
+
+            Forks forks = state.getForks();
+            UUID scopeId = state.getScopes().getCurrentId();
+            Fork fork = forks.getFork(scopeId, a.getElementId());
+
+            ActivateFlowsAction activateFlows = ActivateFlowsAction.empty(a.getDefinitionId());
+            
+            List<String> flows = new ArrayList<>();
+            List<Action> actions = new ArrayList<>();
+            for (String flowId : fork.getFlows()) {
+                int count = fork.getFlowCount(flowId);
+                activateFlows = activateFlows.addFlow(flowId, count);
+
+                // follow the flow the required number of times
+                for (int i = 0; i < count; i++) {
+                    flows.add(flowId);
+                }
             }
+            actions.add(activateFlows);
+            actions.add(new FollowFlowsAction(a.getDefinitionId(), a.getElementId(), flows));
 
-            return follow(state, a.getDefinitionId(), a.getElementId(), filtered);
+            CommandStack stack = state.getStack() //
+                    .push(new PerformActionsCommand(new PopScopeAction())) //
+                    .push(new PerformActionsCommand(actions)) //
+                    .push(new PerformActionsCommand(new PushScopeAction(a.getDefinitionId(), a.getElementId(), false)));
+
+            return state.setForks(forks.removeFork(scopeId, a.getElementId())) //
+                    .setStack(stack);
         }
 
         return state;
     }
 
-    private static ProcessInstance follow(ProcessInstance state, String definitionId, String elementId, List<SequenceFlow> flows) {
-        CommandStack stack = state.getStack()
-                .push(new PerformActionsCommand(
-                        new FollowFlowsAction(definitionId, elementId, ProcessDefinitionUtils.toIds(flows))));
+    private static ProcessInstance follow(IndexedProcessDefinition pd, ProcessInstance state, String definitionId, String elementId, List<SequenceFlow> flows, List<SequenceFlow> inactiveFlows) throws ExecutionException {
 
-        return state.setStack(stack);
+        CommandStack stack = state.getStack();
+        Forks forks = state.getForks();
+        UUID scopeId = state.getScopes().getCurrentId();
+
+        if (!state.getForks().containsFork(scopeId, elementId)) {
+            stack = stack.push(new PerformActionsCommand(new CommenceForkAction(definitionId, elementId)));
+        }
+
+        // special case for 'self-agitating-parallel-loop'
+        // if the first flow is a loop to itself, send it separately in the current scope and accumulate the resulting
+        // activation counts before commencing
+        if (flows.size() > 0) {
+            SequenceFlow ff = flows.get(0);
+            if (ProcessDefinitionUtils.isTracedToElement(pd, ff.getId(), elementId)) {
+                flows.remove(0);
+                stack = stack.push(new PerformActionsCommand(Arrays.asList( //
+                        new ActivateFlowsAction(definitionId, ff.getId(), 1), //
+                        new FollowFlowsAction(definitionId, elementId, Collections.singletonList(ff.getId())) //
+                )));
+            }
+        }
+
+        // increment expected gateway activations downstream
+        for (SequenceFlow flow : flows) {
+            forks = forks.incrementFlow(scopeId, elementId, flow.getId(), 1);
+        }
+
+        // and for inactive flows
+        if (inactiveFlows != null) {
+            for (SequenceFlow flow : inactiveFlows) {
+                forks = forks.incrementFlow(scopeId, elementId, flow.getId(), 0);
+            }
+        }
+
+        return state.setForks(forks).setStack(stack);
     }
 
     private static List<SequenceFlow> filterInactive(ExpressionManager em, ExecutionContext ctx, List<SequenceFlow> flows) {
         List<SequenceFlow> result = new ArrayList<>(flows);
 
-        for (Iterator<SequenceFlow> i = result.iterator(); i.hasNext(); ) {
+        for (Iterator<SequenceFlow> i = result.iterator(); i.hasNext();) {
             SequenceFlow f = i.next();
             if (f.getExpression() != null) {
                 String expr = f.getExpression();

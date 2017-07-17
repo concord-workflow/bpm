@@ -11,15 +11,14 @@ import io.takari.bpm.commands.ProcessElementCommand;
 import io.takari.bpm.context.ExecutionContextImpl;
 import io.takari.bpm.el.ExpressionManager;
 import io.takari.bpm.model.SequenceFlow;
-import io.takari.bpm.state.Activations;
 import io.takari.bpm.state.ProcessInstance;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
 
 @Impure
 public class EvaluatedFlowsReducer implements Reducer {
@@ -114,17 +113,14 @@ public class EvaluatedFlowsReducer implements Reducer {
             throws ExecutionException {
         IndexedProcessDefinition pd = state.getDefinition(definitionId);
 
-        Activations acts = state.getActivations();
-        UUID scopeId = state.getScopes().getCurrentId();
-
         for (SequenceFlow f : ProcessDefinitionUtils.findOutgoingFlows(pd, elementId)) {
             if (f.getId().equals(usedFlowId)) {
                 continue;
             }
-            acts = acts.inc(scopeId, f.getId(), 1);
+            state = ProcessDefinitionUtils.activateGatewayFlow(state, pd, elementId, -1);
             log.debug("activateUnusedFlows ['{}', '{}', '{}'] -> single activation of '{}'", state.getBusinessKey(), definitionId,
                     elementId, f.getId());
         }
-        return state.setActivations(acts);
+        return state;
     }
 }

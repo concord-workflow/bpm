@@ -18,16 +18,17 @@ public class ProcessInstance implements Serializable {
     private final CommandStack stack;
     private final Variables variables;
     private final Activations activations;
+    private final Forks forks;
     private final Scopes scopes;
     private final Events events;
 
     public ProcessInstance(UUID id, String businessKey, IndexedProcessDefinition definition) {
         this(id, businessKey, new Definitions(definition), ProcessStatus.RUNNING, new CommandStack(), new Variables(),
-                new Activations(), new Scopes(), new Events());
+                new Activations(), new Forks(), new Scopes(), new Events());
     }
 
     private ProcessInstance(UUID id, String businessKey, Definitions definitions, ProcessStatus status, CommandStack stack,
-            Variables variables, Activations activations, Scopes scopes, Events events) {
+            Variables variables, Activations activations, Forks forks, Scopes scopes, Events events) {
 
         this.id = id;
         this.businessKey = businessKey;
@@ -36,36 +37,41 @@ public class ProcessInstance implements Serializable {
         this.stack = stack;
         this.variables = variables;
         this.activations = activations;
+        this.forks = forks;
         this.scopes = scopes;
         this.events = events;
     }
 
     private ProcessInstance(ProcessInstance old, CommandStack stack) {
-        this(old.id, old.businessKey, old.definitions, old.status, stack, old.variables, old.activations, old.scopes, old.events);
+        this(old.id, old.businessKey, old.definitions, old.status, stack, old.variables, old.activations, old.forks, old.scopes, old.events);
     }
 
     private ProcessInstance(ProcessInstance old, ProcessStatus status) {
-        this(old.id, old.businessKey, old.definitions, status, old.stack, old.variables, old.activations, old.scopes, old.events);
+        this(old.id, old.businessKey, old.definitions, status, old.stack, old.variables, old.activations, old.forks, old.scopes, old.events);
     }
 
     private ProcessInstance(ProcessInstance old, Variables variables) {
-        this(old.id, old.businessKey, old.definitions, old.status, old.stack, variables, old.activations, old.scopes, old.events);
+        this(old.id, old.businessKey, old.definitions, old.status, old.stack, variables, old.activations, old.forks, old.scopes, old.events);
     }
 
     private ProcessInstance(ProcessInstance old, Definitions definitions) {
-        this(old.id, old.businessKey, definitions, old.status, old.stack, old.variables, old.activations, old.scopes, old.events);
+        this(old.id, old.businessKey, definitions, old.status, old.stack, old.variables, old.activations, old.forks, old.scopes, old.events);
     }
 
     private ProcessInstance(ProcessInstance old, Activations activations) {
-        this(old.id, old.businessKey, old.definitions, old.status, old.stack, old.variables, activations, old.scopes, old.events);
+        this(old.id, old.businessKey, old.definitions, old.status, old.stack, old.variables, activations, old.forks, old.scopes, old.events);
+    }
+
+    private ProcessInstance(ProcessInstance old, Forks forks) {
+        this(old.id, old.businessKey, old.definitions, old.status, old.stack, old.variables, old.activations, forks, old.scopes, old.events);
     }
 
     private ProcessInstance(ProcessInstance old, Scopes scopes) {
-        this(old.id, old.businessKey, old.definitions, old.status, old.stack, old.variables, old.activations, scopes, old.events);
+        this(old.id, old.businessKey, old.definitions, old.status, old.stack, old.variables, old.activations, old.forks, scopes, old.events);
     }
 
     private ProcessInstance(ProcessInstance old, Events events) {
-        this(old.id, old.businessKey, old.definitions, old.status, old.stack, old.variables, old.activations, old.scopes, events);
+        this(old.id, old.businessKey, old.definitions, old.status, old.stack, old.variables, old.activations, old.forks, old.scopes, events);
     }
 
     public UUID getId() {
@@ -122,6 +128,14 @@ public class ProcessInstance implements Serializable {
 
     public ProcessInstance setActivations(Activations activations) {
         return new ProcessInstance(this, activations);
+    }
+
+    public Forks getForks() {
+        return forks;
+    }
+
+    public ProcessInstance setForks(Forks forks) {
+        return new ProcessInstance(this, forks);
     }
 
     public Scopes getScopes() {

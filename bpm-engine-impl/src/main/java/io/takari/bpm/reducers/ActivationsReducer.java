@@ -6,9 +6,15 @@ import io.takari.bpm.ProcessDefinitionUtils;
 import io.takari.bpm.actions.Action;
 import io.takari.bpm.actions.ActivateElementAction;
 import io.takari.bpm.actions.ActivateFlowsAction;
+import io.takari.bpm.actions.ActivateFlowsAction.Flow;
 import io.takari.bpm.api.ExecutionException;
+import io.takari.bpm.model.AbstractElement;
+import io.takari.bpm.model.SequenceFlow;
+import io.takari.bpm.model.StartEvent;
 import io.takari.bpm.state.Activations;
 import io.takari.bpm.state.ProcessInstance;
+import io.takari.bpm.state.Scopes;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,43 +33,48 @@ public class ActivationsReducer implements Reducer {
 
     @Override
     public ProcessInstance reduce(ProcessInstance state, Action action) throws ExecutionException {
-        if (action instanceof ActivateFlowsAction) {
-            ActivateFlowsAction a = (ActivateFlowsAction) action;
+        Scopes scopes = state.getScopes();
+        UUID scopeId = scopes.getCurrentId();
 
-            Activations acts = state.getActivations();
-            for (String elementId : a.getElementIds()) {
-                acts = activateFlows(state, acts, a.getDefinitionId(), elementId, a.getCount());
+        if (action instanceof ActivateFlowsAction) {
+
+            ActivateFlowsAction a = (ActivateFlowsAction) action;
+            IndexedProcessDefinition pd = state.getDefinition(a.getDefinitionId());
+            
+            for (Flow flow : a.getFlows()) {
+                state = ProcessDefinitionUtils.activateGatewayFlow(state, pd, flow.getElementId(), flow.getCount());
             }
 
-            return state.setActivations(acts);
-        } else if (action instanceof ActivateElementAction) {
-            ActivateElementAction a = (ActivateElementAction) action;
-            Activations acts = state.getActivations();
-            UUID scopeId = state.getScopes().getCurrentId();
+            return state;
 
-            acts = acts.inc(scopeId, a.getElementId(), a.getCount());
+        } else if (action instanceof ActivateElementAction) {
+
+            ActivateElementAction a = (ActivateElementAction) action;
+            IndexedProcessDefinition pd = state.getDefinition(a.getDefinitionId());
+
+            AbstractElement ev = ProcessDefinitionUtils.findElement(pd, a.getElementId());
+
+            if (ev instanceof StartEvent) {
+                state = ProcessDefinitionUtils.activateGatewayFlow(state, pd, a.getElementId(), a.getCount());
+            }
+
+            if (ev instanceof SequenceFlow) {
+                Activations acts = state.getActivations();
+                SequenceFlow sf = (SequenceFlow) ev;
+                AbstractElement target = ProcessDefinitionUtils.findElement(pd, sf.getTo());
+                if (ProcessDefinitionUtils.isParallelGateway(target)) {
+                    acts = acts.inc(scopes, scopeId, a.getElementId(), a.getCount());
+                }
+                state = state.setActivations(acts);
+            }
+
             interceptors.fireOnElement(state.getBusinessKey(), a.getDefinitionId(), state.getId(), scopeId, a.getElementId());
 
             log.debug("reduce ['{}', '{}', '{}'] -> single activation", state.getBusinessKey(), a.getElementId(), a.getCount());
-            return state.setActivations(acts);
-        }
+            return state;
 
+        }
         return state;
     }
 
-    private static Activations activateFlows(ProcessInstance state, Activations acts, String definitionId, String elementId, int count)
-            throws ExecutionException {
-
-        IndexedProcessDefinition pd = state.getDefinition(definitionId);
-        String gwId = ProcessDefinitionUtils.findNextGatewayId(pd, elementId);
-        if (gwId == null) {
-            return acts;
-        }
-
-        log.debug("activateFlows ['{}', '{}'] -> activating '{}' via '{}' (count: {})", state.getBusinessKey(), elementId, gwId, elementId, count);
-        UUID scopeId = state.getScopes().getCurrentId();
-        acts = acts.inc(scopeId, gwId, count);
-
-        return acts;
-    }
 }
