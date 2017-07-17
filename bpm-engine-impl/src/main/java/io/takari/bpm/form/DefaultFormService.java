@@ -128,6 +128,7 @@ public class DefaultFormService implements FormService {
         }
 
         // use the form's name to store its values
+        env = new HashMap<>();
         env.put(formName, values);
 
         Map<String, Object> options = form.getOptions();
