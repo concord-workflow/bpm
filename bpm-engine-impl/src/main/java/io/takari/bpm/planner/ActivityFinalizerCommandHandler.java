@@ -18,8 +18,7 @@ import io.takari.bpm.state.Scopes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Arrays;
 import java.util.List;
 
 public class ActivityFinalizerCommandHandler implements CommandHandler<ActivityFinalizerCommand> {
@@ -82,6 +81,8 @@ public class ActivityFinalizerCommandHandler implements CommandHandler<ActivityF
             }
         }
 
+        List<SequenceFlow> flows = ProcessDefinitionUtils.findOptionalOutgoingFlows(pd, cmd.getElementId());
+
         log.debug("handle ['{}', '{}'] -> handling boundary error '{}'", state.getBusinessKey(), cmd.getElementId(), error.getErrorRef());
 
         // the error is handled
@@ -93,25 +94,12 @@ public class ActivityFinalizerCommandHandler implements CommandHandler<ActivityF
         // activate the boundary error event element
         actions.add(new ActivateElementAction(cmd.getDefinitionId(), ev.getId(), 1));
 
-        // follow the outbound flow
-        actions.add(new FollowFlowsAction(cmd.getDefinitionId(), ev.getId()));
-
-        // process the inactive flows. Use a deferred action, so the activation will be performed after
-        // the call's scope is closed
-        List<SequenceFlow> flows = ProcessDefinitionUtils.findOptionalOutgoingFlows(pd, cmd.getElementId());
-        actions.add(new PushCommandAction(new PerformActionsCommand(
-                new ActivateFlowsAction(cmd.getDefinitionId(), ProcessDefinitionUtils.toIds(flows), 1))));
-
-        // process the inactive boundary events: Use a deferred action, just as in the case above
-        List<BoundaryEvent> evs = new ArrayList<>(ProcessDefinitionUtils.findOptionalBoundaryEvents(pd, cmd.getElementId()));
-        for (Iterator<BoundaryEvent> i = evs.iterator(); i.hasNext(); ) {
-            BoundaryEvent e = i.next();
-            if (e.getId().equals(ev.getId())) {
-                i.remove();
-            }
-        }
-        actions.add(new PushCommandAction(new PerformActionsCommand(
-                new ActivateFlowsAction(cmd.getDefinitionId(), ProcessDefinitionUtils.toIds(evs), 1))));
+        // Use a deferred action, so the activation will be performed after the call's scope is closed
+        actions.add(new PushCommandAction(new PerformActionsCommand(Arrays.asList( //
+                // notify that an error is incoming and no normal flows
+                new ActivateFlowsAction(cmd.getDefinitionId(), ev.getId(), 1).addFlows(ProcessDefinitionUtils.toIds(flows), -1),
+                // follow the outbound flow
+                new FollowFlowsAction(cmd.getDefinitionId(), ev.getId())))));
 
         // close the call's scope
         actions.add(new PushCommandAction(new PerformActionsCommand(new PopScopeAction())));

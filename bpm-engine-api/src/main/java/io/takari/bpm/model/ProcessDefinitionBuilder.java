@@ -635,7 +635,7 @@ public abstract class ProcessDefinitionBuilder {
         protected String lastId;
         protected AbstractElement lastElement;
 
-        private FlowFactory flows = new FlowFactory(this);
+        protected FlowFactory flows = new FlowFactory(this);
 
         protected Map<String, JoinData> joins;
 
@@ -741,9 +741,22 @@ public abstract class ProcessDefinitionBuilder {
             if (hasJoins(loopJoin)) {
                 joinPoint(loopJoin);
             }
+            
+            // save those for the new element since doJoinPoint() might overwrite those
+            String flowName = null;
+            String flowExpr = null;
+            if(flows.primed) {
+                flowName = flows.name;
+                flowExpr = flows.expression;
+            }
+            
             doJoinPoint(newId);
 
             if (lastId != null) {
+                // restore flow data if needed
+                if(flowName != null || flowExpr != null) {
+                    flows.prime(flowName, flowExpr);
+                }
                 addFlow(lastId, newId);
             }
             addElement(elem);
@@ -839,11 +852,11 @@ public abstract class ProcessDefinitionBuilder {
             return ret();
         }
 
-        protected void doJoin(String joinName, String id, AbstractElement element, Set<String> additionalDanglingJoins) {
+        protected void doJoin(String joinName, String id, AbstractElement element, String flowName, String flowExpr, List<Tail> additionalDanglingJoins) {
             JoinData j = getJoin(joinName);
             if(!(element instanceof EndEvent)) {
                 if(additionalDanglingJoins.isEmpty()) {
-                    j.danglingJoins.add(id);
+                    j.danglingJoins.add(new Tail(id, flowName, flowExpr));
                 }
 
                 j.danglingJoins.addAll(additionalDanglingJoins);
@@ -887,8 +900,11 @@ public abstract class ProcessDefinitionBuilder {
 
         private void flushJoins(JoinData j) {
             if (j.target != null) {
-                for (String id : j.danglingJoins) {
-                    addFlow(id, j.target);
+                for (Tail tail: j.danglingJoins) {
+                    if(tail.flowName != null || tail.flowExpression != null) {
+                      flows.prime(tail.flowName, tail.flowExpression);
+                    }
+                    addFlow(tail.id, j.target);
                 }
                 j.danglingJoins.clear();
             }
@@ -986,7 +1002,9 @@ public abstract class ProcessDefinitionBuilder {
 
         public P joinTo(String joinName) {
             P p = done();
-            parent.doJoin(joinName, lastId, lastElement, getActiveDanglingItems());
+            String flowName = flows.primed ? flows.name : null;
+            String flowExpr = flows.primed ? flows.expression : null;
+            parent.doJoin(joinName, lastId, lastElement, flowName, flowExpr, getActiveDanglingItems());
             return p;
         }
 
@@ -1002,15 +1020,15 @@ public abstract class ProcessDefinitionBuilder {
             return (P) parent;
         }
 
-        private Set<String> getActiveDanglingItems() {
+        private List<Tail> getActiveDanglingItems() {
             if(joinPoint == null) {
-                return Collections.emptySet();
+                return Collections.emptyList();
             }
             JoinData j = joins.get(joinPoint);
             if(j == null) {
-                return Collections.emptySet();
+                return Collections.emptyList();
             }
-            return new HashSet<>(j.danglingJoins);
+            return j.danglingJoins;
         }
 
         @Override
@@ -1027,16 +1045,28 @@ public abstract class ProcessDefinitionBuilder {
 
     private static class JoinData {
         private String target;
-        private List<String> danglingJoins = new ArrayList<>();
+        private List<Tail> danglingJoins = new ArrayList<>();
+    }
+    
+    private static class Tail {
+      final String id;
+      final String flowName;
+      final String flowExpression;
+      
+      public Tail(String id, String flowName, String flowExpression) {
+        this.id = id;
+        this.flowName = flowName;
+        this.flowExpression = flowExpression;
+      }
     }
 
     private static class FlowFactory {
 
         private SeqImpl<?, ?> seq;
 
-        private boolean primed = false;
-        private String name;
-        private String expression;
+        boolean primed = false;
+        String name;
+        String expression;
 
         public FlowFactory(SeqImpl<?, ?> seq) {
             this.seq = seq;

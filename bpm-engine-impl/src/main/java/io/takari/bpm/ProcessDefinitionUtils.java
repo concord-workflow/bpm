@@ -5,6 +5,9 @@ import io.takari.bpm.commands.Command;
 import io.takari.bpm.commands.ProcessElementCommand;
 import io.takari.bpm.misc.CoverageIgnore;
 import io.takari.bpm.model.*;
+import io.takari.bpm.state.Activations;
+import io.takari.bpm.state.ProcessInstance;
+import io.takari.bpm.state.Scopes;
 import io.takari.bpm.utils.Timeout;
 import org.joda.time.Duration;
 
@@ -173,26 +176,108 @@ public final class ProcessDefinitionUtils {
         return null;
     }
 
-    public static String findNextGatewayId(IndexedProcessDefinition pd, String from) throws ExecutionException {
-        AbstractElement e = findElement(pd, from);
-        if (!(e instanceof SequenceFlow)) {
-            e = findAnyOutgoingFlow(pd, from);
+    private static void fillQueue(Queue<FlowSignal> q, IndexedProcessDefinition pd, String elemId, int count) throws ExecutionException {
+        findOptionalOutgoingFlows(pd, elemId).stream()
+                .map(s -> new FlowSignal(s, count))
+                .forEach(q::add);
+
+        for (BoundaryEvent be : findOptionalBoundaryEvents(pd, elemId)) {
+            findOptionalOutgoingFlows(pd, be.getId()).stream()
+                    .map(s -> new FlowSignal(s, 0)) // assuming no errors at first
+                    .forEach(q::add);
+        }
+    }
+
+    private static class FlowSignal {
+        final SequenceFlow flow;
+        final int count;
+
+        public FlowSignal(SequenceFlow flow, int count) {
+            this.flow = flow;
+            this.count = count;
+        }
+    }
+
+    /**
+     * Collects all (not just the first ones) downstream parallel gateways' incoming flows
+     */
+    private static List<FlowSignal> findDownstreamGatewayFlows(IndexedProcessDefinition pd, String from, int count) throws ExecutionException {
+        Set<String> memento = new HashSet<>();
+        Queue<FlowSignal> processingQueue = new LinkedList<>();
+
+        List<FlowSignal> results = new ArrayList<>();
+
+        AbstractElement elem = findElement(pd, from);
+        if (elem instanceof SequenceFlow) {
+            processingQueue.add(new FlowSignal((SequenceFlow) elem, count));
+        } else {
+            fillQueue(processingQueue, pd, elem.getId(), count);
         }
 
-        while (e != null) {
-            if (e instanceof SequenceFlow) {
-                SequenceFlow f = (SequenceFlow) e;
-                e = findElement(pd, f.getTo());
-            } else if (e instanceof ParallelGateway || e instanceof EventBasedGateway || e instanceof InclusiveGateway || e instanceof ExclusiveGateway) {
-                return e.getId();
-            } else if (e instanceof EndEvent) {
-                return null;
-            } else {
-                e = findOutgoingFlow(pd, e.getId());
+        while (!processingQueue.isEmpty()) {
+            FlowSignal fs = processingQueue.poll();
+
+            if (!memento.add(fs.flow.getId())) {
+                continue;
             }
+
+            AbstractElement target = findElement(pd, fs.flow.getTo());
+            if (target instanceof EndEvent) {
+                continue;
+            }
+
+            if (isParallelGateway(target)) {
+                results.add(fs);
+                continue;
+            }
+
+            fillQueue(processingQueue, pd, target.getId(), fs.count);
         }
 
-        throw new ExecutionException("Invalid process definition '%s': can't find next parallel gateway after '%s'", pd.getId(), from);
+        return results;
+    }
+
+    public static boolean isParallelGateway(AbstractElement e) {
+        return e instanceof ParallelGateway;
+    }
+
+    public static ProcessInstance activateGatewayFlow(ProcessInstance state, IndexedProcessDefinition pd, String elementId, int count) throws ExecutionException {
+        Activations acts = state.getActivations();
+        Scopes scopes = state.getScopes();
+        UUID scopeId = scopes.getCurrentId();
+        for (FlowSignal fs : findDownstreamGatewayFlows(pd, elementId, count)) {
+            acts = acts.incExpectation(scopes, scopeId, fs.flow.getId(), fs.count);
+        }
+        return state.setActivations(acts);
+    }
+
+    /**
+     * Tests whether the normal (non-error) flow can be traced to the specified element
+     */
+    public static boolean isTracedToElement(IndexedProcessDefinition pd, String flowId, String elementId) throws ExecutionException {
+        Set<String> memento = new HashSet<>();
+        Queue<String> processingQueue = new LinkedList<>();
+        processingQueue.add(flowId);
+        while (!processingQueue.isEmpty()) {
+            String nextId = processingQueue.poll();
+
+            if (nextId.equals(elementId)) {
+                return true;
+            }
+
+            if (!memento.add(nextId)) {
+                continue;
+            }
+            AbstractElement target = findElement(pd, nextId);
+            if (target instanceof SequenceFlow) {
+                processingQueue.add(((SequenceFlow) target).getTo());
+                continue;
+            }
+            findOptionalOutgoingFlows(pd, nextId).stream()
+                    .forEach(f -> processingQueue.add(f.getId()));
+        }
+
+        return false;
     }
 
     public static List<String> toIds(List<? extends AbstractElement> elements) {
@@ -201,6 +286,30 @@ public final class ProcessDefinitionUtils {
             result.add(e.getId());
         }
         return result;
+    }
+
+    private static EventBasedGateway findEventGateway(ProcessDefinition pd, String eventElementId) throws ExecutionException {
+        for (SequenceFlow flow : findIncomingFlows(pd, eventElementId)) {
+            AbstractElement elem = findElement(pd, flow.getFrom());
+            if (elem instanceof EventBasedGateway) {
+                return (EventBasedGateway) elem;
+            }
+        }
+        return null;
+    }
+
+    public static List<IntermediateCatchEvent> findSiblingEvents(IndexedProcessDefinition pd, String eventElementId) throws ExecutionException {
+        EventBasedGateway gate = findEventGateway(pd, eventElementId);
+        List<IntermediateCatchEvent> events = new ArrayList<>();
+        if (gate != null) {
+            for (SequenceFlow flow : findOutgoingFlows(pd, gate.getId())) {
+                AbstractElement elem = findElement(pd, flow.getTo());
+                if (elem instanceof IntermediateCatchEvent) {
+                    events.add((IntermediateCatchEvent) elem);
+                }
+            }
+        }
+        return events;
     }
 
     public static List<SequenceFlow> findFlows(ProcessDefinition pd, List<String> ids) throws ExecutionException {

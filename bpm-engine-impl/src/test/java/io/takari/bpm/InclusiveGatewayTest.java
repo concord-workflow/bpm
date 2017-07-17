@@ -16,8 +16,10 @@ import io.takari.bpm.model.SubProcess;
 
 import java.util.Arrays;
 import java.util.UUID;
+
 import org.junit.Test;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 public class InclusiveGatewayTest extends AbstractEngineTest {
@@ -370,7 +372,92 @@ public class InclusiveGatewayTest extends AbstractEngineTest {
             "f11",
             "gw2",
             "f6",
-            "gw2");
+            "gw2",
+            "f13",
+            "end");
         assertNoMoreActivations();
     }
+    
+    /**
+     *                 <------- (x<3?)
+     *                /            \
+     * start (x=0) -> t1 (x++) --> gw1 -> t2 -> gw2 -> end
+     * 
+     */
+    @Test
+    public void testSelfAgitatingLoop() throws Exception {
+
+        JavaDelegate t1 = spy(new JavaDelegate() {
+            int x = 0;
+            @Override
+            public void execute(ExecutionContext ctx) throws Exception {
+                ctx.setVariable("x", ++x);
+            }
+        });
+        JavaDelegate t2 = mock(JavaDelegate.class);
+        
+        getServiceTaskRegistry().register("t1", t1);
+        getServiceTaskRegistry().register("t2", t2);
+  
+        String processId = "test";
+        deploy(new ProcessDefinition(processId, Arrays.asList(
+            new StartEvent("start"),
+            
+            new SequenceFlow("ft1", "start", "t1"),
+            new ServiceTask("t1", ExpressionType.DELEGATE, "${t1}"),
+            
+            new SequenceFlow("fgw1", "t1", "gw1"),
+            new InclusiveGateway("gw1"),
+            
+            new SequenceFlow("floop", "gw1", "t1", "${x < 3}"),
+            new SequenceFlow("ft2", "gw1", "t2"),
+            
+            new ServiceTask("t2", ExpressionType.DELEGATE, "${t2}"),
+            
+            new SequenceFlow("fgw2", "t2", "gw2"),
+            new InclusiveGateway("gw2"),
+            
+            new SequenceFlow("fend", "gw2", "end"),
+            new EndEvent("end")
+        )));
+  
+        String key = UUID.randomUUID().toString();
+        getEngine().start(key, processId, null);
+        
+        verify(t1, times(3)).execute(any(ExecutionContext.class));
+        verify(t2, times(3)).execute(any(ExecutionContext.class));
+  
+        assertActivations(key, processId,
+            "start", 
+            
+            // x == 0
+            "ft1", "t1",
+            "fgw1", "gw1",
+  
+            // x == 1
+            "floop", "t1",
+            "fgw1", "gw1",
+  
+            // x == 2
+            "floop", "t1",
+            "fgw1", "gw1",
+            
+            // y == 0
+            "ft2", "t2",
+            "fgw2", "gw2",
+            
+            // y == 1
+            "ft2", "t2",
+            "fgw2", "gw2",
+            
+            // y == 2
+            "ft2", "t2",
+            "fgw2", "gw2",
+            
+            // done
+            "fend", "end"
+            );
+        assertNoMoreActivations();
+    }
+
 }

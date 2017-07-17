@@ -221,6 +221,44 @@ public class ProcessDefinitionBuilderTest {
 
         assertThat(it.hasNext(), is(false));
     }
+    
+    @Test
+    public void testForkLoopWithExpressions() {
+        ProcessDefinition def = ProcessDefinitionBuilder.newProcess("test")
+                .task("t1")
+                .fork()
+                    .task("t2")
+                    .flowExpr("foo")
+                    .loop()
+                .fork()
+                    .task("t3")
+                    .flowExpr("bar")
+                    .loop()
+                .flowExpr("baz")
+                .task("t4")
+                .end();
+
+        Iterator<AbstractElement> it = def.getChildren().iterator();
+
+        StartEvent s;
+        ServiceTask t, t1, t2, t3;
+
+        s = validateStart(it);
+        t = t1 = validateTaskFlow(it, "t1", s);
+        t = t2 = validateTaskFlow(it, "t2", t1);
+        t = t3 = validateTaskFlow(it, "t3", t1);
+
+        String ft2 = validateFlow(it, t2, null, "foo");
+        String ft3 = validateFlow(it, t3, null, "bar");
+        String ft1 = validateFlow(it, t1, null, "baz");
+        assertThat(ft1.equals(ft2), is(true));
+        assertThat(ft2.equals(ft3), is(true));
+        t = validateTask(it, "t4", ft1);
+
+        validateEndFlow(it, t);
+
+        assertThat(it.hasNext(), is(false));
+    }
 
     @Test
     public void testApply() {
@@ -470,6 +508,10 @@ public class ProcessDefinitionBuilderTest {
     }
 
     private static String validateFlow(Iterator<AbstractElement> it, AbstractElement prev) {
+        return validateFlow(it, prev, null, null);
+    }
+
+    private static String validateFlow(Iterator<AbstractElement> it, AbstractElement prev, String flowName, String flowExpr) {
         assertThat(prev, notNullValue());
         assertThat(it.hasNext(), is(true));
 
@@ -477,6 +519,10 @@ public class ProcessDefinitionBuilderTest {
         assertThat(elem, instanceOf(SequenceFlow.class));
         SequenceFlow f = (SequenceFlow) elem;
         assertThat(f.getFrom(), is(prev.getId()));
+        if(flowName != null) {
+            assertThat(f.getId(), is(flowName));
+        }
+        assertThat(f.getExpression(), is(flowExpr));
 
         return f.getTo();
     }
