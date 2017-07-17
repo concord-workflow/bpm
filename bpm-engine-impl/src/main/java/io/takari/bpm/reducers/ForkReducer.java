@@ -2,14 +2,7 @@ package io.takari.bpm.reducers;
 
 import io.takari.bpm.IndexedProcessDefinition;
 import io.takari.bpm.ProcessDefinitionUtils;
-import io.takari.bpm.actions.Action;
-import io.takari.bpm.actions.ActivateFlowsAction;
-import io.takari.bpm.actions.CommenceForkAction;
-import io.takari.bpm.actions.FollowFlowsAction;
-import io.takari.bpm.actions.InclusiveForkAction;
-import io.takari.bpm.actions.ParallelForkAction;
-import io.takari.bpm.actions.PopScopeAction;
-import io.takari.bpm.actions.PushScopeAction;
+import io.takari.bpm.actions.*;
 import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.commands.CommandStack;
@@ -20,16 +13,10 @@ import io.takari.bpm.model.SequenceFlow;
 import io.takari.bpm.state.Forks;
 import io.takari.bpm.state.Forks.Fork;
 import io.takari.bpm.state.ProcessInstance;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Impure
 public class ForkReducer implements Reducer {
@@ -80,7 +67,7 @@ public class ForkReducer implements Reducer {
             Fork fork = forks.getFork(scopeId, a.getElementId());
 
             ActivateFlowsAction activateFlows = ActivateFlowsAction.empty(a.getDefinitionId());
-            
+
             List<String> flows = new ArrayList<>();
             List<Action> actions = new ArrayList<>();
             for (String flowId : fork.getFlows()) {
@@ -95,12 +82,12 @@ public class ForkReducer implements Reducer {
             actions.add(activateFlows);
             actions.add(new FollowFlowsAction(a.getDefinitionId(), a.getElementId(), flows));
 
-            CommandStack stack = state.getStack() //
-                    .push(new PerformActionsCommand(new PopScopeAction())) //
-                    .push(new PerformActionsCommand(actions)) //
+            CommandStack stack = state.getStack()
+                    .push(new PerformActionsCommand(new PopScopeAction()))
+                    .push(new PerformActionsCommand(actions))
                     .push(new PerformActionsCommand(new PushScopeAction(a.getDefinitionId(), a.getElementId(), false)));
 
-            return state.setForks(forks.removeFork(scopeId, a.getElementId())) //
+            return state.setForks(forks.removeFork(scopeId, a.getElementId()))
                     .setStack(stack);
         }
 
@@ -124,9 +111,9 @@ public class ForkReducer implements Reducer {
             SequenceFlow ff = flows.get(0);
             if (ProcessDefinitionUtils.isTracedToElement(pd, ff.getId(), elementId)) {
                 flows.remove(0);
-                stack = stack.push(new PerformActionsCommand(Arrays.asList( //
-                        new ActivateFlowsAction(definitionId, ff.getId(), 1), //
-                        new FollowFlowsAction(definitionId, elementId, Collections.singletonList(ff.getId())) //
+                stack = stack.push(new PerformActionsCommand(Arrays.asList(
+                        new ActivateFlowsAction(definitionId, ff.getId(), 1),
+                        new FollowFlowsAction(definitionId, elementId, Collections.singletonList(ff.getId()))
                 )));
             }
         }
@@ -149,7 +136,7 @@ public class ForkReducer implements Reducer {
     private static List<SequenceFlow> filterInactive(ExpressionManager em, ExecutionContext ctx, List<SequenceFlow> flows) {
         List<SequenceFlow> result = new ArrayList<>(flows);
 
-        for (Iterator<SequenceFlow> i = result.iterator(); i.hasNext();) {
+        for (Iterator<SequenceFlow> i = result.iterator(); i.hasNext(); ) {
             SequenceFlow f = i.next();
             if (f.getExpression() != null) {
                 String expr = f.getExpression();

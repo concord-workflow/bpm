@@ -177,12 +177,12 @@ public final class ProcessDefinitionUtils {
     }
 
     private static void fillQueue(Queue<FlowSignal> q, IndexedProcessDefinition pd, String elemId, int count) throws ExecutionException {
-        findOptionalOutgoingFlows(pd, elemId).stream() //
-                .map(s -> new FlowSignal(s, count)) //
+        findOptionalOutgoingFlows(pd, elemId).stream()
+                .map(s -> new FlowSignal(s, count))
                 .forEach(q::add);
 
         for (BoundaryEvent be : findOptionalBoundaryEvents(pd, elemId)) {
-            findOptionalOutgoingFlows(pd, be.getId()).stream() //
+            findOptionalOutgoingFlows(pd, be.getId()).stream()
                     .map(s -> new FlowSignal(s, 0)) // assuming no errors at first
                     .forEach(q::add);
         }
@@ -273,7 +273,7 @@ public final class ProcessDefinitionUtils {
                 processingQueue.add(((SequenceFlow) target).getTo());
                 continue;
             }
-            findOptionalOutgoingFlows(pd, nextId).stream() //
+            findOptionalOutgoingFlows(pd, nextId).stream()
                     .forEach(f -> processingQueue.add(f.getId()));
         }
 
