@@ -738,7 +738,7 @@ public abstract class ProcessDefinitionBuilder {
 
             // perform joining, if needed
             String loopJoin = loopJoin();
-            if (hasJoins(loopJoin)) {
+            if (joinPoint == null && hasJoins(loopJoin)) {
                 joinPoint(loopJoin);
             }
             

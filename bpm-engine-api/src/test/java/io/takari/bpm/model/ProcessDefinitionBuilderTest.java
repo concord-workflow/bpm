@@ -221,7 +221,41 @@ public class ProcessDefinitionBuilderTest {
 
         assertThat(it.hasNext(), is(false));
     }
-    
+
+    @Test
+    public void testTieForks() {
+        ProcessDefinition def = ProcessDefinitionBuilder.newProcess("test")
+                .task("t1")
+                .fork()
+                    .task("t2")
+                    .loop()
+                .fork()
+                    .task("t3")
+                    .loop()
+                .tieForks()
+                .task("t4")
+                .end();
+
+        Iterator<AbstractElement> it = def.getChildren().iterator();
+
+        StartEvent s;
+        ServiceTask t, t1, t2, t3;
+
+        s = validateStart(it);
+        t = t1 = validateTaskFlow(it, "t1", s);
+        t = t2 = validateTaskFlow(it, "t2", t1);
+        t = t3 = validateTaskFlow(it, "t3", t1);
+
+        String ft2 = validateFlow(it, t2);
+        String ft3 = validateFlow(it, t3);
+        assertThat(ft2.equals(ft3), is(true));
+        t = validateTask(it, "t4", ft2);
+
+        validateEndFlow(it, t);
+
+        assertThat(it.hasNext(), is(false));
+    }
+
     @Test
     public void testForkLoopWithExpressions() {
         ProcessDefinition def = ProcessDefinitionBuilder.newProcess("test")
