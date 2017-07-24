@@ -1,5 +1,6 @@
 package io.takari.bpm.elements;
 
+import io.takari.bpm.Configuration;
 import io.takari.bpm.IndexedProcessDefinition;
 import io.takari.bpm.ProcessDefinitionUtils;
 import io.takari.bpm.actions.*;
@@ -16,6 +17,12 @@ import java.util.List;
 import java.util.Set;
 
 public class CallActivityHandler implements ElementHandler {
+
+    private final Configuration cfg;
+
+    public CallActivityHandler(Configuration cfg) {
+        this.cfg = cfg;
+    }
 
     @Override
     public List<Action> handle(ProcessInstance state, ProcessElementCommand cmd, List<Action> actions) throws ExecutionException {
@@ -44,7 +51,8 @@ public class CallActivityHandler implements ElementHandler {
         actions.add(new MakeSubProcessVariablesAction(inVariables, a.isCopyAllVariables()));
 
         // add a variables merging command to the stack
-        Command mergeCommand = new MergeVariablesCommand(state.getVariables(), outVariables);
+        Command mergeCommand = new MergeVariablesCommand(state.getVariables(), outVariables,
+                cfg.isCopyAllCallActivityOutVariables() && a.isCopyAllVariables());
         finishers.add(mergeCommand);
         actions.add(new PushCommandAction(mergeCommand));
 

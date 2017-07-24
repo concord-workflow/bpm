@@ -12,10 +12,12 @@ public class MergeVariablesAction implements Action {
 
     private final Variables source;
     private final Set<VariableMapping> outVariables;
+    private final boolean copyAllVariables;
 
-    public MergeVariablesAction(Variables source, Set<VariableMapping> outVariables) {
+    public MergeVariablesAction(Variables source, Set<VariableMapping> outVariables, boolean copyAllVariables) {
         this.source = source;
         this.outVariables = outVariables;
+        this.copyAllVariables = copyAllVariables;
     }
 
     public Variables getSource() {
@@ -26,9 +28,17 @@ public class MergeVariablesAction implements Action {
         return outVariables;
     }
 
+    public boolean isCopyAllVariables() {
+        return copyAllVariables;
+    }
+
     @Override
     @CoverageIgnore
     public String toString() {
-        return "MergeVariablesAction [source=" + source + ", outVariables=" + outVariables + "]";
+        return "MergeVariablesAction [" +
+                "source=" + source +
+                ", outVariables=" + outVariables +
+                ", copyAllVariables=" + copyAllVariables +
+                ']';
     }
 }

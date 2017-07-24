@@ -12,6 +12,8 @@ public class Configuration implements Serializable {
     private UnhandledBpmnErrorStrategy unhandledBpmnErrorStrategy = UnhandledBpmnErrorStrategy.PROPAGATE;
     private boolean wrapAllExceptionsAsBpmnErrors = false;
 
+    private boolean copyAllCallActivityOutVariables = false;
+
     public boolean isThrowExceptionOnUnhandledBpmnError() {
         return unhandledBpmnErrorStrategy == UnhandledBpmnErrorStrategy.EXCEPTION;
     }
@@ -97,6 +99,20 @@ public class Configuration implements Serializable {
      */
     public void setWrapAllExceptionsAsBpmnErrors(boolean wrapAllExceptionsAsBpmnErrors) {
         this.wrapAllExceptionsAsBpmnErrors = wrapAllExceptionsAsBpmnErrors;
+    }
+
+    public boolean isCopyAllCallActivityOutVariables() {
+        return copyAllCallActivityOutVariables;
+    }
+
+    /**
+     * If {@code true}, then {@link io.takari.bpm.model.CallActivity#copyAllVariables} switch will be applied
+     * to OUT variables as well as to IN variables.
+     *
+     * @param copyAllCallActivityOutVariables
+     */
+    public void setCopyAllCallActivityOutVariables(boolean copyAllCallActivityOutVariables) {
+        this.copyAllCallActivityOutVariables = copyAllCallActivityOutVariables;
     }
 
     public enum UnhandledBpmnErrorStrategy {
