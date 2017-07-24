@@ -1,5 +1,14 @@
 # Change Log
 
+## [Unreleased]
+
+### Added
+
+- `Configuration#copyAllCallActivityOutVariables`: enables implicit
+copying of CallActivity's variables back into the parent context.
+
+
+
 ## [0.31.2] - 2017-07-17
 
 ### Changed

@@ -1,5 +1,6 @@
 package io.takari.bpm.elements;
 
+import io.takari.bpm.Configuration;
 import io.takari.bpm.IndexedProcessDefinition;
 import io.takari.bpm.ProcessDefinitionUtils;
 import io.takari.bpm.actions.Action;
@@ -18,8 +19,9 @@ public class DelegatingElementHandler implements ElementHandler {
 
     private static final Logger log = LoggerFactory.getLogger(DelegatingElementHandler.class);
 
-    private static final Map<Class<? extends AbstractElement>, ElementHandler> delegates;
-    static {
+    private final Map<Class<? extends AbstractElement>, ElementHandler> delegates;
+
+    public DelegatingElementHandler(Configuration cfg) {
         delegates = new HashMap<>();
         delegates.put(StartEvent.class, new StartEventHandler());
         delegates.put(EndEvent.class, new EndEventHandler());
@@ -27,7 +29,7 @@ public class DelegatingElementHandler implements ElementHandler {
         delegates.put(ServiceTask.class, new ServiceTaskHandler());
         delegates.put(BoundaryEvent.class, new BoundaryEventHandler());
         delegates.put(SubProcess.class, new SubProcessHandler());
-        delegates.put(CallActivity.class, new CallActivityHandler());
+        delegates.put(CallActivity.class, new CallActivityHandler(cfg));
         delegates.put(IntermediateCatchEvent.class, new IntermediateCatchEventHandler());
         delegates.put(EventBasedGateway.class, new EventBasedGatewayHandler());
         delegates.put(ExclusiveGateway.class, new ExclusiveGatewayHandler());

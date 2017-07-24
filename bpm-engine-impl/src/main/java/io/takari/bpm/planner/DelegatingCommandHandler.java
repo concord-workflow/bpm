@@ -16,7 +16,7 @@ public class DelegatingCommandHandler implements CommandHandler<Command> {
     private final MergeVariablesCommandHandler mergeVariablesCommandHandler;
 
     public DelegatingCommandHandler(Configuration cfg) {
-        this.processElementCommandHandler = new ProcessElementCommandHandler();
+        this.processElementCommandHandler = new ProcessElementCommandHandler(cfg);
         this.performActionCommandHandler = new PerformActionCommandHandler();
         this.activityFinalizerCommandHandler = new ActivityFinalizerCommandHandler(cfg);
         this.mergeVariablesCommandHandler = new MergeVariablesCommandHandler();

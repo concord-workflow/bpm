@@ -1,5 +1,6 @@
 package io.takari.bpm.planner;
 
+import io.takari.bpm.Configuration;
 import io.takari.bpm.actions.Action;
 import io.takari.bpm.actions.ActivateElementAction;
 import io.takari.bpm.api.ExecutionException;
@@ -12,7 +13,11 @@ import java.util.List;
 
 public class ProcessElementCommandHandler implements CommandHandler<ProcessElementCommand> {
 
-    private final ElementHandler elementHandler = new DelegatingElementHandler();
+    private final ElementHandler elementHandler;
+
+    public ProcessElementCommandHandler(Configuration cfg) {
+        this.elementHandler = new DelegatingElementHandler(cfg);
+    }
 
     @Override
     public List<Action> handle(ProcessInstance state, ProcessElementCommand cmd, List<Action> actions) throws ExecutionException {

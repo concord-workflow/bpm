@@ -36,6 +36,11 @@ public class VariablesReducer implements Reducer {
             // copy the out variables to the parent's context
             Variables src = a.getSource();
             Variables dst = state.getVariables();
+
+            if (a.isCopyAllVariables()) {
+                dst = VariablesHelper.copyVariables(src, dst);
+            }
+
             dst = VariablesHelper.copyVariables(expressionManager, src, dst, a.getOutVariables());
 
             return state.setVariables(dst);

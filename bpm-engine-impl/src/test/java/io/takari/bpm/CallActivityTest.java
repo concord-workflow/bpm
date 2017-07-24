@@ -9,6 +9,7 @@ import org.junit.Test;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.*;
 
 public class CallActivityTest extends AbstractEngineTest {
@@ -979,5 +980,90 @@ public class CallActivityTest extends AbstractEngineTest {
         // ---
 
         verify(t1, times(1)).execute(any(ExecutionContext.class));
+    }
+
+    /**
+     * start --> call                      t2 --> end
+     *               \                    /
+     *                start --> t1 --> end
+     */
+    @Test
+    public void testNoImplicitOutVariables() throws Exception {
+        getConfiguration().setCopyAllCallActivityOutVariables(false);
+        String innerKey = "key#" + System.currentTimeMillis();
+        String innerVal = "val#" + System.currentTimeMillis();
+
+        testOutVariable(innerKey, innerVal, new JavaDelegate() {
+            @Override
+            public void execute(ExecutionContext ctx) throws Exception {
+                assertFalse(ctx.hasVariable(innerKey));
+            }
+        });
+    }
+
+    /**
+     * start --> call                      t2 --> end
+     *               \                    /
+     *                start --> t1 --> end
+     */
+    @Test
+    public void testImplicitOutVariables() throws Exception {
+        getConfiguration().setCopyAllCallActivityOutVariables(true);
+        String innerKey = "key#" + System.currentTimeMillis();
+        String innerVal = "val#" + System.currentTimeMillis();
+
+        testOutVariable(innerKey, innerVal, new JavaDelegate() {
+            @Override
+            public void execute(ExecutionContext ctx) throws Exception {
+                assertEquals(innerVal, ctx.getVariable(innerKey));
+            }
+        });
+    }
+
+    private void testOutVariable(String innerKey, String innerVal, JavaDelegate t2) throws Exception {
+        JavaDelegate t1 = spy(new JavaDelegate() {
+            @Override
+            public void execute(ExecutionContext ctx) throws Exception {
+                ctx.setVariable(innerKey, innerVal);
+            }
+        });
+        getServiceTaskRegistry().register("t1", t1);
+
+        t2 = spy(t2);
+        getServiceTaskRegistry().register("t2", t2);
+
+        // ---
+
+
+        String aId = "testA";
+        String bId = "testB";
+
+        deploy(new ProcessDefinition(aId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "call"),
+                new CallActivity("call", bId, true),
+                new SequenceFlow("f2", "call", "t2"),
+                new ServiceTask("t2", ExpressionType.DELEGATE, "${t2}"),
+                new SequenceFlow("f3", "t2", "end"),
+                new EndEvent("end")
+        )));
+
+        deploy(new ProcessDefinition(bId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "t1"),
+                new ServiceTask("t1", ExpressionType.DELEGATE, "${t1}"),
+                new SequenceFlow("f2", "t1", "end"),
+                new EndEvent("end")
+        )));
+
+        // ---
+
+        String key = UUID.randomUUID().toString();
+        getEngine().start(key, aId, null);
+
+        // ---
+
+        verify(t1, times(1)).execute(any(ExecutionContext.class));
+        verify(t2, times(1)).execute(any(ExecutionContext.class));
     }
 }

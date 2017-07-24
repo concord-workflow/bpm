@@ -31,7 +31,7 @@ public class MergeVariablesCommandHandler implements CommandHandler<MergeVariabl
 
         // merge out variables of the child process into the parent's (current)
         // variables map
-        actions.add(new MergeVariablesAction(source, cmd.getOutVariables()));
+        actions.add(new MergeVariablesAction(source, cmd.getOutVariables(), cmd.isCopyAllVariables()));
 
         // handle an raised error (see also EndEventHandler)
         BpmnError error = BpmnErrorHelper.getRaisedError(source);
