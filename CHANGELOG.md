@@ -1,5 +1,13 @@
 # Change Log
 
+## [Unreleased]
+
+### Changed
+
+- fixed an issue with `ProcessDefintionBuilder#tieForks()` logic.
+
+
+
 ## [0.32.0] - 2017-07-24
 
 ### Added
