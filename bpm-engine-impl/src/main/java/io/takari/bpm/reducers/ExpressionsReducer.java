@@ -49,7 +49,7 @@ public class ExpressionsReducer extends BpmnErrorHandlingReducer {
 
         final EvalExpressionAction a = (EvalExpressionAction) action;
 
-        Variables vars = VariablesHelper.applyInVariables(expressionManager, state.getVariables(), a.getIn());
+        Variables vars = VariablesHelper.applyInVariables(expressionManager, state.getVariables(), a.getIn(), a.isCopyAllVariables());
         final ExecutionContextImpl ctx = new ExecutionContextImpl(expressionManager, vars);
 
         boolean storeResult = cfg.isStoreExpressionEvalResultsInContext();

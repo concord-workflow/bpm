@@ -58,7 +58,7 @@ public class ScriptReducer extends BpmnErrorHandlingReducer {
             throw new ExecutionException("Script engine not found: " + t.getLanguage());
         }
 
-        Variables vars = VariablesHelper.applyInVariables(expressionManager, state.getVariables(), t.getIn());
+        Variables vars = VariablesHelper.applyInVariables(expressionManager, state.getVariables(), t.getIn(), t.isCopyAllVariables());
         ExecutionContextImpl ctx = new ExecutionContextImpl(expressionManager, vars);
 
         // expose all available variables plus the context

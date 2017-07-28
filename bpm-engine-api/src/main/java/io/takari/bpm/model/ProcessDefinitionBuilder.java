@@ -31,6 +31,11 @@ public abstract class ProcessDefinitionBuilder {
         Seq task(ExpressionType expType, String expr, Set<VariableMapping> in, Set<VariableMapping> out);
 
         /**
+         * Adds a ServiceTask element with in/out mappings
+         */
+        Seq task(ExpressionType expType, String expr, Set<VariableMapping> in, Set<VariableMapping> out, boolean copyAllVariables);
+
+        /**
          * Adds a simple ServiceTask element
          */
         Seq task(String expr);
@@ -39,6 +44,11 @@ public abstract class ProcessDefinitionBuilder {
          * Adds a simple ServiceTask with in/out mappings
          */
         Seq task(String expr, Set<VariableMapping> in, Set<VariableMapping> out);
+
+        /**
+         * Adds a simple ServiceTask with in/out mappings
+         */
+        Seq task(String expr, Set<VariableMapping> in, Set<VariableMapping> out, boolean copyAllVariables);
 
         /**
          * Adds a delegate ServiceTask element
@@ -51,6 +61,11 @@ public abstract class ProcessDefinitionBuilder {
          * Adds a ScriptTask element.
          */
         Seq script(ScriptTask.Type type, String language, String content);
+
+        /**
+         * Adds a ScriptTask element.
+         */
+        Seq script(ScriptTask.Type type, String language, String content, boolean copyAllVariables);
 
         /**
          * Adds a CallActivity element
@@ -389,7 +404,11 @@ public abstract class ProcessDefinitionBuilder {
         }
 
         default T task(ExpressionType expType, String expr, Set<VariableMapping> in, Set<VariableMapping> out) {
-            return add(new ServiceTask(nextStepId(), expType, expr, in, out));
+            return task(expType, expr, in, out, false);
+        }
+
+        default T task(ExpressionType expType, String expr, Set<VariableMapping> in, Set<VariableMapping> out, boolean copyAllVariables) {
+            return add(new ServiceTask(nextStepId(), expType, expr, in, out, copyAllVariables));
         }
 
         @Override
@@ -399,6 +418,10 @@ public abstract class ProcessDefinitionBuilder {
 
         default T task(String expr, Set<VariableMapping> in, Set<VariableMapping> out) {
             return task(ExpressionType.SIMPLE, expr, in, out);
+        }
+
+        default T task(String expr, Set<VariableMapping> in, Set<VariableMapping> out, boolean copyAllVariables) {
+            return task(ExpressionType.SIMPLE, expr, in, out, copyAllVariables);
         }
 
         @Override
@@ -413,7 +436,12 @@ public abstract class ProcessDefinitionBuilder {
 
         @Override
         default T script(ScriptTask.Type type, String language, String content) {
-            return add(new ScriptTask(nextStepId(), type, language, content));
+            return script(type, language, content, false);
+        }
+
+        @Override
+        default T script(ScriptTask.Type type, String language, String content, boolean copyAllVariables) {
+            return add(new ScriptTask(nextStepId(), type, language, content, copyAllVariables));
         }
 
         @Override

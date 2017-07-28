@@ -1,5 +1,6 @@
 package io.takari.bpm;
 
+import com.google.common.collect.ImmutableSet;
 import io.takari.bpm.api.BpmnError;
 import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.ExecutionException;
@@ -7,7 +8,9 @@ import io.takari.bpm.api.JavaDelegate;
 import io.takari.bpm.model.*;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
+import java.net.ConnectException;
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -423,8 +426,58 @@ public class ServiceTaskTest extends AbstractEngineTest {
         verify(t2, times(1)).execute(any(ExecutionContext.class));
     }
 
+    /**
+     * start --> t1 --> end
+     */
+    @Test
+    public void testCopyAllVariablesTaskExpression() throws Exception {
+        SampleTask t = mock(SampleTask.class);
+        getServiceTaskRegistry().register("hello", t);
+        Set<VariableMapping> inVars = ImmutableSet.of(VariableMapping.set("inVar1Value", "inVar1"));
+        // ---
+
+        String processId = "test";
+        deploy(new ProcessDefinition(processId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "t1"),
+                new ServiceTask("t1", ExpressionType.SIMPLE, "${hello.doIt(execution)}",
+                        inVars, null, true),
+                new SequenceFlow("f2", "t1", "end"),
+                new EndEvent("end")
+        )));
+
+        // ---
+
+        String key = UUID.randomUUID().toString();
+        Map<String, Object> vars = new HashMap<>();
+        vars.put("name", "world");
+        getEngine().start(key, processId, vars);
+
+        // ---
+
+        assertActivations(key, processId,
+                "start",
+                "f1",
+                "t1",
+                "f2",
+                "end");
+        assertNoMoreActivations();
+
+        // ---
+
+        ArgumentCaptor<ExecutionContext> argumentCaptor = ArgumentCaptor.forClass(ExecutionContext.class);
+        verify(t).doIt(argumentCaptor.capture());
+
+        assertEquals("world", argumentCaptor.getValue().getVariable("name"));
+        assertEquals("inVar1Value", argumentCaptor.getValue().getVariable("inVar1"));
+    }
+
     public interface SampleTask {
 
         void doIt(long i);
+
+        default void doIt(ExecutionContext execution) {
+            //do nothing
+        }
     }
 }

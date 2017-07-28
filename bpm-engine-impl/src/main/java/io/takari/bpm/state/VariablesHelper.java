@@ -59,13 +59,19 @@ public final class VariablesHelper {
     }
 
     public static Variables applyInVariables(ExpressionManager expressionManager, Variables src,
-                                             Set<VariableMapping> in) throws ExecutionException {
+                                             Set<VariableMapping> in,
+                                             boolean appendCurrentVariablesIntoInVariables) throws ExecutionException {
 
         if (in == null) {
             // if there is no IN variables, we will use the original process-level variables
             return src;
         }
-        return copyVariables(expressionManager, src, new Variables(), in);
+
+        Variables parentVariables = null;
+        if(appendCurrentVariablesIntoInVariables) {
+            parentVariables = src;
+        }
+        return copyVariables(expressionManager, src, new Variables(parentVariables), in);
     }
 
     public static ProcessInstance applyOutVariables(ExpressionManager expressionManager, ProcessInstance state,
@@ -89,6 +95,7 @@ public final class VariablesHelper {
         return state.setStack(state.getStack().push(cmd));
     }
 
+    @SuppressWarnings("unchecked")
     public static ProcessInstance interpolate(ExpressionManager expressionManager, ProcessInstance state) {
         Variables vars = state.getVariables();
 

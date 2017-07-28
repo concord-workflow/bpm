@@ -9,18 +9,28 @@ public class ScriptTask extends AbstractElement {
     private final String content;
     private final Set<VariableMapping> in;
     private final Set<VariableMapping> out;
+    private boolean copyAllVariables;
 
     public ScriptTask(String id, Type type, String language, String content) {
-        this(id, type, language, content, null, null);
+        this(id, type, language, content, null, null, false);
+    }
+
+    public ScriptTask(String id, Type type, String language, String content, boolean copyAllVariables) {
+        this(id, type, language, content, null, null, copyAllVariables);
     }
 
     public ScriptTask(String id, Type type, String language, String content, Set<VariableMapping> in, Set<VariableMapping> out) {
+        this(id, type, language, content, in, out, false);
+    }
+
+    public ScriptTask(String id, Type type, String language, String content, Set<VariableMapping> in, Set<VariableMapping> out, boolean copyAllVariables) {
         super(id);
         this.type = type;
         this.language = language;
         this.content = content;
         this.in = in;
         this.out = out;
+        this.copyAllVariables = copyAllVariables;
     }
 
     public Type getType() {
@@ -43,6 +53,10 @@ public class ScriptTask extends AbstractElement {
         return out;
     }
 
+    public boolean isCopyAllVariables() {
+        return copyAllVariables;
+    }
+
     public enum Type {
         /**
          * Contains a reference to an external script.
@@ -63,6 +77,7 @@ public class ScriptTask extends AbstractElement {
                 ", in=" + in +
                 ", out=" + out +
                 ", content='" + content + '\'' +
+                ", copyAllVariables='" + copyAllVariables + '\'' +
                 '}';
     }
 }

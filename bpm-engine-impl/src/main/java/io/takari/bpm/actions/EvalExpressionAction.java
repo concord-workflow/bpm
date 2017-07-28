@@ -24,9 +24,11 @@ public class EvalExpressionAction implements Action {
     private final Map<String, Command> errors;
     private final Set<VariableMapping> in;
     private final Set<VariableMapping> out;
+    private final boolean copyAllVariables;
 
     private EvalExpressionAction(String definitionId, String elementId, ExpressionType type, String expression,
-                                 Command defaultCommand, List<Timeout<Command>> timeouts, Command defaultError, Map<String, Command> errors, Set<VariableMapping> in, Set<VariableMapping> out) {
+                                 Command defaultCommand, List<Timeout<Command>> timeouts, Command defaultError, Map<String, Command> errors,
+                                 Set<VariableMapping> in, Set<VariableMapping> out, boolean copyAllVariables) {
         this.definitionId = definitionId;
         this.elementId = elementId;
         this.type = type;
@@ -37,6 +39,7 @@ public class EvalExpressionAction implements Action {
         this.errors = errors;
         this.in = in;
         this.out = out;
+        this.copyAllVariables = copyAllVariables;
     }
 
     public String getDefinitionId() {
@@ -79,6 +82,10 @@ public class EvalExpressionAction implements Action {
         return out;
     }
 
+    public boolean isCopyAllVariables() {
+        return copyAllVariables;
+    }
+
     @Override
     @CoverageIgnore
     public String toString() {
@@ -93,6 +100,7 @@ public class EvalExpressionAction implements Action {
                 ", errors=" + errors +
                 ", in=" + in +
                 ", out=" + out +
+                ", copyAllVariables=" + copyAllVariables +
                 ']';
     }
 
@@ -109,6 +117,7 @@ public class EvalExpressionAction implements Action {
         private Map<String, Command> errors;
         private Set<VariableMapping> in;
         private Set<VariableMapping> out;
+        private boolean copyAllVariables;
 
         public Builder(String definitionId, String elementId, ExpressionType type, String expression, Command defaultCommand) {
             this.definitionId = definitionId;
@@ -143,8 +152,13 @@ public class EvalExpressionAction implements Action {
             return this;
         }
 
+        public Builder withCopyAllVariables(boolean copyAllVariables) {
+            this.copyAllVariables = copyAllVariables;
+            return this;
+        }
+
         public EvalExpressionAction build() {
-            return new EvalExpressionAction(definitionId, elementId, type, expression, defaultCommand, timeouts, defaultError, errors, in, out);
+            return new EvalExpressionAction(definitionId, elementId, type, expression, defaultCommand, timeouts, defaultError, errors, in, out, copyAllVariables);
         }
     }
 }

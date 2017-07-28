@@ -58,6 +58,7 @@ public class ServiceTaskHandler implements ElementHandler {
                     .withErrors(errors)
                     .withInVariables(notEmpty(t.getIn()))
                     .withOutVariables(notEmpty(t.getOut()))
+                    .withCopyAllVariables(t.isCopyAllVariables())
                     .build());
 
             log.debug("handle ['{}', '{}', {}, '{}'] -> done", state.getBusinessKey(), cmd.getElementId(), type, expr);

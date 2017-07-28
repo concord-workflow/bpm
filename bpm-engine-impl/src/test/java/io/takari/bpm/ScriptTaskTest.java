@@ -4,6 +4,7 @@ import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.JavaDelegate;
 import io.takari.bpm.model.*;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
 import java.util.*;
 
@@ -136,6 +137,56 @@ public class ScriptTaskTest extends AbstractEngineTest {
                 "f3",
                 "end");
         assertNoMoreActivations();
+
+        verify(t2, times(1)).execute(any(ExecutionContext.class));
+    }
+
+    /**
+     * start --> t1 --> t2 --> end
+     */
+    @Test
+    public void testJsWithCopyAllVariables() throws Exception {
+
+        String script = "execution.setVariable('inner', execution.getVariable('main') + 10)";
+
+        // --
+
+        Set<VariableMapping> in = new HashSet<>();
+        in.add(VariableMapping.set("whatever", "invar1"));
+        Set<VariableMapping> out = Collections.singleton(VariableMapping.copy("inner", "outer"));
+
+        String processId = "test";
+        deploy(new ProcessDefinition(processId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "t1"),
+                new ScriptTask("t1", ScriptTask.Type.CONTENT, "javascript", script, in, out, true),
+                new SequenceFlow("f2", "t1", "t2"),
+                new ServiceTask("t2", ExpressionType.DELEGATE, "${t2}"),
+                new SequenceFlow("f3", "t2", "end"),
+                new EndEvent("end")
+        )));
+
+        // ---
+
+        JavaDelegate t2 = spy(new JavaDelegate() {
+
+            @Override
+            public void execute(ExecutionContext ctx) throws Exception {
+                Double c = (Double) ctx.getVariable("outer");
+                assertNotNull(c);
+                assertEquals((Double)Double.sum(5,10), c);
+            }
+        });
+        getServiceTaskRegistry().register("t2", t2);
+
+        // ---
+
+        String key = UUID.randomUUID().toString();
+
+        Map<String, Object> args = new HashMap<>();
+        args.put("main", 5);
+
+        getEngine().start(key, processId, args);
 
         verify(t2, times(1)).execute(any(ExecutionContext.class));
     }
