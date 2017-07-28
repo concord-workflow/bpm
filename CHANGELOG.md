@@ -1,5 +1,15 @@
 # Change Log
 
+## [Unreleased]
+
+### Added
+
+- `ScriptTask#copyAllVariables` and `ServiceTask#copyAllVariables`
+options: if `true`, copies all variables of the current context in
+addition to any IN-variables set.
+
+
+
 ## [0.32.1] - 2017-07-24
 
 ### Changed
