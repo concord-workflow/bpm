@@ -184,7 +184,7 @@ public class ScriptTaskTest extends AbstractEngineTest {
         String key = UUID.randomUUID().toString();
 
         Map<String, Object> args = new HashMap<>();
-        args.put("main", 5);
+        args.put("main", 5.0);
 
         getEngine().start(key, processId, args);
 
