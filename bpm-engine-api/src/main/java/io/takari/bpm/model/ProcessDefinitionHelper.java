@@ -43,6 +43,9 @@ public final class ProcessDefinitionHelper {
                 if (t.getOut() != null) {
                     pad(b.append("\n"), level + 1).append("OUT: ").append(t.getOut());
                 }
+            } else if (e instanceof BoundaryEvent) {
+                BoundaryEvent ev = (BoundaryEvent) e;
+                b.append(" ").append(ev.getErrorRef()).append(" @ ").append(ev.getAttachedToRef());
             }
 
             b.append("\n");
