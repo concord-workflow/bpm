@@ -14,7 +14,11 @@ public interface ExpressionManager {
     @SuppressWarnings("unchecked")
     default Object interpolate(ExecutionContext ctx, Object v) {
         if (v instanceof String) {
-            return eval(ctx, (String) v, Object.class);
+            String s = (String) v;
+            if (!s.contains("${")) {
+                return s;
+            }
+            return eval(ctx, s, Object.class);
         } else if (v instanceof Map) {
             Map<Object, Object> m = (Map<Object, Object>) v;
             if (m.isEmpty()) {

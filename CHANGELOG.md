@@ -1,5 +1,13 @@
 # Change Log
 
+## [Unreleased]
+
+### Changed
+
+- small performance optimization of `ExpressionManager#interpolate`.
+
+
+
 ## [0.33.0] - 2017-07-27
 
 ### Added
