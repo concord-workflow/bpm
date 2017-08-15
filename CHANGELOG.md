@@ -1,5 +1,13 @@
 # Change Log
 
+## [Unreleased]
+
+### Added
+
+- new `ExecutionContext#interpolate` method.
+
+
+
 ## [0.33.1] - 2017-08-14
 
 ### Changed

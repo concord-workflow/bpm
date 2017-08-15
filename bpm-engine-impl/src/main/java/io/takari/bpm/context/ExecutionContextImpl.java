@@ -131,6 +131,11 @@ public class ExecutionContextImpl implements ExecutionContext {
         return m;
     }
 
+    @Override
+    public Object interpolate(Object v) {
+        return exprManager.interpolate(this, v);
+    }
+
     private static List<Variables> stack(Variables tail) {
         List<Variables> l = new ArrayList<>();
 

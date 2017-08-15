@@ -30,4 +30,6 @@ public interface ExecutionContext {
     <T> T eval(String expr, Class<T> type);
 
     Map<String, Object> toMap();
+
+    Object interpolate(Object v);
 }
