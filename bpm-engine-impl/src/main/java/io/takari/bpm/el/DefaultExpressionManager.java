@@ -38,6 +38,7 @@ public class DefaultExpressionManager implements ExpressionManager {
     public <T> T eval(ExecutionContext ctx, String expr, Class<T> type) {
         try {
             ELResolver r = createResolver(ctx);
+
             StandardELContext sc = new StandardELContext(expressionFactory);
             sc.putContext(ExpressionFactory.class, expressionFactory);
             sc.addELResolver(r);

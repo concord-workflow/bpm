@@ -4,10 +4,15 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.JavaDelegate;
+import io.takari.bpm.context.ExecutionContextImpl;
+import io.takari.bpm.state.Variables;
 import io.takari.bpm.task.KeyAwareServiceTaskRegistry;
+import io.takari.bpm.task.ServiceTaskRegistry;
 import org.junit.Test;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
@@ -15,10 +20,42 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 
 public class ExpressionManagerTest {
+
+    @Test
+    public void testInterpolation() throws Exception {
+        Map<String, Object> m = new LinkedHashMap<>();
+
+        m.put("primaryServers", new String[]{"127.0.0.1"});
+
+        Map<String, Object> primary = new LinkedHashMap<>();
+        primary.put("servers", "${primaryServers}");
+
+        Map<String, Object> active = new LinkedHashMap<>();
+        active.put("servers", "${landscape.primary.servers}");
+
+        Map<String, Object> landscape = new LinkedHashMap<>();
+        landscape.put("primary", primary);
+        landscape.put("active", active);
+
+        m.put("landscape", landscape);
+
+        // ---
+
+        ExpressionManager em = new DefaultExpressionManager(mock(ServiceTaskRegistry.class));
+
+        ExecutionContext ctx = new ExecutionContextImpl(em, new Variables(m));
+        m = (Map<String, Object>) Interpolator.interpolate(em, ctx, m);
+
+        // ---
+
+        assertEquals(2, m.size());
+
+        Object[] as = (Object[]) ((Map<String, Object>) ((Map<String, Object>) m.get("landscape")).get("active")).get("servers");
+        assertEquals(1, as.length);
+        assertEquals("127.0.0.1", as[0]);
+    }
 
     @Test
     public void testEvalInt() throws Exception {

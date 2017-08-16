@@ -4,6 +4,8 @@
 
 ### Added
 
+- `ExpressionManager#interpolate` can now interpolate recursive
+values in the same Map object;
 - new `ExecutionContext#interpolate` method.
 
 

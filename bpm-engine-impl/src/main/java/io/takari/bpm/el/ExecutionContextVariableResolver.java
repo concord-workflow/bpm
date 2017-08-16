@@ -1,13 +1,12 @@
 package io.takari.bpm.el;
 
-import java.beans.FeatureDescriptor;
-import java.util.Iterator;
+import io.takari.bpm.api.ExecutionContext;
+import io.takari.bpm.misc.CoverageIgnore;
 
 import javax.el.ELContext;
 import javax.el.ELResolver;
-
-import io.takari.bpm.api.ExecutionContext;
-import io.takari.bpm.misc.CoverageIgnore;
+import java.beans.FeatureDescriptor;
+import java.util.Iterator;
 
 public class ExecutionContextVariableResolver extends ELResolver {
 
@@ -37,10 +36,12 @@ public class ExecutionContextVariableResolver extends ELResolver {
 
     @Override
     public Object getValue(ELContext context, Object base, Object property) {
-        String k = (String) property;
-        if (base == null && executionContext.hasVariable(k)) {
-            context.setPropertyResolved(true);
-            return executionContext.getVariable(k);
+        if (base == null && property instanceof String) {
+            String k = (String) property;
+            if (executionContext.hasVariable(k)) {
+                context.setPropertyResolved(true);
+                return executionContext.getVariable(k);
+            }
         }
 
         return null;
