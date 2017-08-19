@@ -11,20 +11,27 @@ import javax.el.*;
 public class DefaultExpressionManager implements ExpressionManager {
 
     private static final Logger log = LoggerFactory.getLogger(DefaultExpressionManager.class);
+    private static final String[] DEFAULT_CONTEXT_VARIABLE_NAMES = { "execution" };
 
     private final String[] contextVariableNames;
     private final ExpressionFactory expressionFactory = ExpressionFactory.newInstance();
     private final ELResolver[] resolvers;
 
     public DefaultExpressionManager(ServiceTaskRegistry serviceTaskRegistry) {
-        this(new String[]{"execution"}, serviceTaskRegistry);
+        this(DEFAULT_CONTEXT_VARIABLE_NAMES, serviceTaskRegistry);
     }
 
     public DefaultExpressionManager(String[] contextVariableNames, ServiceTaskRegistry serviceTaskRegistry) {
+        this(contextVariableNames, new ServiceTaskResolver(serviceTaskRegistry));
+    }
+
+    public DefaultExpressionManager(ELResolver... resolvers) {
+        this(DEFAULT_CONTEXT_VARIABLE_NAMES, resolvers);
+    }
+
+    public DefaultExpressionManager(String[] contextVariableNames, ELResolver... resolvers) {
         this.contextVariableNames = contextVariableNames;
-        this.resolvers = new ELResolver[]{
-                new ServiceTaskResolver(serviceTaskRegistry)
-        };
+        this.resolvers = resolvers;
     }
 
     private ELResolver createResolver(ExecutionContext ctx) {
