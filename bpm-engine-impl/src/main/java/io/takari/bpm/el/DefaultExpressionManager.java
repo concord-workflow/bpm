@@ -12,17 +12,19 @@ public class DefaultExpressionManager implements ExpressionManager {
 
     private static final Logger log = LoggerFactory.getLogger(DefaultExpressionManager.class);
 
+    private final String[] contextVariableNames;
     private final ExpressionFactory expressionFactory = ExpressionFactory.newInstance();
     private final ELResolver[] resolvers;
 
     public DefaultExpressionManager(ServiceTaskRegistry serviceTaskRegistry) {
+        this(new String[]{"execution"}, serviceTaskRegistry);
+    }
+
+    public DefaultExpressionManager(String[] contextVariableNames, ServiceTaskRegistry serviceTaskRegistry) {
+        this.contextVariableNames = contextVariableNames;
         this.resolvers = new ELResolver[]{
                 new ServiceTaskResolver(serviceTaskRegistry)
         };
-    }
-
-    public DefaultExpressionManager(ELResolver... resolvers) {
-        this.resolvers = resolvers;
     }
 
     private ELResolver createResolver(ExecutionContext ctx) {
@@ -42,7 +44,11 @@ public class DefaultExpressionManager implements ExpressionManager {
             StandardELContext sc = new StandardELContext(expressionFactory);
             sc.putContext(ExpressionFactory.class, expressionFactory);
             sc.addELResolver(r);
-            sc.getVariableMapper().setVariable("execution", expressionFactory.createValueExpression(ctx, ExecutionContext.class));
+
+            VariableMapper vm = sc.getVariableMapper();
+            for (String k : contextVariableNames) {
+                vm.setVariable(k, expressionFactory.createValueExpression(ctx, ExecutionContext.class));
+            }
 
             ValueExpression x = expressionFactory.createValueExpression(sc, expr, type);
             Object v = x.getValue(sc);

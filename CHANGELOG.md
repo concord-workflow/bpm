@@ -4,6 +4,8 @@
 
 - allow users to provide their own `ExecutionContext`
 implementations by introducing `ExecutionContextFactory`;
+- support different `ExecutionContext` variable names other than
+`execution`.
 
 
 
