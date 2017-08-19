@@ -1,5 +1,7 @@
 # Change Log
 
+## [0.35.0] - 2017-08-18
+
 ### Added
 
 - allow users to provide their own `ExecutionContext`
