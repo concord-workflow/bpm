@@ -2,6 +2,9 @@ package io.takari.bpm;
 
 import io.takari.bpm.api.Engine;
 import io.takari.bpm.api.EventService;
+import io.takari.bpm.context.DefaultExecutionContextFactory;
+import io.takari.bpm.context.ExecutionContextFactory;
+import io.takari.bpm.context.ExecutionContextImpl;
 import io.takari.bpm.el.DefaultExpressionManager;
 import io.takari.bpm.el.ExpressionManager;
 import io.takari.bpm.event.*;
@@ -25,6 +28,7 @@ public final class EngineBuilder {
 
     private static final int DEFAULT_CONCURRENCY_LEVEL = 64;
 
+    private ExecutionContextFactory<? extends ExecutionContextImpl> contextFactory;
     private EventStorage eventStorage;
     private EventPersistenceManager eventManager;
     private ExecutionInterceptorHolder interceptors;
@@ -118,6 +122,11 @@ public final class EngineBuilder {
         return this;
     }
 
+    public EngineBuilder withContextFactory(ExecutionContextFactory<? extends ExecutionContextImpl> contextFactory) {
+        this.contextFactory = contextFactory;
+        return this;
+    }
+
     public Engine build() {
         if (configuration == null) {
             configuration = new Configuration();
@@ -147,6 +156,10 @@ public final class EngineBuilder {
 
         if (expressionManager == null) {
             expressionManager = new DefaultExpressionManager(taskRegistry);
+        }
+
+        if (contextFactory == null) {
+            contextFactory = new DefaultExecutionContextFactory(expressionManager);
         }
 
         if (lockManager == null) {
@@ -185,7 +198,7 @@ public final class EngineBuilder {
         }
 
         if (executor == null) {
-            executor = new DefaultExecutor(configuration, expressionManager, threadPool, interceptors,
+            executor = new DefaultExecutor(configuration, contextFactory, expressionManager, threadPool, interceptors,
                     indexedDefinitionProvider, uuidGenerator, eventManager, persistenceManager,
                     userTaskHandler, resourceResolver, taskRegistry);
         }

@@ -7,8 +7,7 @@ import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.commands.CommandStack;
 import io.takari.bpm.commands.PerformActionsCommand;
-import io.takari.bpm.context.ExecutionContextImpl;
-import io.takari.bpm.el.ExpressionManager;
+import io.takari.bpm.context.ExecutionContextFactory;
 import io.takari.bpm.model.SequenceFlow;
 import io.takari.bpm.state.Forks;
 import io.takari.bpm.state.Forks.Fork;
@@ -23,10 +22,10 @@ public class ForkReducer implements Reducer {
 
     private static final Logger log = LoggerFactory.getLogger(ForkReducer.class);
 
-    private final ExpressionManager expressionManager;
+    private final ExecutionContextFactory<?> contextFactory;
 
-    public ForkReducer(ExpressionManager expressionManager) {
-        this.expressionManager = expressionManager;
+    public ForkReducer(ExecutionContextFactory<?> contextFactory) {
+        this.contextFactory = contextFactory;
     }
 
     @Override
@@ -47,13 +46,8 @@ public class ForkReducer implements Reducer {
             IndexedProcessDefinition pd = state.getDefinition(a.getDefinitionId());
             List<SequenceFlow> out = ProcessDefinitionUtils.findOutgoingFlows(pd, a.getElementId());
 
-            ExecutionContextImpl ctx = new ExecutionContextImpl(expressionManager, state.getVariables());
-            List<SequenceFlow> filtered = filterInactive(expressionManager, ctx, out);
-
-            // TODO refactor into an utility fn?
-            if (!ctx.toActions().isEmpty()) {
-                log.warn("reduce ['{}', '{}'] -> variables changes in the execution context will be ignored", state.getBusinessKey(), a.getElementId());
-            }
+            ExecutionContext ctx = contextFactory.create(state.getVariables());
+            List<SequenceFlow> filtered = filterInactive(ctx, out);
 
             List<SequenceFlow> inactive = new ArrayList<>(out);
             inactive.removeAll(filtered);
@@ -133,14 +127,14 @@ public class ForkReducer implements Reducer {
         return state.setForks(forks).setStack(stack);
     }
 
-    private static List<SequenceFlow> filterInactive(ExpressionManager em, ExecutionContext ctx, List<SequenceFlow> flows) {
+    private static List<SequenceFlow> filterInactive(ExecutionContext ctx, List<SequenceFlow> flows) {
         List<SequenceFlow> result = new ArrayList<>(flows);
 
         for (Iterator<SequenceFlow> i = result.iterator(); i.hasNext(); ) {
             SequenceFlow f = i.next();
             if (f.getExpression() != null) {
                 String expr = f.getExpression();
-                boolean b = em.eval(ctx, expr, Boolean.class);
+                boolean b = ctx.eval(expr, Boolean.class);
                 if (!b) {
                     i.remove();
                 }

@@ -1,5 +1,12 @@
 # Change Log
 
+### Added
+
+- allow users to provide their own `ExecutionContext`
+implementations by introducing `ExecutionContextFactory`;
+
+
+
 ## [0.34.0] - 2017-08-15
 
 ### Added

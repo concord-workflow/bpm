@@ -13,7 +13,7 @@ import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.commands.Command;
 import io.takari.bpm.commands.PerformActionsCommand;
 import io.takari.bpm.commands.ProcessElementCommand;
-import io.takari.bpm.context.ExecutionContextImpl;
+import io.takari.bpm.context.ExecutionContextFactory;
 import io.takari.bpm.el.ExpressionManager;
 import io.takari.bpm.event.Event;
 import io.takari.bpm.event.EventPersistenceManager;
@@ -33,11 +33,15 @@ public class EventsReducer implements Reducer {
 
     private static final Logger log = LoggerFactory.getLogger(EventsReducer.class);
 
+    private final ExecutionContextFactory<?> contextFactory;
     private final UuidGenerator uuidGenerator;
     private final ExpressionManager expressionManager;
     private final EventPersistenceManager eventManager;
 
-    public EventsReducer(UuidGenerator uuidGenerator, ExpressionManager expressionManager, EventPersistenceManager eventManager) {
+    public EventsReducer(ExecutionContextFactory<?> contextFactory, UuidGenerator uuidGenerator,
+                         ExpressionManager expressionManager, EventPersistenceManager eventManager) {
+
+        this.contextFactory = contextFactory;
         this.uuidGenerator = uuidGenerator;
         this.expressionManager = expressionManager;
         this.eventManager = eventManager;
@@ -81,13 +85,13 @@ public class EventsReducer implements Reducer {
     private Event makeEvent(ProcessInstance state, CreateEventAction action)
             throws ExecutionException {
 
-        ExecutionContextImpl ctx = new ExecutionContextImpl(expressionManager, state.getVariables());
+        ExecutionContext ctx = contextFactory.create(state.getVariables());
 
         UUID id = uuidGenerator.generate();
-        String name = getEventName(action, ctx, expressionManager);
+        String name = getEventName(action, ctx);
 
-        Date timeDate = parseTimeDate(state, ctx, expressionManager, action);
-        Date timeDuration = parseExpiredAt(state, expressionManager, action);
+        Date timeDate = parseTimeDate(ctx, action);
+        Date timeDuration = parseExpiredAt(contextFactory, state, action);
         Date expiredAt = timeDate != null ? timeDate : timeDuration;
 
         Scope s = state.getScopes().peek();
@@ -109,31 +113,25 @@ public class EventsReducer implements Reducer {
         }
     }
 
-    private static String getEventName(CreateEventAction a, ExecutionContext ctx, ExpressionManager em) {
+    private static String getEventName(CreateEventAction a, ExecutionContext ctx) {
         String msgRefExpr = a.getMessageRefExpression();
 
         if (msgRefExpr != null) {
-            return em.eval(ctx, msgRefExpr, String.class);
+            return ctx.eval(msgRefExpr, String.class);
         }
 
         String msgRef = a.getMessageRef();
         return msgRef != null ? msgRef : a.getElementId();
     }
 
-    private static Date parseTimeDate(ProcessInstance state, ExecutionContextImpl ctx, ExpressionManager em, CreateEventAction a)
+    private static Date parseTimeDate(ExecutionContext ctx, CreateEventAction a)
             throws ExecutionException {
 
         String definitionId = a.getDefinitionId();
         String elementId = a.getElementId();
         String s = a.getTimeDate();
 
-        Object v = eval(s, ctx, em, Object.class);
-
-        // expression evaluation may have side-effects, but they are ignored
-        if (!ctx.toActions().isEmpty()) {
-            log.warn("parseTimeData ['{}', '{}', '{}', '{}'] -> variables changes in the execution context will be ignored",
-                    state.getBusinessKey(), definitionId, elementId, s);
-        }
+        Object v = eval(s, ctx, Object.class);
 
         if (v == null) {
             return null;
@@ -149,21 +147,15 @@ public class EventsReducer implements Reducer {
         }
     }
 
-    private static Date parseExpiredAt(ProcessInstance state, ExpressionManager em, CreateEventAction a)
+    private static Date parseExpiredAt(ExecutionContextFactory<?> contextFactory, ProcessInstance state, CreateEventAction a)
             throws ExecutionException {
 
         String definitionId = a.getDefinitionId();
         String elementId = a.getElementId();
         String s = a.getTimeDuration();
 
-        ExecutionContextImpl ctx = new ExecutionContextImpl(em, state.getVariables());
-        Object v = eval(s, ctx, em, Object.class);
-
-        // expression evaluation may have side-effects, but they are ignored
-        if (!ctx.toActions().isEmpty()) {
-            log.warn("parseExpiredAt ['{}', '{}', '{}', '{}'] -> variables changes in the execution context will be ignored",
-                    state.getBusinessKey(), definitionId, elementId, s);
-        }
+        ExecutionContext ctx = contextFactory.create(state.getVariables());
+        Object v = eval(s, ctx, Object.class);
 
         if (v == null) {
             return null;
@@ -177,11 +169,11 @@ public class EventsReducer implements Reducer {
         }
     }
 
-    private static <T> T eval(String expr, ExecutionContext ctx, ExpressionManager em, Class<T> type) {
+    private static <T> T eval(String expr, ExecutionContext ctx, Class<T> type) {
         if (expr == null || expr.trim().isEmpty()) {
             return null;
         }
-        return em.eval(ctx, expr, type);
+        return ctx.eval(expr, type);
     }
 
     public static Date parseIso8601(String s) {

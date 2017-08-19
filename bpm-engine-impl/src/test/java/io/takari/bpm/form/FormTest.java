@@ -4,6 +4,8 @@ import io.takari.bpm.AbstractEngineTest;
 import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.api.JavaDelegate;
+import io.takari.bpm.context.DefaultExecutionContextFactory;
+import io.takari.bpm.context.ExecutionContextFactory;
 import io.takari.bpm.el.DefaultExpressionManager;
 import io.takari.bpm.el.ExpressionManager;
 import io.takari.bpm.form.DefaultFormService.DirectResumeHandler;
@@ -14,6 +16,7 @@ import io.takari.bpm.model.form.DefaultFormFields.StringField;
 import io.takari.bpm.model.form.FormDefinition;
 import io.takari.bpm.model.form.FormExtension;
 import io.takari.bpm.model.form.FormField;
+import io.takari.bpm.task.ServiceTaskRegistry;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -36,18 +39,20 @@ public class FormTest extends AbstractEngineTest {
 
     @Before
     public void setUp() {
-        ExpressionManager expressionManager = new DefaultExpressionManager();
+        ServiceTaskRegistry taskRegistry = mock(ServiceTaskRegistry.class);
+        ExpressionManager expressionManager = new DefaultExpressionManager(taskRegistry);
 
         formRegistry = new InMemFormStorage();
 
         formLocale = spy(new DefaultFormValidatorLocale());
         FormValidator validator = new DefaultFormValidator(formLocale);
 
+        ExecutionContextFactory contextFactory = new DefaultExecutionContextFactory(expressionManager);
         ResumeHandler resumeHandler = new DirectResumeHandler(getEngine());
-        formService = spy(new DefaultFormService(resumeHandler, formRegistry, expressionManager, validator));
+        formService = spy(new DefaultFormService(contextFactory, resumeHandler, formRegistry, validator));
 
         formDefinitionProvider = new TestFormDefinitionProvider();
-        getUserTaskHandler().set(new FormTaskHandler(formDefinitionProvider, formService, expressionManager));
+        getUserTaskHandler().set(new FormTaskHandler(contextFactory, formDefinitionProvider, formService));
     }
 
     /**

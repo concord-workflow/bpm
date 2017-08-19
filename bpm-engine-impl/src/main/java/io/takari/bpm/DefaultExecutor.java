@@ -2,6 +2,8 @@ package io.takari.bpm;
 
 import io.takari.bpm.actions.Action;
 import io.takari.bpm.api.ExecutionException;
+import io.takari.bpm.context.ExecutionContextFactory;
+import io.takari.bpm.context.ExecutionContextImpl;
 import io.takari.bpm.el.ExpressionManager;
 import io.takari.bpm.event.EventPersistenceManager;
 import io.takari.bpm.persistence.PersistenceManager;
@@ -19,6 +21,7 @@ public class DefaultExecutor implements Executor {
     private final Reducer reducer;
 
     public DefaultExecutor(Configuration cfg,
+                           ExecutionContextFactory<? extends ExecutionContextImpl> contextFactory,
                            ExpressionManager expressionManager,
                            ExecutorService executor,
                            ExecutionInterceptorHolder interceptors,
@@ -31,24 +34,24 @@ public class DefaultExecutor implements Executor {
                            ServiceTaskRegistry taskRegistry) {
 
         this.reducer = new CombiningReducer(
-                new ForkReducer(expressionManager),
+                new ForkReducer(contextFactory),
                 new CommandStackReducer(),
                 new StatusReducer(),
                 new FlowsReducer(),
-                new VariablesReducer(expressionManager),
-                new RaiseErrorReducer(expressionManager),
-                new ExpressionsReducer(cfg, expressionManager, executor),
+                new VariablesReducer(contextFactory),
+                new RaiseErrorReducer(contextFactory),
+                new ExpressionsReducer(contextFactory, cfg, executor),
                 new InterceptorEventsReducer(interceptors),
                 new CallActivityReducer(definitionProvider, cfg),
-                new EventsReducer(uuidGenerator, expressionManager, eventManager),
+                new EventsReducer(contextFactory, uuidGenerator, expressionManager, eventManager),
                 new PersistenceReducer(persistenceManager),
-                new EvaluatedFlowsReducer(expressionManager),
+                new EvaluatedFlowsReducer(contextFactory),
                 new ActivationsReducer(interceptors),
-                new FlowListenerReducer(expressionManager),
+                new FlowListenerReducer(contextFactory),
                 new ScopeReducer(uuidGenerator),
                 new EventGatewayReducer(),
                 new UserTaskReducer(userTaskHandler),
-                new ScriptReducer(cfg, resourceResolver, expressionManager, taskRegistry));
+                new ScriptReducer(contextFactory, cfg, resourceResolver, taskRegistry));
     }
 
     @Override

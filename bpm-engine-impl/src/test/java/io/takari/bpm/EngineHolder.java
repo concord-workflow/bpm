@@ -4,6 +4,9 @@ import io.takari.bpm.api.EventService;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.api.interceptors.ExecutionInterceptorAdapter;
 import io.takari.bpm.api.interceptors.InterceptorElementEvent;
+import io.takari.bpm.context.DefaultExecutionContextFactory;
+import io.takari.bpm.context.ExecutionContextFactory;
+import io.takari.bpm.context.ExecutionContextImpl;
 import io.takari.bpm.el.DefaultExpressionManager;
 import io.takari.bpm.el.ExpressionManager;
 import io.takari.bpm.event.*;
@@ -18,7 +21,6 @@ import io.takari.bpm.planner.Planner;
 import io.takari.bpm.resource.ClassPathResourceResolver;
 import io.takari.bpm.resource.ResourceResolver;
 import io.takari.bpm.task.ServiceTaskRegistryImpl;
-import io.takari.bpm.task.UserTaskHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +53,7 @@ public class EngineHolder {
     private final Configuration configuration;
     private final DelegatingUserTaskHandler userTaskHandler;
     private final ResourceResolver resourceResolver;
+    private final ExecutionContextFactory<? extends ExecutionContextImpl> contextFactory;
 
     public EngineHolder() throws Exception {
         serviceTaskRegistry = new ServiceTaskRegistryImpl();
@@ -65,7 +68,8 @@ public class EngineHolder {
         lockManager = new SingleLockManagerImpl();
         userTaskHandler = new DelegatingUserTaskHandler();
         resourceResolver = new ClassPathResourceResolver();
-        executor = wrap(new DefaultExecutor(configuration, expressionManager, Executors.newCachedThreadPool(),
+        contextFactory = new DefaultExecutionContextFactory(expressionManager);
+        executor = wrap(new DefaultExecutor(configuration, contextFactory, expressionManager, Executors.newCachedThreadPool(),
                 interceptorHolder, indexedProcessDefinitionProvider, uuidGenerator, eventManager, persistenceManager,
                 userTaskHandler, resourceResolver, serviceTaskRegistry));
 

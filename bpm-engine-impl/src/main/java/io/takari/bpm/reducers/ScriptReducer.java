@@ -7,8 +7,8 @@ import io.takari.bpm.actions.ExecuteScriptAction;
 import io.takari.bpm.actions.FollowFlowsAction;
 import io.takari.bpm.api.BpmnError;
 import io.takari.bpm.api.ExecutionException;
+import io.takari.bpm.context.ExecutionContextFactory;
 import io.takari.bpm.context.ExecutionContextImpl;
-import io.takari.bpm.el.ExpressionManager;
 import io.takari.bpm.model.ProcessDefinition;
 import io.takari.bpm.model.ScriptTask;
 import io.takari.bpm.model.ScriptTask.Type;
@@ -27,17 +27,20 @@ import java.io.*;
 @Impure
 public class ScriptReducer extends BpmnErrorHandlingReducer {
 
+    private final ExecutionContextFactory<? extends ExecutionContextImpl> contextFactory;
     private final ResourceResolver resourceResolver;
-    private final ExpressionManager expressionManager;
     private final ServiceTaskRegistry taskRegistry;
     private final ScriptEngineManager scriptEngineManager;
 
-    public ScriptReducer(Configuration cfg, ResourceResolver resourceResolver,
-                         ExpressionManager expressionManager, ServiceTaskRegistry taskRegistry) {
+    public ScriptReducer(ExecutionContextFactory<? extends ExecutionContextImpl> contextFactory,
+                         Configuration cfg,
+                         ResourceResolver resourceResolver,
+                         ServiceTaskRegistry taskRegistry) {
 
         super(cfg);
+
+        this.contextFactory = contextFactory;
         this.resourceResolver = resourceResolver;
-        this.expressionManager = expressionManager;
         this.taskRegistry = taskRegistry;
         this.scriptEngineManager = new ScriptEngineManager();
     }
@@ -58,8 +61,8 @@ public class ScriptReducer extends BpmnErrorHandlingReducer {
             throw new ExecutionException("Script engine not found: " + t.getLanguage());
         }
 
-        Variables vars = VariablesHelper.applyInVariables(expressionManager, state.getVariables(), t.getIn(), t.isCopyAllVariables());
-        ExecutionContextImpl ctx = new ExecutionContextImpl(expressionManager, vars);
+        Variables vars = VariablesHelper.applyInVariables(contextFactory, state.getVariables(), t.getIn(), t.isCopyAllVariables());
+        ExecutionContextImpl ctx = contextFactory.create(vars);
 
         // expose all available variables plus the context
         Bindings b = engine.createBindings();
@@ -81,7 +84,7 @@ public class ScriptReducer extends BpmnErrorHandlingReducer {
         }
 
         // apply the changes before continuing the execution
-        state = VariablesHelper.applyOutVariables(expressionManager, state, ctx, t.getOut());
+        state = VariablesHelper.applyOutVariables(contextFactory, state, ctx, t.getOut());
 
         return state;
     }

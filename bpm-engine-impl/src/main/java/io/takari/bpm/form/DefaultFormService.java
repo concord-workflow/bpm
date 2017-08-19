@@ -3,8 +3,7 @@ package io.takari.bpm.form;
 import io.takari.bpm.api.Engine;
 import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.ExecutionException;
-import io.takari.bpm.context.ExecutionContextImpl;
-import io.takari.bpm.el.ExpressionManager;
+import io.takari.bpm.context.ExecutionContextFactory;
 import io.takari.bpm.form.FormSubmitResult.ValidationError;
 import io.takari.bpm.misc.CoverageIgnore;
 import io.takari.bpm.model.form.FormDefinition;
@@ -15,23 +14,25 @@ import java.util.*;
 
 public class DefaultFormService implements FormService {
 
+    private final ExecutionContextFactory contextFactory;
     private final ResumeHandler resumeHandler;
     private final FormStorage formStorage;
-    private final ExpressionManager expresssionManager;
     private final FormValidator validator;
 
-    public DefaultFormService(ResumeHandler resumeHandler, FormStorage formStorage, ExpressionManager expressionManager) {
-        this(resumeHandler, formStorage, expressionManager, new DefaultFormValidator());
+    public DefaultFormService(ExecutionContextFactory contextFactory,
+                              ResumeHandler resumeHandler,
+                              FormStorage formStorage) {
+        this(contextFactory, resumeHandler, formStorage, new DefaultFormValidator());
     }
 
-    public DefaultFormService(ResumeHandler resumeHandler,
+    public DefaultFormService(ExecutionContextFactory contextFactory,
+                              ResumeHandler resumeHandler,
                               FormStorage formStorage,
-                              ExpressionManager expressionManager,
                               FormValidator validator) {
 
+        this.contextFactory = contextFactory;
         this.resumeHandler = resumeHandler;
         this.formStorage = formStorage;
-        this.expresssionManager = expressionManager;
         this.validator = validator;
     }
 
@@ -41,7 +42,7 @@ public class DefaultFormService implements FormService {
                        Map<String, Object> env) throws ExecutionException {
 
         Form f = new Form(processBusinessKey, formInstanceId, eventName, formDefinition, env, Collections.emptyMap(), options);
-        f = prepare(expresssionManager, validator, f);
+        f = prepare(contextFactory, validator, f);
         formStorage.save(f);
     }
 
@@ -70,7 +71,9 @@ public class DefaultFormService implements FormService {
         return result;
     }
 
-    public static Form prepare(ExpressionManager em, FormValidator validator, Form form) throws ExecutionException {
+    public static Form prepare(ExecutionContextFactory contextFactory,
+                               FormValidator validator, Form form) throws ExecutionException {
+
         // make a copy of the form's environment
         Map<String, Object> env = form.getEnv();
         env = new HashMap<>(env != null ? env : Collections.emptyMap());
@@ -98,16 +101,16 @@ public class DefaultFormService implements FormService {
             if (defaultValue != null) {
                 // create a new evaluation context for every expression - results should be independent
                 Variables vars = new Variables(env);
-                ExecutionContext ctx = new ExecutionContextImpl(em, vars);
-                v = em.interpolate(ctx, defaultValue);
+                ExecutionContext ctx = contextFactory.create(vars);
+                v = ctx.interpolate(defaultValue);
             }
 
             Object allowedValue = f.getAllowedValue();
             if (allowedValue != null) {
                 // same deal: use a new context every time
                 Variables vars = new Variables(env);
-                ExecutionContext ctx = new ExecutionContextImpl(em, vars);
-                allowedValue = em.interpolate(ctx, allowedValue);
+                ExecutionContext ctx = contextFactory.create(vars);
+                allowedValue = ctx.interpolate(allowedValue);
                 if (allowedValue != null) {
                     allowedValues.put(f.getName(), allowedValue);
                 }

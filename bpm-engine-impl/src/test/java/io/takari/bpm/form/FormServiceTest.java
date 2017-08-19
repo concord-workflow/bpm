@@ -2,6 +2,8 @@ package io.takari.bpm.form;
 
 import io.takari.bpm.api.Engine;
 import io.takari.bpm.api.ExecutionException;
+import io.takari.bpm.context.DefaultExecutionContextFactory;
+import io.takari.bpm.context.ExecutionContextFactory;
 import io.takari.bpm.el.DefaultExpressionManager;
 import io.takari.bpm.el.ExpressionManager;
 import io.takari.bpm.form.DefaultFormService.ResumeHandler;
@@ -11,6 +13,7 @@ import io.takari.bpm.model.form.DefaultFormFields.StringField;
 import io.takari.bpm.model.form.FormDefinition;
 import io.takari.bpm.model.form.FormField;
 import io.takari.bpm.model.form.FormField.Cardinality;
+import io.takari.bpm.task.ServiceTaskRegistry;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -31,16 +34,18 @@ public class FormServiceTest {
     public void setUp() {
         Engine engine = mock(Engine.class);
 
-        ExpressionManager expressionManager = new DefaultExpressionManager();
+        ServiceTaskRegistry taskRegistry = mock(ServiceTaskRegistry.class);
+        ExpressionManager expressionManager = new DefaultExpressionManager(taskRegistry);
 
         formStorage = new InMemFormStorage();
 
+        ExecutionContextFactory contextFactory = new DefaultExecutionContextFactory(expressionManager);
         ResumeHandler resumeHandler = (form, args) -> engine.resume(form.getProcessBusinessKey(), form.getEventName(), args);
 
         formLocale = spy(new DefaultFormValidatorLocale());
         FormValidator validator = new DefaultFormValidator(formLocale);
 
-        formService = new DefaultFormService(resumeHandler, formStorage, expressionManager, validator);
+        formService = new DefaultFormService(contextFactory, resumeHandler, formStorage, validator);
     }
 
     private static FormField stringValue(String fieldName) {

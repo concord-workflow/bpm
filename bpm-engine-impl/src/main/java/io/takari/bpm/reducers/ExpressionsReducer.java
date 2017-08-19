@@ -9,8 +9,8 @@ import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.api.JavaDelegate;
 import io.takari.bpm.commands.Command;
 import io.takari.bpm.commands.CommandStack;
+import io.takari.bpm.context.ExecutionContextFactory;
 import io.takari.bpm.context.ExecutionContextImpl;
-import io.takari.bpm.el.ExpressionManager;
 import io.takari.bpm.model.ExpressionType;
 import io.takari.bpm.model.ServiceTask;
 import io.takari.bpm.state.ProcessInstance;
@@ -30,14 +30,18 @@ public class ExpressionsReducer extends BpmnErrorHandlingReducer {
 
     private static final Logger log = LoggerFactory.getLogger(ExpressionsReducer.class);
 
+    private final ExecutionContextFactory<? extends ExecutionContextImpl> contextFactory;
     private final Configuration cfg;
-    private final ExpressionManager expressionManager;
     private final ExecutorService executor;
 
-    public ExpressionsReducer(Configuration cfg, ExpressionManager expressionManager, ExecutorService executor) {
+    public ExpressionsReducer(ExecutionContextFactory<? extends ExecutionContextImpl> contextFactory,
+                              Configuration cfg,
+                              ExecutorService executor) {
+
         super(cfg);
+
+        this.contextFactory = contextFactory;
         this.cfg = cfg;
-        this.expressionManager = expressionManager;
         this.executor = executor;
     }
 
@@ -49,11 +53,11 @@ public class ExpressionsReducer extends BpmnErrorHandlingReducer {
 
         final EvalExpressionAction a = (EvalExpressionAction) action;
 
-        Variables vars = VariablesHelper.applyInVariables(expressionManager, state.getVariables(), a.getIn(), a.isCopyAllVariables());
-        final ExecutionContextImpl ctx = new ExecutionContextImpl(expressionManager, vars);
+        Variables vars = VariablesHelper.applyInVariables(contextFactory, state.getVariables(), a.getIn(), a.isCopyAllVariables());
+        final ExecutionContextImpl ctx = contextFactory.create(vars);
 
         boolean storeResult = cfg.isStoreExpressionEvalResultsInContext();
-        Callable<Command> fn = new DelegateFn(expressionManager, ctx, a.getType(), a.getExpression(), a.getDefaultCommand(), storeResult);
+        Callable<Command> fn = new DelegateFn(ctx, a.getType(), a.getExpression(), a.getDefaultCommand(), storeResult);
 
         List<Timeout<Command>> timeouts = a.getTimeouts();
         if (timeouts != null && !timeouts.isEmpty()) {
@@ -84,7 +88,7 @@ public class ExpressionsReducer extends BpmnErrorHandlingReducer {
 
         // we apply new state of variables regardless of whether the call was
         // successful or not
-        state = VariablesHelper.applyOutVariables(expressionManager, state, ctx, a.getOut());
+        state = VariablesHelper.applyOutVariables(contextFactory, state, ctx, a.getOut());
 
         return state;
     }
@@ -99,16 +103,15 @@ public class ExpressionsReducer extends BpmnErrorHandlingReducer {
 
     private static final class DelegateFn implements Callable<Command> {
 
-        private final ExpressionManager expressionManager;
         private final ExecutionContext ctx;
         private final ExpressionType type;
         private final String expression;
         private final Command defaultCommand;
         private final boolean storeResult;
 
-        public DelegateFn(ExpressionManager expressionManager, ExecutionContext ctx, ExpressionType type,
+        public DelegateFn(ExecutionContext ctx, ExpressionType type,
                           String expression, Command defaultCommand, boolean storeResult) {
-            this.expressionManager = expressionManager;
+
             this.ctx = ctx;
             this.type = type;
             this.expression = expression;
@@ -118,7 +121,7 @@ public class ExpressionsReducer extends BpmnErrorHandlingReducer {
 
         @Override
         public Command call() throws Exception {
-            Object v = expressionManager.eval(ctx, expression, Object.class);
+            Object v = ctx.eval(expression, Object.class);
 
             if (type == ExpressionType.DELEGATE) {
                 if (v instanceof JavaDelegate) {

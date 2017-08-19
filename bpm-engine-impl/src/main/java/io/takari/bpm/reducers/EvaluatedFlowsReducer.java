@@ -8,11 +8,9 @@ import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.commands.CommandStack;
 import io.takari.bpm.commands.ProcessElementCommand;
-import io.takari.bpm.context.ExecutionContextImpl;
-import io.takari.bpm.el.ExpressionManager;
+import io.takari.bpm.context.ExecutionContextFactory;
 import io.takari.bpm.model.SequenceFlow;
 import io.takari.bpm.state.ProcessInstance;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,10 +23,10 @@ public class EvaluatedFlowsReducer implements Reducer {
 
     private static final Logger log = LoggerFactory.getLogger(EvaluatedFlowsReducer.class);
 
-    private final ExpressionManager expressionManager;
+    private final ExecutionContextFactory<?> contextFactory;
 
-    public EvaluatedFlowsReducer(ExpressionManager expressionManager) {
-        this.expressionManager = expressionManager;
+    public EvaluatedFlowsReducer(ExecutionContextFactory<?> contextFactory) {
+        this.contextFactory = contextFactory;
     }
 
     @Override
@@ -47,7 +45,7 @@ public class EvaluatedFlowsReducer implements Reducer {
         // first, we need to eval all flow expressions and filter out 'false'
         // results
 
-        ExecutionContextImpl ctx = new ExecutionContextImpl(expressionManager, state.getVariables());
+        ExecutionContext ctx = contextFactory.create(state.getVariables());
         for (Iterator<SequenceFlow> i = flows.iterator(); i.hasNext(); ) {
             SequenceFlow f = i.next();
             if (f.getExpression() == null) {
@@ -56,17 +54,10 @@ public class EvaluatedFlowsReducer implements Reducer {
 
             i.remove();
 
-            if (eval(expressionManager, ctx, f)) {
+            if (eval(ctx, f)) {
                 nextId = f.getId();
                 break;
             }
-        }
-
-        // expression evaluation may have side-effects, but they are ignored
-        // there
-        if (!ctx.toActions().isEmpty()) {
-            log.warn("reduce ['{}', '{}'] -> variables changes in the execution context will be ignored",
-                    state.getBusinessKey(), a.getElementId());
         }
 
         // at this point, only flows without expressions are left
@@ -101,9 +92,9 @@ public class EvaluatedFlowsReducer implements Reducer {
         return state;
     }
 
-    private static boolean eval(ExpressionManager em, ExecutionContext ctx, SequenceFlow f) {
+    private static boolean eval(ExecutionContext ctx, SequenceFlow f) {
         String expr = f.getExpression();
-        boolean b = em.eval(ctx, expr, Boolean.class);
+        boolean b = ctx.eval(expr, Boolean.class);
 
         log.debug("eval ['{}', '{}'] -> {}", f.getId(), f.getExpression(), b);
         return b;

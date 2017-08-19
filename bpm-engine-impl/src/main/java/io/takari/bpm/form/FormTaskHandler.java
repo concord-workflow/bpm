@@ -4,8 +4,7 @@ import io.takari.bpm.ProcessDefinitionUtils;
 import io.takari.bpm.actions.CreateEventAction;
 import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.ExecutionException;
-import io.takari.bpm.context.ExecutionContextImpl;
-import io.takari.bpm.el.ExpressionManager;
+import io.takari.bpm.context.ExecutionContextFactory;
 import io.takari.bpm.model.ProcessDefinition;
 import io.takari.bpm.model.UserTask;
 import io.takari.bpm.model.UserTask.Extension;
@@ -26,17 +25,17 @@ public class FormTaskHandler implements UserTaskHandler {
 
     private static final Logger log = LoggerFactory.getLogger(FormTaskHandler.class);
 
+    private final ExecutionContextFactory contextFactory;
     private final FormDefinitionProvider formDefinitionProvider;
     private final FormService formService;
-    private final ExpressionManager expressionManager;
 
-    public FormTaskHandler(FormDefinitionProvider formDefinitionProvider,
-                           FormService formService,
-                           ExpressionManager expressionManager) {
+    public FormTaskHandler(ExecutionContextFactory contextFactory,
+                           FormDefinitionProvider formDefinitionProvider,
+                           FormService formService) {
 
+        this.contextFactory = contextFactory;
         this.formDefinitionProvider = formDefinitionProvider;
         this.formService = formService;
-        this.expressionManager = expressionManager;
     }
 
     @Override
@@ -69,8 +68,8 @@ public class FormTaskHandler implements UserTaskHandler {
     }
 
     private Map<String, Object> getOptions(FormExtension x, Variables vars) {
-        ExecutionContext ctx = new ExecutionContextImpl(expressionManager, vars);
-        return (Map<String, Object>) expressionManager.interpolate(ctx, x.getOptions());
+        ExecutionContext ctx = contextFactory.create(vars);
+        return (Map<String, Object>) ctx.interpolate(x.getOptions());
     }
 
     private static FormExtension findFormExtension(Collection<Extension> extensions) {

@@ -1,11 +1,12 @@
 package io.takari.bpm.state;
 
 import io.takari.bpm.actions.Action;
+import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.commands.Command;
 import io.takari.bpm.commands.PerformActionsCommand;
+import io.takari.bpm.context.ExecutionContextFactory;
 import io.takari.bpm.context.ExecutionContextImpl;
-import io.takari.bpm.el.ExpressionManager;
 import io.takari.bpm.misc.CoverageIgnore;
 import io.takari.bpm.model.VariableMapping;
 
@@ -16,7 +17,7 @@ import java.util.Set;
 
 public final class VariablesHelper {
 
-    public static Variables copyVariables(ExpressionManager em, Variables src, Variables dst, Set<VariableMapping> mapping)
+    public static Variables copyVariables(ExecutionContextFactory<?> contextFactory, Variables src, Variables dst, Set<VariableMapping> mapping)
             throws ExecutionException {
 
         if (mapping == null) {
@@ -31,16 +32,16 @@ public final class VariablesHelper {
             Object v = null;
             if (sourceValue != null) {
                 if (m.isInterpolateValue()) {
-                    ExecutionContextImpl ctx = new ExecutionContextImpl(em, src);
-                    v = em.interpolate(ctx, sourceValue);
+                    ExecutionContext ctx = contextFactory.create(src);
+                    v = ctx.interpolate(sourceValue);
                 } else {
                     v = sourceValue;
                 }
             } else if (source != null) {
                 v = src.getVariable(source);
             } else if (sourceExpression != null) {
-                ExecutionContextImpl ctx = new ExecutionContextImpl(em, src);
-                v = em.eval(ctx, sourceExpression, Object.class);
+                ExecutionContext ctx = contextFactory.create(src);
+                v = ctx.eval(sourceExpression, Object.class);
             }
 
             dst = dst.setVariable(m.getTarget(), v);
@@ -58,7 +59,7 @@ public final class VariablesHelper {
         return dst;
     }
 
-    public static Variables applyInVariables(ExpressionManager expressionManager, Variables src,
+    public static Variables applyInVariables(ExecutionContextFactory<?> contextFactory, Variables src,
                                              Set<VariableMapping> in,
                                              boolean appendCurrentVariablesIntoInVariables) throws ExecutionException {
 
@@ -71,17 +72,17 @@ public final class VariablesHelper {
         if(appendCurrentVariablesIntoInVariables) {
             parentVariables = src;
         }
-        return copyVariables(expressionManager, src, new Variables(parentVariables), in);
+        return copyVariables(contextFactory, src, new Variables(parentVariables), in);
     }
 
-    public static ProcessInstance applyOutVariables(ExpressionManager expressionManager, ProcessInstance state,
+    public static ProcessInstance applyOutVariables(ExecutionContextFactory<?> contextFactory, ProcessInstance state,
                                                     ExecutionContextImpl ctx, Set<VariableMapping> out) throws ExecutionException {
 
         if (out != null) {
             // we need to apply actions immediately and filter the result according to
             // the supplied out variables mapping
             Variables src = ctx.toVariables();
-            Variables dst = copyVariables(expressionManager, src, state.getVariables(), out);
+            Variables dst = copyVariables(contextFactory, src, state.getVariables(), out);
             return state.setVariables(dst);
         }
 
@@ -96,13 +97,13 @@ public final class VariablesHelper {
     }
 
     @SuppressWarnings("unchecked")
-    public static ProcessInstance interpolate(ExpressionManager expressionManager, ProcessInstance state) {
+    public static ProcessInstance interpolate(ExecutionContextFactory<?> contextFactory, ProcessInstance state) {
         Variables vars = state.getVariables();
 
-        ExecutionContextImpl ctx = new ExecutionContextImpl(expressionManager, vars);
+        ExecutionContext ctx = contextFactory.create(vars);
 
         Map<String, Object> m = new HashMap<>(vars.asMap());
-        m = (Map<String, Object>) expressionManager.interpolate(ctx, m);
+        m = (Map<String, Object>) ctx.interpolate(m);
 
         Variables interpolated = new Variables(vars.getParent()).setVariables(m);
         return state.setVariables(interpolated);

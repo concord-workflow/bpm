@@ -2,7 +2,7 @@ package io.takari.bpm.reducers;
 
 import io.takari.bpm.actions.*;
 import io.takari.bpm.api.ExecutionException;
-import io.takari.bpm.el.ExpressionManager;
+import io.takari.bpm.context.ExecutionContextFactory;
 import io.takari.bpm.state.ProcessInstance;
 import io.takari.bpm.state.Variables;
 import io.takari.bpm.state.VariablesHelper;
@@ -10,10 +10,10 @@ import io.takari.bpm.state.VariablesHelper;
 @Impure
 public class VariablesReducer implements Reducer {
 
-    private final ExpressionManager expressionManager;
+    private final ExecutionContextFactory<?> contextFactory;
 
-    public VariablesReducer(ExpressionManager expressionManager) {
-        this.expressionManager = expressionManager;
+    public VariablesReducer(ExecutionContextFactory<?> contextFactory) {
+        this.contextFactory = contextFactory;
     }
 
     @Override
@@ -41,7 +41,7 @@ public class VariablesReducer implements Reducer {
                 dst = VariablesHelper.copyVariables(src, dst);
             }
 
-            dst = VariablesHelper.copyVariables(expressionManager, src, dst, a.getOutVariables());
+            dst = VariablesHelper.copyVariables(contextFactory, src, dst, a.getOutVariables());
 
             return state.setVariables(dst);
         } else if (action instanceof MakeSubProcessVariablesAction) {
@@ -55,10 +55,10 @@ public class VariablesReducer implements Reducer {
                 dst = VariablesHelper.copyVariables(src, dst);
             }
 
-            dst = VariablesHelper.copyVariables(expressionManager, src, dst, a.getInVariables());
+            dst = VariablesHelper.copyVariables(contextFactory, src, dst, a.getInVariables());
             return state.setVariables(dst);
         } else if (action instanceof InterpolateCurrentVariablesAction) {
-            return VariablesHelper.interpolate(expressionManager, state);
+            return VariablesHelper.interpolate(contextFactory, state);
         }
 
         return state;
