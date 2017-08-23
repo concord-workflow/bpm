@@ -16,9 +16,7 @@ import io.takari.bpm.planner.DefaultPlanner;
 import io.takari.bpm.planner.Planner;
 import io.takari.bpm.resource.ClassPathResourceResolver;
 import io.takari.bpm.resource.ResourceResolver;
-import io.takari.bpm.task.NoopUserTaskHandler;
-import io.takari.bpm.task.ServiceTaskRegistry;
-import io.takari.bpm.task.UserTaskHandler;
+import io.takari.bpm.task.*;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -43,6 +41,7 @@ public final class EngineBuilder {
     private ServiceTaskRegistry taskRegistry;
     private UuidGenerator uuidGenerator;
     private Function<Executor, Executor> executorWrappingFn;
+    private JavaDelegateHandler javaDelegateHandler;
     private UserTaskHandler userTaskHandler;
     private ResourceResolver resourceResolver;
     private Configuration configuration;
@@ -109,6 +108,11 @@ public final class EngineBuilder {
 
     public EngineBuilder wrapDefinitionProviderWith(Function<ProcessDefinitionProvider, IndexedProcessDefinitionProvider> fn) {
         this.definitionProviderWrappingFn = fn;
+        return this;
+    }
+
+    public EngineBuilder withJavaDelegateHandler(JavaDelegateHandler javaDelegateHandler) {
+        this.javaDelegateHandler = javaDelegateHandler;
         return this;
     }
 
@@ -189,6 +193,10 @@ public final class EngineBuilder {
             indexedDefinitionProvider = new IndexedProcessDefinitionProvider(definitionProvider);
         }
 
+        if (javaDelegateHandler == null) {
+            javaDelegateHandler = new DefaultJavaDelegateHandler();
+        }
+
         if (userTaskHandler == null) {
             userTaskHandler = new NoopUserTaskHandler();
         }
@@ -200,7 +208,7 @@ public final class EngineBuilder {
         if (executor == null) {
             executor = new DefaultExecutor(configuration, contextFactory, expressionManager, threadPool, interceptors,
                     indexedDefinitionProvider, uuidGenerator, eventManager, persistenceManager,
-                    userTaskHandler, resourceResolver, taskRegistry);
+                    javaDelegateHandler, userTaskHandler, resourceResolver, taskRegistry);
         }
 
         if (executorWrappingFn != null) {

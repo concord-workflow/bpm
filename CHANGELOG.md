@@ -1,5 +1,13 @@
 # Change Log
 
+## [Unreleased]
+
+### Added
+
+- pluggable `JavaDelegate` handlers.
+
+
+
 ## [0.35.0] - 2017-08-18
 
 ### Added

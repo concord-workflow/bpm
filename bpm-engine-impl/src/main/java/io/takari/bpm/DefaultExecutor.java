@@ -10,6 +10,7 @@ import io.takari.bpm.persistence.PersistenceManager;
 import io.takari.bpm.reducers.*;
 import io.takari.bpm.resource.ResourceResolver;
 import io.takari.bpm.state.ProcessInstance;
+import io.takari.bpm.task.JavaDelegateHandler;
 import io.takari.bpm.task.ServiceTaskRegistry;
 import io.takari.bpm.task.UserTaskHandler;
 
@@ -29,6 +30,7 @@ public class DefaultExecutor implements Executor {
                            UuidGenerator uuidGenerator,
                            EventPersistenceManager eventManager,
                            PersistenceManager persistenceManager,
+                           JavaDelegateHandler javaDelegateHandler,
                            UserTaskHandler userTaskHandler,
                            ResourceResolver resourceResolver,
                            ServiceTaskRegistry taskRegistry) {
@@ -40,7 +42,7 @@ public class DefaultExecutor implements Executor {
                 new FlowsReducer(),
                 new VariablesReducer(contextFactory),
                 new RaiseErrorReducer(contextFactory),
-                new ExpressionsReducer(contextFactory, cfg, executor),
+                new ExpressionsReducer(contextFactory, cfg, javaDelegateHandler, executor),
                 new InterceptorEventsReducer(interceptors),
                 new CallActivityReducer(definitionProvider, cfg),
                 new EventsReducer(contextFactory, uuidGenerator, expressionManager, eventManager),

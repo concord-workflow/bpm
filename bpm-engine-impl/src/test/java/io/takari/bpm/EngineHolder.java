@@ -20,6 +20,8 @@ import io.takari.bpm.planner.DefaultPlanner;
 import io.takari.bpm.planner.Planner;
 import io.takari.bpm.resource.ClassPathResourceResolver;
 import io.takari.bpm.resource.ResourceResolver;
+import io.takari.bpm.task.DefaultJavaDelegateHandler;
+import io.takari.bpm.task.JavaDelegateHandler;
 import io.takari.bpm.task.ServiceTaskRegistryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +53,7 @@ public class EngineHolder {
     private final UuidGenerator uuidGenerator;
     private final LockManager lockManager;
     private final Configuration configuration;
+    private final JavaDelegateHandler javaDelegateHandler;
     private final DelegatingUserTaskHandler userTaskHandler;
     private final ResourceResolver resourceResolver;
     private final ExecutionContextFactory<? extends ExecutionContextImpl> contextFactory;
@@ -66,12 +69,14 @@ public class EngineHolder {
         uuidGenerator = new TestUuidGenerator();
         configuration = new Configuration();
         lockManager = new SingleLockManagerImpl();
+        javaDelegateHandler = new DefaultJavaDelegateHandler();
         userTaskHandler = new DelegatingUserTaskHandler();
         resourceResolver = new ClassPathResourceResolver();
         contextFactory = new DefaultExecutionContextFactory(expressionManager);
+
         executor = wrap(new DefaultExecutor(configuration, contextFactory, expressionManager, Executors.newCachedThreadPool(),
                 interceptorHolder, indexedProcessDefinitionProvider, uuidGenerator, eventManager, persistenceManager,
-                userTaskHandler, resourceResolver, serviceTaskRegistry));
+                javaDelegateHandler, userTaskHandler, resourceResolver, serviceTaskRegistry));
 
         engine = new AbstractEngine() {
 

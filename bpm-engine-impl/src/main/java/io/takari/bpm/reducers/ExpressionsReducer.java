@@ -16,6 +16,7 @@ import io.takari.bpm.model.ServiceTask;
 import io.takari.bpm.state.ProcessInstance;
 import io.takari.bpm.state.Variables;
 import io.takari.bpm.state.VariablesHelper;
+import io.takari.bpm.task.JavaDelegateHandler;
 import io.takari.bpm.utils.Timeout;
 import io.takari.bpm.utils.TimeoutCallable;
 import org.slf4j.Logger;
@@ -32,16 +33,19 @@ public class ExpressionsReducer extends BpmnErrorHandlingReducer {
 
     private final ExecutionContextFactory<? extends ExecutionContextImpl> contextFactory;
     private final Configuration cfg;
+    private final JavaDelegateHandler javaDelegateHandler;
     private final ExecutorService executor;
 
     public ExpressionsReducer(ExecutionContextFactory<? extends ExecutionContextImpl> contextFactory,
                               Configuration cfg,
+                              JavaDelegateHandler javaDelegateHandler,
                               ExecutorService executor) {
 
         super(cfg);
 
         this.contextFactory = contextFactory;
         this.cfg = cfg;
+        this.javaDelegateHandler = javaDelegateHandler;
         this.executor = executor;
     }
 
@@ -57,7 +61,7 @@ public class ExpressionsReducer extends BpmnErrorHandlingReducer {
         final ExecutionContextImpl ctx = contextFactory.create(vars);
 
         boolean storeResult = cfg.isStoreExpressionEvalResultsInContext();
-        Callable<Command> fn = new DelegateFn(ctx, a.getType(), a.getExpression(), a.getDefaultCommand(), storeResult);
+        Callable<Command> fn = new DelegateFn(javaDelegateHandler, ctx, a.getType(), a.getExpression(), a.getDefaultCommand(), storeResult);
 
         List<Timeout<Command>> timeouts = a.getTimeouts();
         if (timeouts != null && !timeouts.isEmpty()) {
@@ -103,15 +107,21 @@ public class ExpressionsReducer extends BpmnErrorHandlingReducer {
 
     private static final class DelegateFn implements Callable<Command> {
 
+        private final JavaDelegateHandler javaDelegateHandler;
         private final ExecutionContext ctx;
         private final ExpressionType type;
         private final String expression;
         private final Command defaultCommand;
         private final boolean storeResult;
 
-        public DelegateFn(ExecutionContext ctx, ExpressionType type,
-                          String expression, Command defaultCommand, boolean storeResult) {
+        public DelegateFn(JavaDelegateHandler javaDelegateHandler,
+                          ExecutionContext ctx,
+                          ExpressionType type,
+                          String expression,
+                          Command defaultCommand,
+                          boolean storeResult) {
 
+            this.javaDelegateHandler = javaDelegateHandler;
             this.ctx = ctx;
             this.type = type;
             this.expression = expression;
@@ -125,7 +135,7 @@ public class ExpressionsReducer extends BpmnErrorHandlingReducer {
 
             if (type == ExpressionType.DELEGATE) {
                 if (v instanceof JavaDelegate) {
-                    ((JavaDelegate) v).execute(ctx);
+                    javaDelegateHandler.execute(v, ctx);
 
                     if (storeResult) {
                         ctx.setVariable(ServiceTask.EXPRESSION_RESULT_VAR, null);
