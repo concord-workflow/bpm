@@ -6,7 +6,6 @@ import io.takari.bpm.actions.EvalExpressionAction;
 import io.takari.bpm.api.BpmnError;
 import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.ExecutionException;
-import io.takari.bpm.api.JavaDelegate;
 import io.takari.bpm.commands.Command;
 import io.takari.bpm.commands.CommandStack;
 import io.takari.bpm.context.ExecutionContextFactory;
@@ -134,14 +133,10 @@ public class ExpressionsReducer extends BpmnErrorHandlingReducer {
             Object v = ctx.eval(expression, Object.class);
 
             if (type == ExpressionType.DELEGATE) {
-                if (v instanceof JavaDelegate) {
-                    javaDelegateHandler.execute(v, ctx);
+                javaDelegateHandler.execute(v, ctx);
 
-                    if (storeResult) {
-                        ctx.setVariable(ServiceTask.EXPRESSION_RESULT_VAR, null);
-                    }
-                } else {
-                    throw new ExecutionException("Unexpected result type: " + v + ". Was expecting an instance of JavaDelegate");
+                if (storeResult) {
+                    ctx.setVariable(ServiceTask.EXPRESSION_RESULT_VAR, null);
                 }
             }
 
