@@ -76,7 +76,7 @@ public class DefaultFormService implements FormService {
 
         // make a copy of the form's environment
         Map<String, Object> env = form.getEnv();
-        env = new HashMap<>(env != null ? env : Collections.emptyMap());
+        env = new LinkedHashMap<>(env != null ? env : Collections.emptyMap());
 
         FormDefinition fd = form.getFormDefinition();
         String formName = fd.getName();
@@ -87,11 +87,11 @@ public class DefaultFormService implements FormService {
         }
 
         // fill the form's values either using provided defaults or by eval'ing field expressions
-        Map<String, Object> values = new HashMap<>(defaults);
+        Map<String, Object> values = new LinkedHashMap<>(defaults);
 
         // calculate and store allowed values for the form's fields
         Map<String, Object> allowedValues = form.getAllowedValues();
-        allowedValues = new HashMap<>(allowedValues != null ? allowedValues : Collections.emptyMap());
+        allowedValues = new LinkedHashMap<>(allowedValues != null ? allowedValues : Collections.emptyMap());
 
         for (FormField f : fd.getFields()) {
             String k = f.getName();
@@ -131,7 +131,7 @@ public class DefaultFormService implements FormService {
         }
 
         // use the form's name to store its values
-        env = new HashMap<>();
+        env = new LinkedHashMap<>();
         env.put(formName, values);
 
         Map<String, Object> options = form.getOptions();
@@ -153,8 +153,8 @@ public class DefaultFormService implements FormService {
         FormDefinition fd = form.getFormDefinition();
 
         // the new form's values will be available under the form's name key
-        Map<String, Object> args = new HashMap<>();
-        args.put(fd.getName(), new HashMap<>(data));
+        Map<String, Object> args = new LinkedHashMap<>();
+        args.put(fd.getName(), new LinkedHashMap<>(data));
         resumeHandler.resume(form, args);
 
         return FormSubmitResult.ok(processBusinessKey);

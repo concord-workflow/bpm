@@ -1,5 +1,14 @@
 # Change Log
 
+## [Unreleased]
+
+### Changed
+
+- preserve the order of variable definitions. This should fix the
+newly found issues with variable interpolation.
+
+
+
 ## [0.36.1] - 2017-08-29
 
 ### Changed

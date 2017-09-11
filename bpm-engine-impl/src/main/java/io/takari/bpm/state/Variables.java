@@ -1,10 +1,8 @@
 package io.takari.bpm.state;
 
-import org.pcollections.HashTreePMap;
-import org.pcollections.PMap;
-
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -16,7 +14,7 @@ public class Variables implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final Variables parent;
-    private final PMap<String, Object> values;
+    private final LinkedHashMap<String, Object> values;
 
     public Variables() {
         this((Variables) null);
@@ -24,15 +22,15 @@ public class Variables implements Serializable {
 
     public Variables(Variables parent) {
         this.parent = parent;
-        this.values = HashTreePMap.empty();
+        this.values = new LinkedHashMap<>();
     }
 
     public Variables(Map<String, Object> values) {
         this.parent = null;
-        this.values = HashTreePMap.from(values);
+        this.values = new LinkedHashMap<>(values);
     }
 
-    private Variables(Variables parent, PMap<String, Object> values) {
+    private Variables(Variables parent, LinkedHashMap<String, Object> values) {
         this.parent = parent;
         this.values = values;
     }
@@ -42,11 +40,15 @@ public class Variables implements Serializable {
     }
 
     public Variables setVariable(String key, Object value) {
-        return new Variables(parent, values.plus(key, value));
+        LinkedHashMap<String, Object> next = new LinkedHashMap<>(values);
+        next.put(key, value);
+        return new Variables(parent, next);
     }
 
     public Variables setVariables(Map<String, Object> m) {
-        return new Variables(parent, values.plusAll(m));
+        LinkedHashMap<String, Object> next = new LinkedHashMap<>(values);
+        next.putAll(m);
+        return new Variables(parent, next);
     }
 
     public Object getVariable(String key) {
@@ -68,7 +70,9 @@ public class Variables implements Serializable {
 
     public Variables removeVariable(String key) {
         if (values.containsKey(key)) {
-            return new Variables(parent, values.minus(key));
+            LinkedHashMap<String, Object> next = new LinkedHashMap<>(values);
+            next.remove(key);
+            return new Variables(parent, next);
         }
 
         if (parent == null) {

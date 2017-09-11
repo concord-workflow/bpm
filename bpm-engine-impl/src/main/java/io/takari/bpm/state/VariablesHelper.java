@@ -10,10 +10,7 @@ import io.takari.bpm.context.ExecutionContextImpl;
 import io.takari.bpm.misc.CoverageIgnore;
 import io.takari.bpm.model.VariableMapping;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public final class VariablesHelper {
 
@@ -102,7 +99,7 @@ public final class VariablesHelper {
 
         ExecutionContext ctx = contextFactory.create(vars);
 
-        Map<String, Object> m = new HashMap<>(vars.asMap());
+        Map<String, Object> m = new LinkedHashMap<>(vars.asMap());
         m = (Map<String, Object>) ctx.interpolate(m);
 
         Variables interpolated = new Variables(vars.getParent()).setVariables(m);
