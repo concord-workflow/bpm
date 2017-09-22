@@ -1,5 +1,14 @@
 # Change Log
 
+## [Unreleased]
+
+### Added
+
+- `Engine#resume` methods to resume a process and merge nested input
+data into the process' variables.
+
+
+
 ## [0.36.2] - 2017-09-10
 
 ### Changed

@@ -1,23 +1,14 @@
 package io.takari.bpm.form;
 
-import io.takari.bpm.AbstractEngineTest;
 import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.api.JavaDelegate;
-import io.takari.bpm.context.DefaultExecutionContextFactory;
-import io.takari.bpm.context.ExecutionContextFactory;
-import io.takari.bpm.el.DefaultExpressionManager;
-import io.takari.bpm.el.ExpressionManager;
-import io.takari.bpm.form.DefaultFormService.DirectResumeHandler;
-import io.takari.bpm.form.DefaultFormService.ResumeHandler;
 import io.takari.bpm.form.FormSubmitResult.ValidationError;
 import io.takari.bpm.model.*;
 import io.takari.bpm.model.form.DefaultFormFields.StringField;
 import io.takari.bpm.model.form.FormDefinition;
 import io.takari.bpm.model.form.FormExtension;
 import io.takari.bpm.model.form.FormField;
-import io.takari.bpm.task.ServiceTaskRegistry;
-import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -30,30 +21,8 @@ import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
-public class FormTest extends AbstractEngineTest {
+public class FormTest extends AbstractFormTest {
 
-    private InMemFormStorage formRegistry;
-    private FormService formService;
-    private FormValidatorLocale formLocale;
-    private TestFormDefinitionProvider formDefinitionProvider;
-
-    @Before
-    public void setUp() {
-        ServiceTaskRegistry taskRegistry = mock(ServiceTaskRegistry.class);
-        ExpressionManager expressionManager = new DefaultExpressionManager(taskRegistry);
-
-        formRegistry = new InMemFormStorage();
-
-        formLocale = spy(new DefaultFormValidatorLocale());
-        FormValidator validator = new DefaultFormValidator(formLocale);
-
-        ExecutionContextFactory contextFactory = new DefaultExecutionContextFactory(expressionManager);
-        ResumeHandler resumeHandler = new DirectResumeHandler(getEngine());
-        formService = spy(new DefaultFormService(contextFactory, resumeHandler, formRegistry, validator));
-
-        formDefinitionProvider = new TestFormDefinitionProvider();
-        getUserTaskHandler().set(new FormTaskHandler(contextFactory, formDefinitionProvider, formService));
-    }
 
     /**
      * start --> t1 --> t2 --> end

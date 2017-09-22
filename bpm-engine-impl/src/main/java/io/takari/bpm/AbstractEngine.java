@@ -74,7 +74,7 @@ public abstract class AbstractEngine implements Engine {
     }
 
     @Override
-    public void resume(String processBusinessKey, String eventName, Map<String, Object> variables) throws ExecutionException {
+    public void resume(String processBusinessKey, String eventName, Map<String, Object> variables, boolean merge) throws ExecutionException {
         LockManager lm = getLockManager();
         lm.lock(processBusinessKey);
 
@@ -93,7 +93,7 @@ public abstract class AbstractEngine implements Engine {
             }
 
             Event e = evs.iterator().next();
-            resumeLockSafe(e, variables);
+            resumeLockSafe(e, variables, merge);
         } catch (Exception e) {
             // TODO move to the executor?
             getInterceptorHolder().fireOnError(processBusinessKey, null, null, null, e);
@@ -104,7 +104,12 @@ public abstract class AbstractEngine implements Engine {
     }
 
     @Override
-    public void resume(UUID eventId, Map<String, Object> variables) throws ExecutionException {
+    public void resume(String processBusinessKey, String eventName, Map<String, Object> variables) throws ExecutionException {
+        resume(processBusinessKey, eventName, variables, false);
+    }
+
+    @Override
+    public void resume(UUID eventId, Map<String, Object> variables, boolean merge) throws ExecutionException {
         EventPersistenceManager em = getEventManager();
         Event ev = em.get(eventId);
         if (ev == null) {
@@ -117,7 +122,7 @@ public abstract class AbstractEngine implements Engine {
         lm.lock(businessKey);
 
         try {
-            resumeLockSafe(ev, variables);
+            resumeLockSafe(ev, variables, merge);
         } catch (Exception e) {
             // TODO move to the executor?
             getInterceptorHolder().fireOnError(businessKey, ev.getDefinitionId(), ev.getExecutionId(), null, e);
@@ -128,11 +133,16 @@ public abstract class AbstractEngine implements Engine {
     }
 
     @Override
+    public void resume(UUID eventId, Map<String, Object> variables) throws ExecutionException {
+        resume(eventId, variables, false);
+    }
+
+    @Override
     public void addInterceptor(ExecutionInterceptor i) {
         getInterceptorHolder().addInterceptor(i);
     }
 
-    private void resumeLockSafe(Event e, Map<String, Object> variables) throws ExecutionException {
+    private void resumeLockSafe(Event e, Map<String, Object> variables, boolean merge) throws ExecutionException {
         String businessKey = e.getProcessBusinessKey();
         String eventName = e.getName();
 
@@ -158,7 +168,7 @@ public abstract class AbstractEngine implements Engine {
         state = state.setStatus(ProcessStatus.RUNNING);
 
         // apply the external variables (no additional attributes provided)
-        state = StateHelper.applyVariables(state, null, variables);
+        state = StateHelper.applyVariables(state, null, variables, merge);
 
         // fire the interceptors
         // TODO move to the planner?

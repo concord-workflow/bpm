@@ -15,10 +15,11 @@ import io.takari.bpm.commands.ProcessElementCommand;
 import io.takari.bpm.misc.CoverageIgnore;
 import io.takari.bpm.model.ProcessDefinition;
 import io.takari.bpm.model.StartEvent;
-import io.takari.bpm.state.Activations.ActivationKey;
 import io.takari.bpm.state.Activations.Activation;
+import io.takari.bpm.state.Activations.ActivationKey;
 import io.takari.bpm.state.Events.EventRecord;
 import io.takari.bpm.state.Scopes.Scope;
+import io.takari.bpm.utils.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +48,7 @@ public final class StateHelper {
         state = push(state, new PerformActionsCommand(new PushScopeAction(pd.getId(), start.getId(), false)));
 
         // set external variables
-        state = applyVariables(state, pd.getAttributes(), args);
+        state = applyVariables(state, pd.getAttributes(), args, false);
 
         // fire interceptors
         state = push(state, new FireOnStartInterceptorsAction(pd.getId()));
@@ -55,7 +56,7 @@ public final class StateHelper {
         return state;
     }
 
-    public static ProcessInstance applyVariables(ProcessInstance state, Map<String, String> attr, Map<String, Object> args) {
+    public static ProcessInstance applyVariables(ProcessInstance state, Map<String, String> attr, Map<String, Object> args, boolean merge) {
         Variables vars = state.getVariables();
 
         if (attr != null) {
@@ -67,7 +68,18 @@ public final class StateHelper {
 
         if (args != null) {
             for (Map.Entry<String, Object> e : args.entrySet()) {
-                vars = vars.setVariable(e.getKey(), e.getValue());
+                String k = e.getKey();
+
+                Object a = vars.getVariable(k);
+                Object b = e.getValue();
+
+                if (merge && a instanceof Map && b instanceof Map) {
+                    a = MapUtils.deepMerge((Map) a, (Map) b);
+                } else {
+                    a = b;
+                }
+
+                vars = vars.setVariable(k, a);
             }
         }
 

@@ -28,6 +28,14 @@ public interface Engine {
     void resume(String processBusinessKey, String eventName, Map<String, Object> variables) throws ExecutionException;
 
     /**
+     * @see #resume(String, String, Map)
+     * @param merge if {@code true}, then the variables will be merged into existing
+     * process values.
+     * @throws ExecutionException
+     */
+    void resume(String processBusinessKey, String eventName, Map<String, Object> variables, boolean merge) throws ExecutionException;
+
+    /**
      * Resumes a process instance, waiting for the specific event.
      * @param eventId the ID of event.
      * @param variables variables to be passed, can be null. Values with the same
@@ -35,6 +43,15 @@ public interface Engine {
      * @throws ExecutionException
      */
     void resume(UUID eventId, Map<String, Object> variables) throws ExecutionException;
+
+
+    /**
+     * @see #resume(UUID, Map)
+     * @param merge if {@code true}, then the variables will be merged into existing
+     * process values.
+     * @throws ExecutionException
+     */
+    void resume(UUID eventId, Map<String, Object> variables, boolean merge) throws ExecutionException;
 
     /**
      * Adds an execution interceptor. Execution interceptor will receive events
