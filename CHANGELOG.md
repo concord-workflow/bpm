@@ -4,6 +4,7 @@
 
 ### Added
 
+- `io.takari.bpm.EngineListener` interface to handle internal events;
 - `Engine#resume` methods to resume a process and merge nested input
 data into the process' variables.
 

@@ -50,6 +50,7 @@ public class EngineHolder {
     private final Executor executor;
     private final ExpressionManager expressionManager;
     private final ExecutionInterceptorHolder interceptorHolder = new ExecutionInterceptorHolder();
+    private final EngineListenerHolder listenerHolder = new EngineListenerHolder();
     private final UuidGenerator uuidGenerator;
     private final LockManager lockManager;
     private final Configuration configuration;
@@ -101,6 +102,11 @@ public class EngineHolder {
             @Override
             protected ExecutionInterceptorHolder getInterceptorHolder() {
                 return interceptorHolder;
+            }
+
+            @Override
+            protected EngineListenerHolder getListenerHolder() {
+                return listenerHolder;
             }
 
             @Override

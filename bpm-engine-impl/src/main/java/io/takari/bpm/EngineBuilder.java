@@ -30,6 +30,7 @@ public final class EngineBuilder {
     private EventStorage eventStorage;
     private EventPersistenceManager eventManager;
     private ExecutionInterceptorHolder interceptors;
+    private EngineListenerHolder listeners;
     private Executor executor;
     private ExecutorService threadPool;
     private ExpressionManager expressionManager;
@@ -131,6 +132,14 @@ public final class EngineBuilder {
         return this;
     }
 
+    public EngineBuilder withListener(EngineListener listener) {
+        if (this.listeners == null) {
+            this.listeners = new EngineListenerHolder();
+        }
+        this.listeners.addListener(listener);
+        return this;
+    }
+
     public Engine build() {
         if (configuration == null) {
             configuration = new Configuration();
@@ -182,6 +191,10 @@ public final class EngineBuilder {
             interceptors = new ExecutionInterceptorHolder();
         }
 
+        if (listeners == null) {
+            listeners = new EngineListenerHolder();
+        }
+
         if (threadPool == null) {
             threadPool = Executors.newCachedThreadPool();
         }
@@ -225,7 +238,8 @@ public final class EngineBuilder {
                 executor,
                 planner,
                 configuration,
-                interceptors);
+                interceptors,
+                listeners);
     }
 
     public static final class EngineImpl extends AbstractEngine {
@@ -239,6 +253,7 @@ public final class EngineBuilder {
         private final Planner planner;
         private final Configuration configuration;
         private final ExecutionInterceptorHolder interceptors;
+        private final EngineListenerHolder listeners;
 
         private final EventService eventService;
 
@@ -252,7 +267,8 @@ public final class EngineBuilder {
                 Executor executor,
                 Planner planner,
                 Configuration configuration,
-                ExecutionInterceptorHolder interceptors) {
+                ExecutionInterceptorHolder interceptors,
+                EngineListenerHolder listeners) {
 
             this.definitionProvider = definitionProvider;
             this.eventManager = eventManager;
@@ -265,6 +281,7 @@ public final class EngineBuilder {
             this.configuration = configuration;
 
             this.interceptors = interceptors;
+            this.listeners = listeners;
 
             this.eventService = new EventServiceImpl(lockManager, eventStorage);
         }
@@ -297,6 +314,11 @@ public final class EngineBuilder {
         @Override
         protected ExecutionInterceptorHolder getInterceptorHolder() {
             return interceptors;
+        }
+
+        @Override
+        protected EngineListenerHolder getListenerHolder() {
+            return listeners;
         }
 
         @Override

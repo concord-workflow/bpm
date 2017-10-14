@@ -38,6 +38,8 @@ public abstract class AbstractEngine implements Engine {
 
     protected abstract ExecutionInterceptorHolder getInterceptorHolder();
 
+    protected abstract EngineListenerHolder getListenerHolder();
+
     protected abstract EventPersistenceManager getEventManager();
 
     protected abstract LockManager getLockManager();
@@ -203,6 +205,9 @@ public abstract class AbstractEngine implements Engine {
             List<Action> actions = getPlanner().eval(state);
             state = getExecutor().eval(state, actions);
         }
+
+        // fire the listeners
+        state = getListenerHolder().fireOnFinalize(state);
 
         // fire the interceptors
 
