@@ -59,6 +59,11 @@
             <artifactId>groovy-all</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.esotericsoftware</groupId>
+            <artifactId>kryo</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

@@ -134,14 +134,10 @@ public class ExpressionsReducer extends BpmnErrorHandlingReducer {
 
             if (type == ExpressionType.DELEGATE) {
                 javaDelegateHandler.execute(v, ctx);
-
+            } else {
                 if (storeResult) {
-                    ctx.setVariable(ServiceTask.EXPRESSION_RESULT_VAR, null);
+                    ctx.setVariable(ServiceTask.EXPRESSION_RESULT_VAR, v);
                 }
-            }
-
-            if (storeResult) {
-                ctx.setVariable(ServiceTask.EXPRESSION_RESULT_VAR, v);
             }
 
             return defaultCommand;

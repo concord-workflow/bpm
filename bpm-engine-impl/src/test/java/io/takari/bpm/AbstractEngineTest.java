@@ -4,6 +4,8 @@ import io.takari.bpm.api.BpmnError;
 import io.takari.bpm.api.Engine;
 import io.takari.bpm.event.EventPersistenceManager;
 import io.takari.bpm.model.ProcessDefinition;
+import io.takari.bpm.persistence.InMemPersistenceManager;
+import io.takari.bpm.persistence.PersistenceManager;
 import io.takari.bpm.task.ServiceTaskRegistryImpl;
 import org.junit.Before;
 
@@ -16,10 +18,19 @@ import static junit.framework.Assert.assertNotNull;
 public class AbstractEngineTest {
 
     private EngineHolder engineHolder;
+    private final PersistenceManager persistenceManager;
+
+    public AbstractEngineTest() {
+        this(new InMemPersistenceManager());
+    }
+
+    public AbstractEngineTest(PersistenceManager persistenceManager) {
+        this.persistenceManager = persistenceManager;
+    }
 
     @Before
     public void init() throws Exception {
-        this.engineHolder = new EngineHolder();
+        this.engineHolder = new EngineHolder(persistenceManager);
     }
 
     protected UUID randomUuid() {
@@ -32,6 +43,10 @@ public class AbstractEngineTest {
 
     protected Engine getEngine() {
         return engineHolder.getEngine();
+    }
+
+    protected PersistenceManager getPersistenceManager() {
+        return engineHolder.getPersistenceManager();
     }
 
     protected ServiceTaskRegistryImpl getServiceTaskRegistry() {

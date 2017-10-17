@@ -60,12 +60,17 @@ public class EngineHolder {
     private final ExecutionContextFactory<? extends ExecutionContextImpl> contextFactory;
 
     public EngineHolder() throws Exception {
+        this(new InMemPersistenceManager());
+    }
+
+    public EngineHolder(PersistenceManager persistenceManager) throws Exception {
+        this.persistenceManager = persistenceManager;
+
         serviceTaskRegistry = new ServiceTaskRegistryImpl();
         processDefinitionProvider = spy(new TestProcessDefinitionProvider());
         indexedProcessDefinitionProvider = new IndexedProcessDefinitionProvider(processDefinitionProvider);
         eventStorage = new InMemEventStorage();
         eventManager = spy(new EventPersistenceManagerImpl(eventStorage));
-        persistenceManager = new InMemPersistenceManager();
         expressionManager = new DefaultExpressionManager(serviceTaskRegistry);
         uuidGenerator = new TestUuidGenerator();
         configuration = new Configuration();
@@ -178,6 +183,10 @@ public class EngineHolder {
 
     public DelegatingUserTaskHandler getUserTaskHandler() {
         return userTaskHandler;
+    }
+
+    public PersistenceManager getPersistenceManager() {
+        return persistenceManager;
     }
 
     public void deploy(ProcessDefinition pd) {
