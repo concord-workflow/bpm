@@ -46,6 +46,7 @@ public class LevelDbEventStorage implements EventStorage {
         } catch (Exception e) {
             log.error("init -> error, closing...", e);
             close();
+            throw e;
         }
     }
 

@@ -1,22 +1,14 @@
 package io.takari.bpm.leveldb;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
-import java.io.ObjectStreamClass;
-import java.nio.ByteBuffer;
-import java.util.UUID;
-
+import io.takari.bpm.persistence.PersistenceManager;
+import io.takari.bpm.state.ProcessInstance;
 import org.iq80.leveldb.DBFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.takari.bpm.persistence.PersistenceManager;
-import io.takari.bpm.state.ProcessInstance;
+import java.io.*;
+import java.nio.ByteBuffer;
+import java.util.UUID;
 
 public class LevelDbPersistenceManager implements PersistenceManager {
 
@@ -54,8 +46,6 @@ public class LevelDbPersistenceManager implements PersistenceManager {
     @Override
     public void remove(UUID id) {
         byte[] key = marshallKey(id);
-        byte[] bytes = db.get(key);
-        ProcessInstance e = unmarshallValue(bytes);
         db.delete(key);
     }
 
@@ -75,7 +65,7 @@ public class LevelDbPersistenceManager implements PersistenceManager {
             return bos.toByteArray();
         } catch (IOException e) {
             log.error("marshallValue -> error", e);
-            return null;
+            throw new RuntimeException(e);
         }
     }
 
@@ -100,8 +90,8 @@ public class LevelDbPersistenceManager implements PersistenceManager {
                 }) {
             return (ProcessInstance) in.readObject();
         } catch (IOException | ClassNotFoundException e) {
-            log.error("marshallValue -> error", e);
-            return null;
+            log.error("unmarshallValue -> error", e);
+            throw new RuntimeException(e);
         }
     }
 }

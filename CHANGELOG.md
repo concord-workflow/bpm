@@ -1,5 +1,14 @@
 # Change Log
 
+## [Unreleased]
+
+### Changed
+
+- cleaned up value removal and error handling in the LevelDB
+persistence provider.
+
+
+
 ## [0.37.0] - 2017-10-13
 
 ### Added
