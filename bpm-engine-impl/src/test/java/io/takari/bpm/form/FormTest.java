@@ -5,6 +5,9 @@ import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.api.JavaDelegate;
 import io.takari.bpm.form.FormSubmitResult.ValidationError;
 import io.takari.bpm.model.*;
+import io.takari.bpm.model.form.DefaultFormFields.BooleanField;
+import io.takari.bpm.model.form.DefaultFormFields.DecimalField;
+import io.takari.bpm.model.form.DefaultFormFields.IntegerField;
 import io.takari.bpm.model.form.DefaultFormFields.StringField;
 import io.takari.bpm.model.form.FormDefinition;
 import io.takari.bpm.model.form.FormExtension;
@@ -12,17 +15,13 @@ import io.takari.bpm.model.form.FormField;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 public class FormTest extends AbstractFormTest {
-
 
     /**
      * start --> t1 --> t2 --> end
@@ -192,5 +191,77 @@ public class FormTest extends AbstractFormTest {
 
         Map m = opts.getValue();
         assertEquals(inputVal, m.get("opt"));
+    }
+
+    /**
+     * start --> t1 --> t2 --> end
+     */
+    @Test
+    public void testAllTypes() throws Exception {
+        String formId = "testForm";
+
+        formDefinitionProvider.deploy(new FormDefinition(formId,
+                new FormField.Builder("aString", StringField.TYPE)
+                        .build(),
+                new FormField.Builder("anInteger", IntegerField.TYPE)
+                        .build(),
+                new FormField.Builder("aDecimal", DecimalField.TYPE)
+                        .build(),
+                new FormField.Builder("aBoolean", BooleanField.TYPE)
+                        .build()));
+
+        // ---
+
+        JavaDelegate t2 = spy(new JavaDelegate() {
+
+            @Override
+            public void execute(ExecutionContext ctx) throws ExecutionException {
+                assertEquals("aStringValue", get(ctx, "aString"));
+                assertEquals(12345, get(ctx, "anInteger"));
+                assertEquals(54.321, get(ctx, "aDecimal"));
+                assertEquals(true, get(ctx, "aBoolean"));
+            }
+
+            private Object get(ExecutionContext ctx, String fieldName) {
+                return ctx.eval("${" + formId + "." + fieldName + "}", Object.class);
+            }
+        });
+        getServiceTaskRegistry().register("t2", t2);
+
+        // ---
+
+        String processId = "test";
+        deploy(new ProcessDefinition(processId,
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "t1"),
+                new UserTask("t1", new FormExtension(formId)),
+                new SequenceFlow("f2", "t1", "t2"),
+                new ServiceTask("t2", ExpressionType.DELEGATE, "${t2}"),
+                new SequenceFlow("f3", "t2", "end"),
+                new EndEvent("end")
+        ));
+
+        // ---
+
+        String key = UUID.randomUUID().toString();
+        getEngine().start(key, processId, null);
+
+        // ---
+
+        UUID formInstanceId = formRegistry.getForms().keySet().iterator().next();
+        assertNotNull(formInstanceId);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("aString", "aStringValue");
+        data.put("anInteger", 12345);
+        data.put("aDecimal", 54.321);
+        data.put("aBoolean", true);
+
+        FormSubmitResult r = formService.submit(formInstanceId, data);
+        assertTrue(r.isValid());
+
+        // ---
+
+        verify(t2, times(1)).execute(any(ExecutionContext.class));
     }
 }

@@ -2,6 +2,7 @@ package io.takari.bpm.form;
 
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.form.FormSubmitResult.ValidationError;
+import io.takari.bpm.model.form.DefaultFormFields.BooleanField;
 import io.takari.bpm.model.form.DefaultFormFields.DecimalField;
 import io.takari.bpm.model.form.DefaultFormFields.IntegerField;
 import io.takari.bpm.model.form.DefaultFormFields.StringField;
@@ -30,6 +31,7 @@ public class DefaultFormValidator implements FormValidator {
         vs.add(new StringFieldValidator(locale));
         vs.add(new IntegerFieldValidator(locale));
         vs.add(new DecimalFieldValidator(locale));
+        vs.add(new BooleanFieldValidator(locale));
 
         this.validators = vs;
     }
@@ -486,6 +488,33 @@ public class DefaultFormValidator implements FormValidator {
                     return new ValidationError(fieldName, locale.decimalRangeError(formId, f, idx, min, max, v));
                 }
             } else {
+                return new ValidationError(fieldName, locale.expectedDecimal(formId, f, idx, v));
+            }
+
+            return null;
+        }
+    }
+
+    public static final class BooleanFieldValidator implements FieldValidator {
+
+        private static final String[] TYPES = {BooleanField.TYPE};
+
+        private final FormValidatorLocale locale;
+
+        public BooleanFieldValidator(FormValidatorLocale locale) {
+            this.locale = locale;
+        }
+
+        @Override
+        public String[] allowedTypes() {
+            return TYPES;
+        }
+
+        @Override
+        public ValidationError validate(String formId, FormField f, Integer idx, Object v) throws ExecutionException {
+            String fieldName = f.getName();
+
+            if (!(v instanceof Boolean)) {
                 return new ValidationError(fieldName, locale.expectedDecimal(formId, f, idx, v));
             }
 

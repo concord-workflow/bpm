@@ -31,6 +31,11 @@ public class DefaultFormValidatorLocale implements FormValidatorLocale {
     }
 
     @Override
+    public String expectedBoolean(String formId, FormField field, Integer idx, Object value) {
+        return String.format("%s: expected a boolean value, got %s", fieldName(field, idx), value);
+    }
+
+    @Override
     public String doesntMatchPattern(String formId, FormField field, Integer idx, String pattern, Object value) {
         return String.format("%s: value '%s' doesn't match pattern '%s'", fieldName(field, idx), pattern, value);
     }

@@ -55,6 +55,16 @@ public interface FormValidatorLocale {
      */
     String expectedDecimal(String formId, FormField field, Integer idx, Object value);
 
+    /**
+     * Expected a boolean value.
+     *
+     * @param formId
+     * @param field
+     * @param idx
+     * @param value
+     * @return
+     */
+    String expectedBoolean(String formId, FormField field, Integer idx, Object value);
 
     /**
      * A string value doesn't match the specified pattern.

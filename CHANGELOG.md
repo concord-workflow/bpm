@@ -4,6 +4,7 @@
 
 ### Changed
 
+- added support for boolean form fields;
 - fixed last expression result saving when using a JavaDelegate;
 - cleaned up value removal and error handling in the LevelDB
 persistence provider.

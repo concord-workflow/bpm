@@ -7,6 +7,7 @@ import io.takari.bpm.context.ExecutionContextFactory;
 import io.takari.bpm.el.DefaultExpressionManager;
 import io.takari.bpm.el.ExpressionManager;
 import io.takari.bpm.form.DefaultFormService.ResumeHandler;
+import io.takari.bpm.model.form.DefaultFormFields.BooleanField;
 import io.takari.bpm.model.form.DefaultFormFields.DecimalField;
 import io.takari.bpm.model.form.DefaultFormFields.IntegerField;
 import io.takari.bpm.model.form.DefaultFormFields.StringField;
@@ -100,6 +101,11 @@ public class FormServiceTest {
                 .cardinality(Cardinality.ONE_OR_NONE)
                 .option(DecimalField.MIN, min)
                 .option(DecimalField.MAX, max)
+                .build();
+    }
+
+    private static FormField booleanValue(String fieldName) {
+        return new FormField.Builder(fieldName, BooleanField.TYPE)
                 .build();
     }
 
@@ -262,6 +268,13 @@ public class FormServiceTest {
         assertFalse(r.isValid());
 
         verify(formLocale, times(1)).decimalRangeError(anyString(), eq(f), any(Integer.class), any(Double.class), any(Double.class), anyObject());
+    }
+
+    @Test
+    public void testValidSingleBoolean() throws Exception {
+        FormSubmitResult r = submit(new FormField[]{booleanValue("a")},
+                "a", true);
+        assertTrue(r.isValid());
     }
 
     private FormSubmitResult submit(FormField[] fields, Object... values) throws ExecutionException {

@@ -27,6 +27,11 @@ public final class DefaultFormFields {
         public static final Option<Double> MAX = FormField.registerOption(TYPE, "max", Double.class);
     }
 
+    public static final class BooleanField {
+
+        public static final String TYPE = "boolean";
+    }
+
     private DefaultFormFields() {
     }
 }
