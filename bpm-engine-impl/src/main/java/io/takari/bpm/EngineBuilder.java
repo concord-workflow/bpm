@@ -47,6 +47,11 @@ public final class EngineBuilder {
     private ResourceResolver resourceResolver;
     private Configuration configuration;
 
+    public EngineBuilder withUuidGenerator(UuidGenerator uuidGenerator) {
+        this.uuidGenerator = uuidGenerator;
+        return this;
+    }
+
     public EngineBuilder withDefinitionProvider(ProcessDefinitionProvider definitionProvider) {
         this.definitionProvider = definitionProvider;
         return this;

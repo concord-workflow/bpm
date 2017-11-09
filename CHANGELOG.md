@@ -1,10 +1,22 @@
 # Change Log
 
+## [Unreleased]
+
+### Added
+
+- allow users to supply their own `UuidGenerator`s in
+`EngineBuilder`.
+
+
+
 ## [0.38.0] - 2017-10-24
+
+### Added
+
+- added support for boolean form fields;
 
 ### Changed
 
-- added support for boolean form fields;
 - fixed last expression result saving when using a JavaDelegate;
 - cleaned up value removal and error handling in the LevelDB
 persistence provider.
