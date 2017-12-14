@@ -36,6 +36,11 @@ public class DefaultFormValidator implements FormValidator {
         this.validators = vs;
     }
 
+    public DefaultFormValidator(Collection<FieldValidator> validators, FormValidatorLocale locale) {
+        this.validators = validators;
+        this.locale = locale;
+    }
+
     @Override
     public List<ValidationError> validate(Form form, Map<String, Object> data) throws ExecutionException {
         List<ValidationError> errors = new ArrayList<>();
@@ -515,7 +520,7 @@ public class DefaultFormValidator implements FormValidator {
             String fieldName = f.getName();
 
             if (!(v instanceof Boolean)) {
-                return new ValidationError(fieldName, locale.expectedDecimal(formId, f, idx, v));
+                return new ValidationError(fieldName, locale.expectedBoolean(formId, f, idx, v));
             }
 
             return null;
