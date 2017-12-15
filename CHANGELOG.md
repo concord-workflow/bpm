@@ -1,5 +1,17 @@
 # Change Log
 
+## [0.40.0] - 2017-12-14
+
+### Added
+
+- support for custom field validators in the `DefaultFormValidator`.
+
+### Changed
+
+- fixed handling of booleans in forms.
+
+
+
 ## [0.39.0] - 2017-11-09
 
 ### Added
