@@ -1,5 +1,13 @@
 # Change Log
 
+## [Unreleased]
+
+### Added
+
+- support for `TerminateEvent`.
+
+
+
 ## [0.40.0] - 2017-12-14
 
 ### Added

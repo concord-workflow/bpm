@@ -25,6 +25,7 @@ public class DelegatingElementHandler implements ElementHandler {
         delegates = new HashMap<>();
         delegates.put(StartEvent.class, new StartEventHandler());
         delegates.put(EndEvent.class, new EndEventHandler());
+        delegates.put(TerminateEvent.class, new TerminateEventHandler());
         delegates.put(SequenceFlow.class, new SequenceFlowHandler());
         delegates.put(ServiceTask.class, new ServiceTaskHandler());
         delegates.put(BoundaryEvent.class, new BoundaryEventHandler());

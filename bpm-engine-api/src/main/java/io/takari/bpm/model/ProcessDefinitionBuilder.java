@@ -384,6 +384,11 @@ public abstract class ProcessDefinitionBuilder {
         Object end(String errorRef, String causeExpression, Significance sig, int line, int col, String desc);
 
         /**
+         * Adds an TerminateEvent and completes current sequence
+         */
+        Object terminate();
+
+        /**
          * Adds a source map to the last added element.
          */
         Seq sourceMap(Significance sig, int line, int col, String desc);
@@ -619,6 +624,9 @@ public abstract class ProcessDefinitionBuilder {
         @Override
         P end(String errorRef, String causeExpression, Significance sig, int line, int col, String desc);
 
+        @Override
+        P terminate();
+
         P parent();
 
         @Override
@@ -830,6 +838,19 @@ public abstract class ProcessDefinitionBuilder {
 
         public P end(String errorRef, String causeExpression, Significance sig, int line, int col, String desc) {
             addEnd(errorRef, causeExpression, sig, line, col, desc);
+            return done();
+        }
+
+        public void addTerminate() {
+            add(new TerminateEvent(nextEndId()));
+
+            validate();
+        }
+
+        public P terminate() {
+            if(!(lastElement instanceof TerminateEvent)) {
+                addTerminate();
+            }
             return done();
         }
 
