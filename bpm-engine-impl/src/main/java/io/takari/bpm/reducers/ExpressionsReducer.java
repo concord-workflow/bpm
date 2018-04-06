@@ -2,12 +2,14 @@ package io.takari.bpm.reducers;
 
 import io.takari.bpm.Configuration;
 import io.takari.bpm.actions.Action;
+import io.takari.bpm.actions.CreateEventAction;
 import io.takari.bpm.actions.EvalExpressionAction;
 import io.takari.bpm.api.BpmnError;
 import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.commands.Command;
 import io.takari.bpm.commands.CommandStack;
+import io.takari.bpm.commands.PerformActionsCommand;
 import io.takari.bpm.context.ExecutionContextFactory;
 import io.takari.bpm.context.ExecutionContextImpl;
 import io.takari.bpm.model.ExpressionType;
@@ -70,10 +72,20 @@ public class ExpressionsReducer extends BpmnErrorHandlingReducer {
 
         try {
             Command result = fn.call();
-            log.debug("reduce ['{}', '{}'] -> next action is '{}'", state.getBusinessKey(), a, result);
 
             CommandStack stack = state.getStack();
-            state = state.setStack(stack.push(result));
+
+            String messageRef = ctx.getSuspendMessageRef();
+            if (messageRef == null) {
+                log.debug("reduce ['{}', '{}'] -> next action is '{}'", state.getBusinessKey(), a, result);
+                stack = stack.push(result);
+            } else {
+                log.debug("reduce ['{}', '{}'] -> suspend is requested '{}'", state.getBusinessKey(), a, messageRef);
+                stack = stack.push(new PerformActionsCommand(
+                        new CreateEventAction(a.getDefinitionId(), a.getElementId(), messageRef, null, null, null)));
+            }
+
+            state = state.setStack(stack);
         } catch (ELException e) {
             Throwable cause = e.getCause();
             if (cause instanceof BpmnError) {

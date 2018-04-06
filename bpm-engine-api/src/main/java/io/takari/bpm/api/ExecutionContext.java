@@ -32,4 +32,6 @@ public interface ExecutionContext {
     Map<String, Object> toMap();
 
     Object interpolate(Object v);
+
+    void suspend(String messageRef);
 }

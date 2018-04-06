@@ -183,5 +183,10 @@ public final class Interpolator {
         public Object interpolate(Object v) {
             throw new IllegalStateException("Not supported");
         }
+
+        @Override
+        public void suspend(String messageRef) {
+            throw new IllegalStateException("Not supported");
+        }
     }
 }

@@ -15,6 +15,8 @@ public class ExecutionContextImpl implements ExecutionContext {
     private final Variables source;
     private final Map<String, Change> changes = new HashMap<>();
 
+    private String suspendMessageRef = null;
+
     public ExecutionContextImpl(ExpressionManager exprManager, Variables source) {
         this.exprManager = exprManager;
         this.source = source;
@@ -134,6 +136,15 @@ public class ExecutionContextImpl implements ExecutionContext {
     @Override
     public Object interpolate(Object v) {
         return exprManager.interpolate(this, v);
+    }
+
+    @Override
+    public void suspend(String messageRef) {
+        this.suspendMessageRef = messageRef;
+    }
+
+    public String getSuspendMessageRef() {
+        return suspendMessageRef;
     }
 
     private static List<Variables> stack(Variables tail) {

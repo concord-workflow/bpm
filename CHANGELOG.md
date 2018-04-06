@@ -1,5 +1,14 @@
 # Change Log
 
+## [Unreleased]
+
+### Added
+
+- `ExecutionContext#suspend` to suspend a process from a task or an
+expresssion.
+
+
+
 ## [0.41.0] - 2018-03-23
 
 ### Added
