@@ -27,7 +27,7 @@ public class RaiseErrorReducer implements Reducer {
         String expression = a.getCauseExpression();
         Throwable cause = null;
         if (expression != null) {
-            ExecutionContext ctx = contextFactory.create(state.getVariables());
+            ExecutionContext ctx = contextFactory.create(state.getVariables(), a.getDefinitionId(), a.getElementId());
             cause = ctx.eval(expression, Throwable.class);
         }
 

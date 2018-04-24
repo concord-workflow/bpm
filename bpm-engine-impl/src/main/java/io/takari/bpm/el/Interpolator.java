@@ -188,5 +188,15 @@ public final class Interpolator {
         public void suspend(String messageRef) {
             throw new IllegalStateException("Not supported");
         }
+
+        @Override
+        public String getProcessDefinitionId() {
+            throw new IllegalStateException("Not supported");
+        }
+
+        @Override
+        public String getElementId() {
+            throw new IllegalStateException("Not supported");
+        }
     }
 }

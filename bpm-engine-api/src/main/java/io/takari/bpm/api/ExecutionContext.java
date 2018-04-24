@@ -34,4 +34,8 @@ public interface ExecutionContext {
     Object interpolate(Object v);
 
     void suspend(String messageRef);
+
+    String getProcessDefinitionId();
+
+    String getElementId();
 }

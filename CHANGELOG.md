@@ -1,5 +1,15 @@
 # Change Log
 
+## [Unreleased]
+
+### Added
+
+- `ExecutionContext#getProcessDefinitionId` and `#getElementId()`
+methods to provide additional process metadata for tasks and
+expressions.
+
+
+
 ## [0.42.0] - 2018-04-06
 
 ### Added

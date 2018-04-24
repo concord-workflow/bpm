@@ -46,7 +46,7 @@ public class ForkReducer implements Reducer {
             IndexedProcessDefinition pd = state.getDefinition(a.getDefinitionId());
             List<SequenceFlow> out = ProcessDefinitionUtils.findOutgoingFlows(pd, a.getElementId());
 
-            ExecutionContext ctx = contextFactory.create(state.getVariables());
+            ExecutionContext ctx = contextFactory.create(state.getVariables(), a.getDefinitionId(), a.getElementId());
             List<SequenceFlow> filtered = filterInactive(ctx, out);
 
             List<SequenceFlow> inactive = new ArrayList<>(out);

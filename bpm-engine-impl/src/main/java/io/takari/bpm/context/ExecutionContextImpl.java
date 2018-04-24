@@ -17,9 +17,18 @@ public class ExecutionContextImpl implements ExecutionContext {
 
     private String suspendMessageRef = null;
 
+    private final String processDefinitionId;
+    private final String elementId;
+
     public ExecutionContextImpl(ExpressionManager exprManager, Variables source) {
+        this(exprManager, source, null, null);
+    }
+
+    public ExecutionContextImpl(ExpressionManager exprManager, Variables source, String processDefinitionId, String elementId) {
         this.exprManager = exprManager;
         this.source = source;
+        this.processDefinitionId = processDefinitionId;
+        this.elementId = elementId;
     }
 
     public <T> T eval(String expr, Class<T> type) {
@@ -145,6 +154,16 @@ public class ExecutionContextImpl implements ExecutionContext {
 
     public String getSuspendMessageRef() {
         return suspendMessageRef;
+    }
+
+    @Override
+    public String getProcessDefinitionId() {
+        return processDefinitionId;
+    }
+
+    @Override
+    public String getElementId() {
+        return elementId;
     }
 
     private static List<Variables> stack(Variables tail) {

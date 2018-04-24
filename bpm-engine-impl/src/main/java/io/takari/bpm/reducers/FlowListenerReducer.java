@@ -36,7 +36,7 @@ public class FlowListenerReducer implements Reducer {
         IndexedProcessDefinition pd = state.getDefinition(a.getDefinitionId());
         SequenceFlow f = (SequenceFlow) ProcessDefinitionUtils.findElement(pd, a.getElementId());
 
-        ExecutionContext ctx = contextFactory.create(state.getVariables());
+        ExecutionContext ctx = contextFactory.create(state.getVariables(), a.getDefinitionId(), a.getElementId());
         processListeners(ctx, f);
         
         return state;

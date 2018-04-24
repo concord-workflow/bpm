@@ -45,7 +45,7 @@ public class EvaluatedFlowsReducer implements Reducer {
         // first, we need to eval all flow expressions and filter out 'false'
         // results
 
-        ExecutionContext ctx = contextFactory.create(state.getVariables());
+        ExecutionContext ctx = contextFactory.create(state.getVariables(), a.getDefinitionId(), a.getElementId());
         for (Iterator<SequenceFlow> i = flows.iterator(); i.hasNext(); ) {
             SequenceFlow f = i.next();
             if (f.getExpression() == null) {

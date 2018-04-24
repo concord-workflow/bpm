@@ -80,7 +80,7 @@ public class EngineHolder {
         resourceResolver = new ClassPathResourceResolver();
         contextFactory = new DefaultExecutionContextFactory(expressionManager);
 
-        executor = wrap(new DefaultExecutor(configuration, contextFactory, expressionManager, Executors.newCachedThreadPool(),
+        executor = wrap(new DefaultExecutor(configuration, contextFactory, Executors.newCachedThreadPool(),
                 interceptorHolder, indexedProcessDefinitionProvider, uuidGenerator, eventManager, persistenceManager,
                 javaDelegateHandler, userTaskHandler, resourceResolver, serviceTaskRegistry));
 

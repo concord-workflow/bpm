@@ -4,7 +4,6 @@ import io.takari.bpm.actions.Action;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.context.ExecutionContextFactory;
 import io.takari.bpm.context.ExecutionContextImpl;
-import io.takari.bpm.el.ExpressionManager;
 import io.takari.bpm.event.EventPersistenceManager;
 import io.takari.bpm.persistence.PersistenceManager;
 import io.takari.bpm.reducers.*;
@@ -23,7 +22,6 @@ public class DefaultExecutor implements Executor {
 
     public DefaultExecutor(Configuration cfg,
                            ExecutionContextFactory<? extends ExecutionContextImpl> contextFactory,
-                           ExpressionManager expressionManager,
                            ExecutorService executor,
                            ExecutionInterceptorHolder interceptors,
                            IndexedProcessDefinitionProvider definitionProvider,
@@ -45,7 +43,7 @@ public class DefaultExecutor implements Executor {
                 new ExpressionsReducer(contextFactory, cfg, javaDelegateHandler, executor),
                 new InterceptorEventsReducer(interceptors),
                 new CallActivityReducer(definitionProvider, cfg),
-                new EventsReducer(contextFactory, uuidGenerator, expressionManager, eventManager),
+                new EventsReducer(contextFactory, uuidGenerator, eventManager),
                 new PersistenceReducer(persistenceManager),
                 new EvaluatedFlowsReducer(contextFactory),
                 new ActivationsReducer(interceptors),

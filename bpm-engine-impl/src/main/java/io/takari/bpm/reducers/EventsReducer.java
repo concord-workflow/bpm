@@ -14,7 +14,6 @@ import io.takari.bpm.commands.Command;
 import io.takari.bpm.commands.PerformActionsCommand;
 import io.takari.bpm.commands.ProcessElementCommand;
 import io.takari.bpm.context.ExecutionContextFactory;
-import io.takari.bpm.el.ExpressionManager;
 import io.takari.bpm.event.Event;
 import io.takari.bpm.event.EventPersistenceManager;
 import io.takari.bpm.model.SequenceFlow;
@@ -23,27 +22,21 @@ import io.takari.bpm.state.ProcessInstance;
 import io.takari.bpm.state.Scopes.Scope;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
 @Impure
 public class EventsReducer implements Reducer {
 
-    private static final Logger log = LoggerFactory.getLogger(EventsReducer.class);
-
     private final ExecutionContextFactory<?> contextFactory;
     private final UuidGenerator uuidGenerator;
-    private final ExpressionManager expressionManager;
     private final EventPersistenceManager eventManager;
 
     public EventsReducer(ExecutionContextFactory<?> contextFactory, UuidGenerator uuidGenerator,
-                         ExpressionManager expressionManager, EventPersistenceManager eventManager) {
+                         EventPersistenceManager eventManager) {
 
         this.contextFactory = contextFactory;
         this.uuidGenerator = uuidGenerator;
-        this.expressionManager = expressionManager;
         this.eventManager = eventManager;
     }
 
@@ -85,7 +78,7 @@ public class EventsReducer implements Reducer {
     private Event makeEvent(ProcessInstance state, CreateEventAction action)
             throws ExecutionException {
 
-        ExecutionContext ctx = contextFactory.create(state.getVariables());
+        ExecutionContext ctx = contextFactory.create(state.getVariables(), action.getDefinitionId(), action.getElementId());
 
         UUID id = uuidGenerator.generate();
         String name = getEventName(action, ctx);
@@ -154,7 +147,7 @@ public class EventsReducer implements Reducer {
         String elementId = a.getElementId();
         String s = a.getTimeDuration();
 
-        ExecutionContext ctx = contextFactory.create(state.getVariables());
+        ExecutionContext ctx = contextFactory.create(state.getVariables(), a.getDefinitionId(), a.getElementId());
         Object v = eval(s, ctx, Object.class);
 
         if (v == null) {

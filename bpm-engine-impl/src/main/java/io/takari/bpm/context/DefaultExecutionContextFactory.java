@@ -15,4 +15,9 @@ public class DefaultExecutionContextFactory implements ExecutionContextFactory<E
     public ExecutionContextImpl create(Variables source) {
         return new ExecutionContextImpl(expressionManager, source);
     }
+
+    @Override
+    public ExecutionContextImpl create(Variables source, String processDefinitionId, String elementId) {
+        return new ExecutionContextImpl(expressionManager, source, processDefinitionId, elementId);
+    }
 }

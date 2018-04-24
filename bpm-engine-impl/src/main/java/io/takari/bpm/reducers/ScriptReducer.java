@@ -62,7 +62,7 @@ public class ScriptReducer extends BpmnErrorHandlingReducer {
         }
 
         Variables vars = VariablesHelper.applyInVariables(contextFactory, state.getVariables(), t.getIn(), t.isCopyAllVariables());
-        ExecutionContextImpl ctx = contextFactory.create(vars);
+        ExecutionContextImpl ctx = contextFactory.create(vars, a.getDefinitionId(), a.getElementId());
 
         // expose all available variables plus the context
         Bindings b = engine.createBindings();

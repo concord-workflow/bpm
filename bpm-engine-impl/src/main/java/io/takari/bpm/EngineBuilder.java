@@ -224,7 +224,7 @@ public final class EngineBuilder {
         }
 
         if (executor == null) {
-            executor = new DefaultExecutor(configuration, contextFactory, expressionManager, threadPool, interceptors,
+            executor = new DefaultExecutor(configuration, contextFactory, threadPool, interceptors,
                     indexedDefinitionProvider, uuidGenerator, eventManager, persistenceManager,
                     javaDelegateHandler, userTaskHandler, resourceResolver, taskRegistry);
         }
