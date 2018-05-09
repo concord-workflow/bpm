@@ -1,6 +1,7 @@
 package io.takari.bpm.el;
 
 import io.takari.bpm.api.ExecutionContext;
+import io.takari.bpm.api.ExecutionContextFactory;
 
 import java.util.*;
 
@@ -10,7 +11,7 @@ public final class Interpolator {
     }
 
     @SuppressWarnings("unchecked")
-    public static Object interpolate(ExpressionManager em, ExecutionContext ctx, Object v) {
+    public static Object interpolate(ExecutionContextFactory<?> f, ExpressionManager em, ExecutionContext ctx, Object v) {
         if (v instanceof String) {
             String s = (String) v;
             if (!s.contains("${")) {
@@ -18,7 +19,7 @@ public final class Interpolator {
             }
             return em.eval(ctx, s, Object.class);
         } else if (v instanceof Map) {
-            return interpolateMap(em, ctx, (Map<?, ?>) v);
+            return interpolateMap(f, em, ctx, (Map<?, ?>) v);
         } else if (v instanceof List) {
             List src = (List) v;
             if (src.isEmpty()) {
@@ -27,7 +28,7 @@ public final class Interpolator {
 
             List dst = new ArrayList(src.size());
             for (Object vv : src) {
-                dst.add(interpolate(em, ctx, vv));
+                dst.add(interpolate(f, em, ctx, vv));
             }
 
             return dst;
@@ -39,7 +40,7 @@ public final class Interpolator {
 
             Set dst = new HashSet(src.size());
             for (Object vv : src) {
-                dst.add(interpolate(em, ctx, vv));
+                dst.add(interpolate(f, em, ctx, vv));
             }
         } if (v instanceof Object[]) {
             Object[] src = (Object[]) v;
@@ -48,20 +49,20 @@ public final class Interpolator {
             }
 
             for (int i = 0; i < src.length; i++) {
-                src[i] = interpolate(em, ctx, src[i]);
+                src[i] = interpolate(f, em, ctx, src[i]);
             }
         }
 
         return v;
     }
 
-    private static Map<?, ?> interpolateMap(ExpressionManager em, ExecutionContext ctx, Map<?, ?> m) {
+    private static Map<?, ?> interpolateMap(ExecutionContextFactory<?> f, ExpressionManager em, ExecutionContext ctx, Map<?, ?> m) {
         if (m.isEmpty()) {
             return m;
         }
 
         Map<Object, Object> mm = new LinkedHashMap<>(m.size());
-        ctx = new MapBackedExecutionContext(ctx, mm);
+        ctx = f.withOverrides(ctx, mm);
 
         for (Map.Entry<?, ?> e : m.entrySet()) {
             Object k = e.getKey();
@@ -124,79 +125,5 @@ public final class Interpolator {
         }
 
         return v;
-    }
-
-    private static final class MapBackedExecutionContext implements ExecutionContext {
-
-        private final ExecutionContext delegate;
-        private final Map<Object, Object> overrides;
-
-        private MapBackedExecutionContext(ExecutionContext delegate, Map<Object, Object> overrides) {
-            this.delegate = delegate;
-            this.overrides = overrides;
-        }
-
-        @Override
-        public Object getVariable(String key) {
-            if (overrides.containsKey(key)) {
-                return overrides.get(key);
-            }
-            return delegate.getVariable(key);
-        }
-
-        @Override
-        public Map<String, Object> getVariables() {
-            throw new IllegalStateException("Not supported");
-        }
-
-        @Override
-        public void setVariable(String key, Object value) {
-            throw new IllegalStateException("Not supported");
-        }
-
-        @Override
-        public boolean hasVariable(String key) {
-            return overrides.containsKey(key) || delegate.hasVariable(key);
-        }
-
-        @Override
-        public void removeVariable(String key) {
-            throw new IllegalStateException("Not supported");
-        }
-
-        @Override
-        public Set<String> getVariableNames() {
-            throw new IllegalStateException("Not supported");
-        }
-
-        @Override
-        public <T> T eval(String expr, Class<T> type) {
-            throw new IllegalStateException("Not supported");
-        }
-
-        @Override
-        public Map<String, Object> toMap() {
-            throw new IllegalStateException("Not supported");
-        }
-
-        @Override
-        public Object interpolate(Object v) {
-            throw new IllegalStateException("Not supported");
-        }
-
-        @Override
-        public void suspend(String messageRef) {
-            throw new IllegalStateException("Not supported");
-        }
-
-        @Override
-        public String getProcessDefinitionId() {
-            throw new IllegalStateException("Not supported");
-        }
-
-        @Override
-        public String getElementId() {
-            throw new IllegalStateException("Not supported");
-        }
     }
 }

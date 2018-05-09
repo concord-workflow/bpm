@@ -4,11 +4,11 @@ import io.takari.bpm.actions.Action;
 import io.takari.bpm.actions.RemoveInstanceAction;
 import io.takari.bpm.actions.SuspendAndPersistAction;
 import io.takari.bpm.api.ExecutionException;
+import io.takari.bpm.api.Variables;
 import io.takari.bpm.persistence.PersistenceManager;
 import io.takari.bpm.state.BpmnErrorHelper;
 import io.takari.bpm.state.ProcessInstance;
 import io.takari.bpm.state.ProcessStatus;
-import io.takari.bpm.state.Variables;
 
 @Impure
 public class PersistenceReducer implements Reducer {

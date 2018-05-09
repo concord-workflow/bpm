@@ -4,13 +4,15 @@ import io.takari.bpm.actions.Action;
 import io.takari.bpm.actions.SetVariableAction;
 import io.takari.bpm.actions.UnsetVariableAction;
 import io.takari.bpm.api.ExecutionContext;
+import io.takari.bpm.api.ExecutionContextFactory;
+import io.takari.bpm.api.Variables;
 import io.takari.bpm.el.ExpressionManager;
-import io.takari.bpm.state.Variables;
 
 import java.util.*;
 
 public class ExecutionContextImpl implements ExecutionContext {
 
+    private final ExecutionContextFactory<? extends ExecutionContext> executionContextFactory;
     private final ExpressionManager exprManager;
     private final Variables source;
     private final Map<String, Change> changes = new HashMap<>();
@@ -20,11 +22,14 @@ public class ExecutionContextImpl implements ExecutionContext {
     private final String processDefinitionId;
     private final String elementId;
 
-    public ExecutionContextImpl(ExpressionManager exprManager, Variables source) {
-        this(exprManager, source, null, null);
+    public ExecutionContextImpl(ExecutionContextFactory<? extends ExecutionContext> executionContextFactory,
+                                ExpressionManager exprManager, Variables source) {
+        this(executionContextFactory, exprManager, source, null, null);
     }
 
-    public ExecutionContextImpl(ExpressionManager exprManager, Variables source, String processDefinitionId, String elementId) {
+    public ExecutionContextImpl(ExecutionContextFactory<? extends ExecutionContext> executionContextFactory,
+                                ExpressionManager exprManager, Variables source, String processDefinitionId, String elementId) {
+        this.executionContextFactory = executionContextFactory;
         this.exprManager = exprManager;
         this.source = source;
         this.processDefinitionId = processDefinitionId;
@@ -144,7 +149,7 @@ public class ExecutionContextImpl implements ExecutionContext {
 
     @Override
     public Object interpolate(Object v) {
-        return exprManager.interpolate(this, v);
+        return exprManager.interpolate(executionContextFactory, this, v);
     }
 
     @Override

@@ -3,9 +3,10 @@ package io.takari.bpm.state;
 import io.takari.bpm.actions.Action;
 import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.ExecutionException;
+import io.takari.bpm.api.Variables;
 import io.takari.bpm.commands.Command;
 import io.takari.bpm.commands.PerformActionsCommand;
-import io.takari.bpm.context.ExecutionContextFactory;
+import io.takari.bpm.api.ExecutionContextFactory;
 import io.takari.bpm.context.ExecutionContextImpl;
 import io.takari.bpm.misc.CoverageIgnore;
 import io.takari.bpm.model.VariableMapping;
@@ -14,8 +15,7 @@ import java.util.*;
 
 public final class VariablesHelper {
 
-    public static Variables copyVariables(ExecutionContextFactory<?> contextFactory, Variables src, Variables dst, Set<VariableMapping> mapping)
-            throws ExecutionException {
+    public static Variables copyVariables(ExecutionContextFactory<?> contextFactory, Variables src, Variables dst, Set<VariableMapping> mapping) {
 
         if (mapping == null) {
             return dst;

@@ -1,7 +1,7 @@
 package io.takari.bpm.actions;
 
+import io.takari.bpm.api.Variables;
 import io.takari.bpm.misc.CoverageIgnore;
-import io.takari.bpm.state.Variables;
 
 public class SetVariablesAction implements Action {
 

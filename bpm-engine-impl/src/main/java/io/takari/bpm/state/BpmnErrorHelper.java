@@ -5,6 +5,7 @@ import io.takari.bpm.actions.RaiseErrorAction;
 import io.takari.bpm.actions.SetVariableAction;
 import io.takari.bpm.actions.UnsetVariableAction;
 import io.takari.bpm.api.BpmnError;
+import io.takari.bpm.api.Variables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

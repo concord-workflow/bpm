@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import io.takari.bpm.IndexedProcessDefinition;
 import io.takari.bpm.api.ExecutionException;
+import io.takari.bpm.api.Variables;
 import io.takari.bpm.commands.CommandStack;
 
 public class ProcessInstance implements Serializable {

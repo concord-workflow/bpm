@@ -8,6 +8,7 @@ import io.takari.bpm.actions.PopScopeAction;
 import io.takari.bpm.actions.PushScopeAction;
 import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.ExecutionException;
+import io.takari.bpm.api.Variables;
 import io.takari.bpm.commands.Command;
 import io.takari.bpm.commands.CommandStack;
 import io.takari.bpm.commands.PerformActionsCommand;

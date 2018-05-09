@@ -5,7 +5,7 @@ import io.takari.bpm.actions.RaiseErrorAction;
 import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.commands.PerformActionsCommand;
-import io.takari.bpm.context.ExecutionContextFactory;
+import io.takari.bpm.api.ExecutionContextFactory;
 import io.takari.bpm.state.BpmnErrorHelper;
 import io.takari.bpm.state.ProcessInstance;
 

@@ -1,4 +1,4 @@
-package io.takari.bpm.state;
+package io.takari.bpm.api;
 
 import java.io.Serializable;
 import java.util.HashSet;
@@ -82,7 +82,7 @@ public class Variables implements Serializable {
         return new Variables(parent.removeVariable(key), values);
     }
 
-    public java.util.Map<String, Object> asMap() {
+    public Map<String, Object> asMap() {
         return values;
     }
 }

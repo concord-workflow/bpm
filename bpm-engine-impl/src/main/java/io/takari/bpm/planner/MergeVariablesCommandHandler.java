@@ -8,10 +8,10 @@ import io.takari.bpm.actions.PopCommandAction;
 import io.takari.bpm.actions.SetVariablesAction;
 import io.takari.bpm.api.BpmnError;
 import io.takari.bpm.api.ExecutionException;
+import io.takari.bpm.api.Variables;
 import io.takari.bpm.commands.MergeVariablesCommand;
 import io.takari.bpm.state.BpmnErrorHelper;
 import io.takari.bpm.state.ProcessInstance;
-import io.takari.bpm.state.Variables;
 
 public class MergeVariablesCommandHandler implements CommandHandler<MergeVariablesCommand> {
 

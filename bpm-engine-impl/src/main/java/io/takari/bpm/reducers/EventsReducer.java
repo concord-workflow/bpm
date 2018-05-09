@@ -13,7 +13,7 @@ import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.commands.Command;
 import io.takari.bpm.commands.PerformActionsCommand;
 import io.takari.bpm.commands.ProcessElementCommand;
-import io.takari.bpm.context.ExecutionContextFactory;
+import io.takari.bpm.api.ExecutionContextFactory;
 import io.takari.bpm.event.Event;
 import io.takari.bpm.event.EventPersistenceManager;
 import io.takari.bpm.model.SequenceFlow;

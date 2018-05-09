@@ -2,17 +2,18 @@ package io.takari.bpm.reducers;
 
 import io.takari.bpm.actions.*;
 import io.takari.bpm.api.ExecutionException;
-import io.takari.bpm.context.ExecutionContextFactory;
+import io.takari.bpm.api.ExecutionContextFactory;
+import io.takari.bpm.api.Variables;
+import io.takari.bpm.context.ExecutionContextImpl;
 import io.takari.bpm.state.ProcessInstance;
-import io.takari.bpm.state.Variables;
 import io.takari.bpm.state.VariablesHelper;
 
 @Impure
 public class VariablesReducer implements Reducer {
 
-    private final ExecutionContextFactory<?> contextFactory;
+    private final ExecutionContextFactory<? extends ExecutionContextImpl> contextFactory;
 
-    public VariablesReducer(ExecutionContextFactory<?> contextFactory) {
+    public VariablesReducer(ExecutionContextFactory<? extends ExecutionContextImpl> contextFactory) {
         this.contextFactory = contextFactory;
     }
 

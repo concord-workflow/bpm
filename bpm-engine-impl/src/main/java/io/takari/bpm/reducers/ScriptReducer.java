@@ -5,9 +5,7 @@ import io.takari.bpm.ProcessDefinitionUtils;
 import io.takari.bpm.actions.Action;
 import io.takari.bpm.actions.ExecuteScriptAction;
 import io.takari.bpm.actions.FollowFlowsAction;
-import io.takari.bpm.api.BpmnError;
-import io.takari.bpm.api.ExecutionException;
-import io.takari.bpm.context.ExecutionContextFactory;
+import io.takari.bpm.api.*;
 import io.takari.bpm.context.ExecutionContextImpl;
 import io.takari.bpm.model.ProcessDefinition;
 import io.takari.bpm.model.ScriptTask;
@@ -15,7 +13,6 @@ import io.takari.bpm.model.ScriptTask.Type;
 import io.takari.bpm.resource.ResourceResolver;
 import io.takari.bpm.state.ProcessInstance;
 import io.takari.bpm.state.StateHelper;
-import io.takari.bpm.state.Variables;
 import io.takari.bpm.state.VariablesHelper;
 import io.takari.bpm.task.ServiceTaskRegistry;
 

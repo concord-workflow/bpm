@@ -3,13 +3,16 @@ package io.takari.bpm.el;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import io.takari.bpm.api.ExecutionContext;
+import io.takari.bpm.api.ExecutionContextFactory;
 import io.takari.bpm.api.JavaDelegate;
+import io.takari.bpm.api.Variables;
+import io.takari.bpm.context.DefaultExecutionContextFactory;
 import io.takari.bpm.context.ExecutionContextImpl;
-import io.takari.bpm.state.Variables;
 import io.takari.bpm.task.KeyAwareServiceTaskRegistry;
 import io.takari.bpm.task.ServiceTaskRegistry;
 import org.junit.Test;
 
+import java.security.spec.ECField;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,9 +47,10 @@ public class ExpressionManagerTest {
         // ---
 
         ExpressionManager em = new DefaultExpressionManager(mock(ServiceTaskRegistry.class));
+        DefaultExecutionContextFactory ctxFactory = new DefaultExecutionContextFactory(em);
 
-        ExecutionContext ctx = new ExecutionContextImpl(em, new Variables(m));
-        m = (Map<String, Object>) Interpolator.interpolate(em, ctx, m);
+        ExecutionContext ctx = new ExecutionContextImpl(ctxFactory, em, new Variables(m));
+        m = (Map<String, Object>) Interpolator.interpolate(ctxFactory, em, ctx, m);
 
         // ---
 

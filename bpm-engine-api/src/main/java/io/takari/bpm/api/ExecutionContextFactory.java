@@ -1,12 +1,12 @@
-package io.takari.bpm.context;
+package io.takari.bpm.api;
 
-import io.takari.bpm.api.ExecutionContext;
-import io.takari.bpm.model.AbstractElement;
-import io.takari.bpm.state.Variables;
+import java.util.Map;
 
 public interface ExecutionContextFactory<T extends ExecutionContext> {
 
     T create(Variables source);
 
     T create(Variables source, String processDefinitionId, String elementId);
+
+    ExecutionContext withOverrides(ExecutionContext delegate, Map<Object, Object> overrides);
 }

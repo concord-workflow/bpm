@@ -4,8 +4,8 @@ import io.takari.bpm.actions.Action;
 import io.takari.bpm.actions.SetVariableAction;
 import io.takari.bpm.actions.UnsetVariableAction;
 import io.takari.bpm.api.ExecutionContext;
+import io.takari.bpm.api.Variables;
 import io.takari.bpm.el.ExpressionManager;
-import io.takari.bpm.state.Variables;
 import org.junit.Test;
 
 import java.util.List;
@@ -26,7 +26,7 @@ public class ExecutionContextTest {
                 .setVariable("a", 123)
                 .setVariable("b", false);
 
-        ExecutionContextImpl ctx = new ExecutionContextImpl(em, vars);
+        ExecutionContextImpl ctx = new ExecutionContextImpl(new DefaultExecutionContextFactory(em), em, vars);
 
         // ---
 
@@ -63,7 +63,7 @@ public class ExecutionContextTest {
                 .setVariable("b", true)
                 .setVariable("c", "hello");
 
-        ExecutionContext ctx = new ExecutionContextImpl(em, vars2);
+        ExecutionContext ctx = new ExecutionContextImpl(new DefaultExecutionContextFactory(em), em, vars2);
 
         ctx.removeVariable("b");
         ctx.setVariable("d", "bye");

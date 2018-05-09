@@ -5,7 +5,7 @@ import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.api.interceptors.ExecutionInterceptorAdapter;
 import io.takari.bpm.api.interceptors.InterceptorElementEvent;
 import io.takari.bpm.context.DefaultExecutionContextFactory;
-import io.takari.bpm.context.ExecutionContextFactory;
+import io.takari.bpm.api.ExecutionContextFactory;
 import io.takari.bpm.context.ExecutionContextImpl;
 import io.takari.bpm.el.DefaultExpressionManager;
 import io.takari.bpm.el.ExpressionManager;

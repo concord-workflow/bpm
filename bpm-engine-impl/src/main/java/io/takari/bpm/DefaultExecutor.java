@@ -2,7 +2,7 @@ package io.takari.bpm;
 
 import io.takari.bpm.actions.Action;
 import io.takari.bpm.api.ExecutionException;
-import io.takari.bpm.context.ExecutionContextFactory;
+import io.takari.bpm.api.ExecutionContextFactory;
 import io.takari.bpm.context.ExecutionContextImpl;
 import io.takari.bpm.event.EventPersistenceManager;
 import io.takari.bpm.persistence.PersistenceManager;

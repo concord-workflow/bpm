@@ -1,8 +1,8 @@
 package io.takari.bpm.actions;
 
+import io.takari.bpm.api.Variables;
 import io.takari.bpm.misc.CoverageIgnore;
 import io.takari.bpm.model.VariableMapping;
-import io.takari.bpm.state.Variables;
 
 import java.util.Set;
 

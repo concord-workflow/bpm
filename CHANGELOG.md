@@ -1,5 +1,18 @@
 # Change Log
 
+## [Unreleased]
+
+### Added
+
+- new method `ExecutionContextFactory#withOverrides`. Used to create
+contexts with variable overrides.
+
+### Breaking
+
+- `ExecutionContextFactory` moved to `bpm-engine-api`.
+
+
+
 ## [0.43.0] - 2018-04-24
 
 ### Added

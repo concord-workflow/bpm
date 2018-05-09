@@ -8,7 +8,7 @@ import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.commands.CommandStack;
 import io.takari.bpm.commands.ProcessElementCommand;
-import io.takari.bpm.context.ExecutionContextFactory;
+import io.takari.bpm.api.ExecutionContextFactory;
 import io.takari.bpm.model.SequenceFlow;
 import io.takari.bpm.state.ProcessInstance;
 import org.slf4j.Logger;

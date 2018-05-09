@@ -3,7 +3,7 @@ package io.takari.bpm.form;
 import io.takari.bpm.AbstractEngineTest;
 import io.takari.bpm.api.Engine;
 import io.takari.bpm.context.DefaultExecutionContextFactory;
-import io.takari.bpm.context.ExecutionContextFactory;
+import io.takari.bpm.api.ExecutionContextFactory;
 import io.takari.bpm.el.DefaultExpressionManager;
 import io.takari.bpm.el.ExpressionManager;
 import io.takari.bpm.form.DefaultFormService.DirectResumeHandler;

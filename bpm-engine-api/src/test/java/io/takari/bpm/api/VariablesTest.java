@@ -1,9 +1,8 @@
-package io.takari.bpm;
+package io.takari.bpm.api;
 
-import static org.junit.Assert.*;
+import io.takari.bpm.api.Variables;
+import org.junit.Assert;
 import org.junit.Test;
-
-import io.takari.bpm.state.Variables;
 
 public class VariablesTest {
 
@@ -17,22 +16,22 @@ public class VariablesTest {
         
         // ---
         
-        assertEquals(123, p.getVariable("a"));
-        assertEquals(123, v.getVariable("a"));
+        Assert.assertEquals(123, p.getVariable("a"));
+        Assert.assertEquals(123, v.getVariable("a"));
         
         // ---
         
         v = v.removeVariable("a");
         
-        assertNull(v.getVariable("a"));
-        assertNotNull(p.getVariable("a"));
-        assertNull(v.getParent().getVariable("a"));
+        Assert.assertNull(v.getVariable("a"));
+        Assert.assertNotNull(p.getVariable("a"));
+        Assert.assertNull(v.getParent().getVariable("a"));
         
         // ---
         
         v = v.setVariable("b", true);
         
-        assertEquals(true, v.getVariable("b"));
-        assertEquals(false, v.getParent().getVariable("b"));
+        Assert.assertEquals(true, v.getVariable("b"));
+        Assert.assertEquals(false, v.getParent().getVariable("b"));
     }
 }
