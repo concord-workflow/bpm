@@ -1,5 +1,14 @@
 # Change Log
 
+## [Unreleased]
+
+## Added
+
+- Element event's variables can now be retrieved using
+`InterceptorElementEvent#getVariables`.
+
+
+
 ## [0.44.0] - 2018-05-09
 
 ### Added

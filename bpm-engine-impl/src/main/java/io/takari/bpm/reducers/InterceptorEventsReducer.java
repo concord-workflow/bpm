@@ -22,7 +22,7 @@ public class InterceptorEventsReducer implements Reducer {
         if (action instanceof FireOnElementInterceptorsAction) {
             FireOnElementInterceptorsAction a = (FireOnElementInterceptorsAction) action;
             UUID scopeId = state.getScopes().getCurrentId();
-            interceptors.fireOnElement(state.getBusinessKey(), a.getDefinitionId(), state.getId(), scopeId, a.getElementId());
+            interceptors.fireOnElement(state.getVariables(), state.getBusinessKey(), a.getDefinitionId(), state.getId(), scopeId, a.getElementId());
         } else if (action instanceof FireOnStartInterceptorsAction) {
             FireOnStartInterceptorsAction a = (FireOnStartInterceptorsAction) action;
             interceptors.fireOnStart(state.getBusinessKey(), a.getDefinitionId(), state.getId(), getCurrentVariables(state));

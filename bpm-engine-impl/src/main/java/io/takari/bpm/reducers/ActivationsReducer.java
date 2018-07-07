@@ -14,7 +14,6 @@ import io.takari.bpm.model.StartEvent;
 import io.takari.bpm.state.Activations;
 import io.takari.bpm.state.ProcessInstance;
 import io.takari.bpm.state.Scopes;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,7 +67,7 @@ public class ActivationsReducer implements Reducer {
                 state = state.setActivations(acts);
             }
 
-            interceptors.fireOnElement(state.getBusinessKey(), a.getDefinitionId(), state.getId(), scopeId, a.getElementId());
+            interceptors.fireOnElement(state.getVariables(), state.getBusinessKey(), a.getDefinitionId(), state.getId(), scopeId, a.getElementId());
 
             log.debug("reduce ['{}', '{}', '{}'] -> single activation", state.getBusinessKey(), a.getElementId(), a.getCount());
             return state;

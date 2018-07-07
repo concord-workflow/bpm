@@ -1,5 +1,7 @@
 package io.takari.bpm.api.interceptors;
 
+import io.takari.bpm.api.Variables;
+
 import java.io.Serializable;
 import java.util.UUID;
 
@@ -12,13 +14,15 @@ public class InterceptorElementEvent implements Serializable {
     private final UUID executionId;
     private final String elementId;
     private final UUID scopeId;
+    private final Variables variables;
 
-    public InterceptorElementEvent(String processBusinessKey, String processDefinitionId, UUID executionId, String elementId, UUID scopeId) {
+    public InterceptorElementEvent(String processBusinessKey, String processDefinitionId, UUID executionId, String elementId, UUID scopeId, Variables variables) {
         this.processBusinessKey = processBusinessKey;
         this.processDefinitionId = processDefinitionId;
         this.executionId = executionId;
         this.elementId = elementId;
         this.scopeId = scopeId;
+        this.variables = variables;
     }
 
     public String getProcessBusinessKey() {
@@ -39,5 +43,9 @@ public class InterceptorElementEvent implements Serializable {
 
     public UUID getScopeId() {
         return scopeId;
+    }
+
+    public Variables getVariables() {
+        return variables;
     }
 }

@@ -7,6 +7,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import io.takari.bpm.api.BpmnError;
 import io.takari.bpm.api.ExecutionException;
+import io.takari.bpm.api.Variables;
 import io.takari.bpm.api.interceptors.*;
 
 public class ExecutionInterceptorHolder {
@@ -66,10 +67,10 @@ public class ExecutionInterceptorHolder {
         }
     }
 
-    public void fireOnElement(String processBusinessKey, String processDefinitionId, UUID executionId, UUID scopeId, String elementId)
+    public void fireOnElement(Variables variables, String processBusinessKey, String processDefinitionId, UUID executionId, UUID scopeId, String elementId)
             throws ExecutionException {
 
-        InterceptorElementEvent ev = new InterceptorElementEvent(processBusinessKey, processDefinitionId, executionId, elementId, scopeId);
+        InterceptorElementEvent ev = new InterceptorElementEvent(processBusinessKey, processDefinitionId, executionId, elementId, scopeId, variables);
         for (ExecutionInterceptor i : interceptors) {
             i.onElement(ev);
         }
