@@ -42,7 +42,7 @@ public class DefaultExecutor implements Executor {
                 new RaiseErrorReducer(contextFactory),
                 new ExpressionsReducer(contextFactory, cfg, javaDelegateHandler, executor),
                 new InterceptorEventsReducer(interceptors),
-                new CallActivityReducer(definitionProvider, cfg),
+                new CallActivityReducer(contextFactory, definitionProvider, cfg),
                 new EventsReducer(contextFactory, uuidGenerator, eventManager),
                 new PersistenceReducer(persistenceManager),
                 new EvaluatedFlowsReducer(contextFactory),

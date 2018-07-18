@@ -1066,4 +1066,48 @@ public class CallActivityTest extends AbstractEngineTest {
         verify(t1, times(1)).execute(any(ExecutionContext.class));
         verify(t2, times(1)).execute(any(ExecutionContext.class));
     }
+
+    @Test
+    public void testCallWithExpressionName() throws Exception {
+        String aId = "testA";
+        String bId = "testB";
+
+        deploy(new ProcessDefinition(aId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "call"),
+                new CallActivity("call", null, "${callVariable}", null, null, true),
+                new SequenceFlow("f2", "call", "end"),
+                new EndEvent("end")
+        )));
+
+        deploy(new ProcessDefinition(bId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "end"),
+                new EndEvent("end")
+        )));
+
+        // ---
+        Map<String, Object> vars = new HashMap<>();
+        vars.put("callVariable", bId);
+        String key = UUID.randomUUID().toString();
+        getEngine().start(key, aId, vars);
+
+        // ---
+
+        assertActivations(key, aId,
+                "start",
+                "f1",
+                "call");
+
+        assertActivations(key, bId,
+                "start",
+                "f1",
+                "end");
+
+        assertActivations(key, aId,
+                "f2",
+                "end");
+
+        assertNoMoreActivations();
+    }
 }

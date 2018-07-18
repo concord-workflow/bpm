@@ -58,13 +58,13 @@ public class CallActivityHandler implements ElementHandler {
 
         // find the called process and start its execution
         CallActivity e = (CallActivity) ProcessDefinitionUtils.findElement(pd, cmd.getElementId());
-        actions.add(new FindAndCallActivityAction(e.getCalledElement()));
+        actions.add(new FindAndCallActivityAction(e.getCalledElement(), e.getCalledElementExpression()));
 
         // push the new scope when the call begins
         // the scope will be "popped" by one of the finishing actions
         actions.add(new PushCommandAction(new PerformActionsCommand(
                 new PushScopeAction(cmd.getDefinitionId(), cmd.getElementId(), false,
-                        finishers.toArray(new Command[finishers.size()])))));
+                        finishers.toArray(new Command[0])))));
 
         return actions;
     }

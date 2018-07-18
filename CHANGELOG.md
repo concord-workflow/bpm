@@ -1,8 +1,16 @@
 # Change Log
 
+## [Unreleased]
+
+### Added
+
+- support for expressions in `CallActivity` targets.
+
+
+
 ## [0.45.0] - 2018-07-07
 
-## Added
+### Added
 
 - Element event's variables can now be retrieved using
 `InterceptorElementEvent#getVariables`.

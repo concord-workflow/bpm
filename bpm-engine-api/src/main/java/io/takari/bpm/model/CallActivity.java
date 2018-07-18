@@ -8,6 +8,7 @@ public class CallActivity extends AbstractElement {
 
     private String name;
     private final String calledElement;
+    private final String calledElementExpression;
     private final Set<VariableMapping> in;
     private final Set<VariableMapping> out;
     private final boolean copyAllVariables;
@@ -25,8 +26,13 @@ public class CallActivity extends AbstractElement {
     }
 
     public CallActivity(String id, String calledElement, Set<VariableMapping> in, Set<VariableMapping> out, boolean copyAllVariables) {
+        this(id, calledElement, null, in, out, copyAllVariables);
+    }
+
+    public CallActivity(String id, String calledElement, String calledElementExpression, Set<VariableMapping> in, Set<VariableMapping> out, boolean copyAllVariables) {
         super(id);
         this.calledElement = calledElement;
+        this.calledElementExpression = calledElementExpression;
         this.in = in;
         this.out = out;
         this.copyAllVariables = copyAllVariables;
@@ -34,6 +40,10 @@ public class CallActivity extends AbstractElement {
 
     public String getCalledElement() {
         return calledElement;
+    }
+
+    public String getCalledElementExpression() {
+        return calledElementExpression;
     }
 
     public Set<VariableMapping> getIn() {

@@ -8,19 +8,31 @@ public class FindAndCallActivityAction implements Action {
 
     private final String calledElement;
 
+    private final String calledElementExpression;
+
     public FindAndCallActivityAction(String calledElement) {
+        this(calledElement, null);
+    }
+
+    public FindAndCallActivityAction(String calledElement, String calledElementExpression) {
         this.calledElement = calledElement;
+        this.calledElementExpression = calledElementExpression;
     }
 
     public String getCalledElement() {
         return calledElement;
     }
 
+    public String getCalledElementExpression() {
+        return calledElementExpression;
+    }
+
     @Override
     @CoverageIgnore
     public String toString() {
         return "FindAndCallActivityAction [" +
-                "calledElement=" + calledElement +
+                "calledElement=" + calledElement + ',' +
+                "calledElementExpression=" + calledElementExpression +
                 ']';
     }
 }

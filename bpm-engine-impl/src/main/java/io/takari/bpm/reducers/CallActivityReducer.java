@@ -1,6 +1,8 @@
 package io.takari.bpm.reducers;
 
 import io.takari.bpm.Configuration;
+import io.takari.bpm.api.ExecutionContext;
+import io.takari.bpm.api.ExecutionContextFactory;
 import io.takari.bpm.state.Definitions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,10 +21,12 @@ public class CallActivityReducer implements Reducer {
 
     private static final Logger log = LoggerFactory.getLogger(CallActivityReducer.class);
 
+    private final ExecutionContextFactory<?> contextFactory;
     private final IndexedProcessDefinitionProvider definitionProvider;
     private final Configuration cfg;
 
-    public CallActivityReducer(IndexedProcessDefinitionProvider definitionProvider, Configuration cfg) {
+    public CallActivityReducer(ExecutionContextFactory<?> contextFactory, IndexedProcessDefinitionProvider definitionProvider, Configuration cfg) {
+        this.contextFactory = contextFactory;
         this.definitionProvider = definitionProvider;
         this.cfg = cfg;
     }
@@ -34,7 +38,7 @@ public class CallActivityReducer implements Reducer {
         }
 
         FindAndCallActivityAction a = (FindAndCallActivityAction) action;
-        String proc = a.getCalledElement();
+        String proc = resolveCalledElement(state, a);
 
         // find a called process' definition
         IndexedProcessDefinition sub = null;
@@ -56,5 +60,14 @@ public class CallActivityReducer implements Reducer {
         state = state.setStack(state.getStack().push(new ProcessElementCommand(sub.getId(), ev.getId())));
 
         return state;
+    }
+
+    private String resolveCalledElement(ProcessInstance state, FindAndCallActivityAction a) {
+        if (a.getCalledElementExpression() == null) {
+            return a.getCalledElement();
+        }
+
+        ExecutionContext ctx = contextFactory.create(state.getVariables());
+        return ctx.eval(a.getCalledElementExpression(), String.class);
     }
 }
