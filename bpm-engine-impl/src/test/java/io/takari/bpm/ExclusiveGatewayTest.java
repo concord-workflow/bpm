@@ -1,6 +1,7 @@
 package io.takari.bpm;
 
 import io.takari.bpm.api.ExecutionContext;
+import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.api.JavaDelegate;
 import io.takari.bpm.model.*;
 
@@ -10,6 +11,7 @@ import java.util.UUID;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -109,6 +111,29 @@ public class ExclusiveGatewayTest extends AbstractEngineTest {
                 "fB",
                 "end");
         assertNoMoreActivations();
+    }
+
+    @Test
+    public void testNullExpression() throws Exception {
+        String processId = "test";
+        deploy(new ProcessDefinition(processId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "gw"),
+                new ExclusiveGateway("gw", "fA"),
+                new SequenceFlow("fA", "gw", "end", "${0 == 1}"),
+                new SequenceFlow("fB", "gw", "end", "${null}"),
+                new EndEvent("end")
+        )));
+
+        // ---
+
+        String key = UUID.randomUUID().toString();
+        try {
+            getEngine().start(key, processId, null);
+            fail("exception expected");
+        } catch (ExecutionException e) {
+            assert(e.getMessage().contains("got null"));
+        }
     }
 
     @Test

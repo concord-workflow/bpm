@@ -127,14 +127,18 @@ public class ForkReducer implements Reducer {
         return state.setForks(forks).setStack(stack);
     }
 
-    private static List<SequenceFlow> filterInactive(ExecutionContext ctx, List<SequenceFlow> flows) {
+    private static List<SequenceFlow> filterInactive(ExecutionContext ctx, List<SequenceFlow> flows) throws ExecutionException {
         List<SequenceFlow> result = new ArrayList<>(flows);
 
         for (Iterator<SequenceFlow> i = result.iterator(); i.hasNext(); ) {
             SequenceFlow f = i.next();
             if (f.getExpression() != null) {
                 String expr = f.getExpression();
-                boolean b = ctx.eval(expr, Boolean.class);
+                Boolean b = ctx.eval(expr, Boolean.class);
+                if (b == null) {
+                    throw new ExecutionException("'{}' expected a boolean value, got null. Possibly undefined variable.", expr);
+                }
+
                 if (!b) {
                     i.remove();
                 }

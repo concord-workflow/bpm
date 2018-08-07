@@ -92,9 +92,12 @@ public class EvaluatedFlowsReducer implements Reducer {
         return state;
     }
 
-    private static boolean eval(ExecutionContext ctx, SequenceFlow f) {
+    private static boolean eval(ExecutionContext ctx, SequenceFlow f) throws ExecutionException {
         String expr = f.getExpression();
-        boolean b = ctx.eval(expr, Boolean.class);
+        Boolean b = ctx.eval(expr, Boolean.class);
+        if (b == null) {
+            throw new ExecutionException("'{}' expected a boolean value, got null. Possibly undefined variable.", expr);
+        }
 
         log.debug("eval ['{}', '{}'] -> {}", f.getId(), f.getExpression(), b);
         return b;
@@ -102,8 +105,8 @@ public class EvaluatedFlowsReducer implements Reducer {
 
     private static ProcessInstance activateUnusedFlows(ProcessInstance state, String definitionId, String elementId, String usedFlowId)
             throws ExecutionException {
-        IndexedProcessDefinition pd = state.getDefinition(definitionId);
 
+        IndexedProcessDefinition pd = state.getDefinition(definitionId);
         for (SequenceFlow f : ProcessDefinitionUtils.findOutgoingFlows(pd, elementId)) {
             if (f.getId().equals(usedFlowId)) {
                 continue;
@@ -112,6 +115,7 @@ public class EvaluatedFlowsReducer implements Reducer {
             log.debug("activateUnusedFlows ['{}', '{}', '{}'] -> single activation of '{}'", state.getBusinessKey(), definitionId,
                     elementId, f.getId());
         }
+
         return state;
     }
 }

@@ -1,5 +1,13 @@
 # Change Log
 
+## [Unreleased]
+
+### Changed
+
+- validate results of boolean expressions when branching. 
+
+
+
 ## [0.46.0]
 
 ### Added
