@@ -18,6 +18,7 @@ public class ExecutionContextImpl implements ExecutionContext {
     private final Map<String, Change> changes = new HashMap<>();
 
     private String suspendMessageRef = null;
+    private Object suspendPayload = null;
 
     private final String processDefinitionId;
     private final String elementId;
@@ -157,8 +158,18 @@ public class ExecutionContextImpl implements ExecutionContext {
         this.suspendMessageRef = messageRef;
     }
 
+    @Override
+    public void suspend(String messageRef, Object payload) {
+        this.suspendMessageRef = messageRef;
+        this.suspendPayload = payload;
+    }
+
     public String getSuspendMessageRef() {
         return suspendMessageRef;
+    }
+
+    public Object getSuspendPayload() {
+        return suspendPayload;
     }
 
     @Override

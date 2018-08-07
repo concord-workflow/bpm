@@ -525,7 +525,7 @@ public abstract class ProcessDefinitionBuilder {
 
         @Override
         default T catchEventExpr(String messageRefExpr, String timeDate, String timeDuration) {
-            return add(new IntermediateCatchEvent(nextStepId(), null, messageRefExpr, timeDate, timeDuration));
+            return add(new IntermediateCatchEvent(nextStepId(), null, messageRefExpr, timeDate, timeDuration, null));
         }
 
         @Override

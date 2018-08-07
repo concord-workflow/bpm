@@ -35,7 +35,7 @@ public class EventBasedGatewayTest extends AbstractEngineTest {
                 new SequenceFlow("f1", "start", "gw"),
                 new EventBasedGateway("gw"),
                     new SequenceFlow("f2", "gw", "ev"),
-                    new IntermediateCatchEvent("ev", "ev"),
+                    new IntermediateCatchEvent("ev", "ev", "checkpoint"),
                     new SequenceFlow("f3", "ev", "end"),
                     new EndEvent("end")
         )));
@@ -46,7 +46,6 @@ public class EventBasedGatewayTest extends AbstractEngineTest {
         getEngine().start(key, processId, null);
 
         // ---
-
         getEngine().resume(key, "ev", null);
 
         // ---

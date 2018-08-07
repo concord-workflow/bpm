@@ -16,9 +16,10 @@ public final class Event implements io.takari.bpm.api.Event {
     private final String processBusinessKey;
     private final boolean exclusive;
     private final Date expiredAt;
+    private final Object payload;
 
     public Event(UUID id, UUID executionId, String definitionId, UUID scopeId, String name, String processBusinessKey, boolean exclusive,
-                 Date expiredAt) {
+                 Date expiredAt, Object payload) {
         this.id = id;
         this.executionId = executionId;
         this.definitionId = definitionId;
@@ -27,6 +28,7 @@ public final class Event implements io.takari.bpm.api.Event {
         this.processBusinessKey = processBusinessKey;
         this.exclusive = exclusive;
         this.expiredAt = expiredAt;
+        this.payload = payload;
     }
 
     @Override
@@ -67,6 +69,11 @@ public final class Event implements io.takari.bpm.api.Event {
     @Override
     public String getName() {
         return name;
+    }
+
+    @Override
+    public Object getPayload() {
+        return payload;
     }
 
     @Override
@@ -112,9 +119,19 @@ public final class Event implements io.takari.bpm.api.Event {
         return Objects.equals(this.expiredAt, other.expiredAt);
     }
 
-    // TODO replace
+
     @Override
     public String toString() {
-        return "Event{" + "id=" + id + ", name=" + name + ", executionId=" + executionId + ", scopeId=" + scopeId + ", processBusinessKey=" + processBusinessKey + ", exclusive=" + exclusive + ", expiredAt=" + expiredAt + '}';
+        return "Event{" +
+                "id=" + id +
+                ", executionId=" + executionId +
+                ", definitionId='" + definitionId + '\'' +
+                ", scopeId=" + scopeId +
+                ", name='" + name + '\'' +
+                ", processBusinessKey='" + processBusinessKey + '\'' +
+                ", exclusive=" + exclusive +
+                ", expiredAt=" + expiredAt +
+                ", payload=" + payload +
+                '}';
     }
 }

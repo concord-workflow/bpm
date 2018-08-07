@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Added
+
+- optional event payload (see `Event#getPayload` and
+`ExecutionContext#suspend(messageRef, payload)`).
+
 ### Changed
 
 - validate results of boolean expressions when branching. 

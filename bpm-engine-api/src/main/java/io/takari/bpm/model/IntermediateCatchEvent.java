@@ -3,19 +3,19 @@ package io.takari.bpm.model;
 public class IntermediateCatchEvent extends AbstractElement {
 
     public static IntermediateCatchEvent message(String id, String messageRef) {
-        return new IntermediateCatchEvent(id, messageRef, null, null, null);
+        return new IntermediateCatchEvent(id, messageRef, null, null, null, null);
     }
 
     public static IntermediateCatchEvent messageExpr(String id, String messageRefExpression) {
-        return new IntermediateCatchEvent(id, null, messageRefExpression, null, null);
+        return new IntermediateCatchEvent(id, null, messageRefExpression, null, null, null);
     }
 
     public static IntermediateCatchEvent timeDate(String id, String timeDate) {
-        return new IntermediateCatchEvent(id, null, null, timeDate, null);
+        return new IntermediateCatchEvent(id, null, null, timeDate, null, null);
     }
 
     public static IntermediateCatchEvent timeDuration(String id, String timeDuration) {
-        return new IntermediateCatchEvent(id, null, null, null, timeDuration);
+        return new IntermediateCatchEvent(id, null, null, null, timeDuration, null);
     }
 	
 	private static final long serialVersionUID = 1L;
@@ -24,6 +24,7 @@ public class IntermediateCatchEvent extends AbstractElement {
     private final String messageRefExpression;
     private final String timeDate;
     private final String timeDuration;
+    private final Object payload;
 
     public IntermediateCatchEvent(String id) {
         this(id, null, null, null);
@@ -33,16 +34,22 @@ public class IntermediateCatchEvent extends AbstractElement {
         this(id, messageRef, null, null);
     }
 
-    public IntermediateCatchEvent(String id, String messageRef, String timeDate, String timeDuration) {
-        this(id, messageRef, null, timeDate, timeDuration);
+    public IntermediateCatchEvent(String id, String messageRef, Object payload) {
+        this(id, messageRef, null, null, null, payload);
     }
 
-    public IntermediateCatchEvent(String id, String messageRef, String messageRefExpression, String timeDate, String timeDuration) {
+    public IntermediateCatchEvent(String id, String messageRef, String timeDate, String timeDuration) {
+        this(id, messageRef, null, timeDate, timeDuration, null);
+    }
+
+    public IntermediateCatchEvent(String id, String messageRef, String messageRefExpression, String timeDate, String timeDuration,
+                                  Object payload) {
         super(id);
         this.messageRef = messageRef;
         this.messageRefExpression = messageRefExpression;
         this.timeDate = timeDate;
         this.timeDuration = timeDuration;
+        this.payload = payload;
     }
     
     public String getMessageRef() {
@@ -61,6 +68,10 @@ public class IntermediateCatchEvent extends AbstractElement {
         return timeDuration;
     }
 
+    public Object getPayload() {
+        return payload;
+    }
+
     @Override
     public String toString() {
         return "IntermediateCatchEvent (" + getId() + ") {" +
@@ -68,6 +79,7 @@ public class IntermediateCatchEvent extends AbstractElement {
                 ", messageRefExpression='" + messageRefExpression + '\'' +
                 ", timeDate='" + timeDate + '\'' +
                 ", timeDuration='" + timeDuration + '\'' +
+                ", payload='" + payload + '\'' +
                 '}';
     }
 }

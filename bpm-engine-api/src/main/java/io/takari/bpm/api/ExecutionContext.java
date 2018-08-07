@@ -35,6 +35,8 @@ public interface ExecutionContext {
 
     void suspend(String messageRef);
 
+    void suspend(String messageRef, Object payload);
+
     String getProcessDefinitionId();
 
     String getElementId();

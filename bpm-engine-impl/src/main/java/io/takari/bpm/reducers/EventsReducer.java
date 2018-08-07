@@ -91,7 +91,7 @@ public class EventsReducer implements Reducer {
         UUID scopeId = s.getId();
         boolean exclusive = s.isExclusive();
 
-        return new Event(id, state.getId(), action.getDefinitionId(), scopeId, name, state.getBusinessKey(), exclusive, expiredAt);
+        return new Event(id, state.getId(), action.getDefinitionId(), scopeId, name, state.getBusinessKey(), exclusive, expiredAt, action.getPayload());
     }
 
     private static void addScopeClosingActions(Collection<Command> cmds, List<Scope> currentStack) {

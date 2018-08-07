@@ -78,7 +78,8 @@ public class ExpressionsReducer extends BpmnErrorHandlingReducer {
             } else {
                 log.debug("reduce ['{}', '{}'] -> suspend is requested '{}'", state.getBusinessKey(), a, messageRef);
                 stack = stack.push(new PerformActionsCommand(
-                        new CreateEventAction(a.getDefinitionId(), a.getElementId(), messageRef, null, null, null)));
+                        new CreateEventAction(a.getDefinitionId(), a.getElementId(), messageRef, null, null, null,
+                                ctx.getSuspendPayload())));
             }
 
             state = state.setStack(stack);

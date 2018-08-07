@@ -95,6 +95,11 @@ public class DefaultExecutionContextFactory implements ExecutionContextFactory<E
         }
 
         @Override
+        public void suspend(String messageRef, Object payload) {
+            throw new IllegalStateException("Not supported");
+        }
+
+        @Override
         public String getProcessDefinitionId() {
             throw new IllegalStateException("Not supported");
         }

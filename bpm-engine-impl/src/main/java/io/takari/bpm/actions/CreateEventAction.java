@@ -13,18 +13,20 @@ public class CreateEventAction implements Action {
     private final String messageRefExpression;
     private final String timeDate;
     private final String timeDuration;
+    private final Object payload;
 
     public CreateEventAction(String definitionId, IntermediateCatchEvent ev) {
         this(definitionId, ev.getId(), ev.getMessageRef(), ev.getMessageRefExpression(),
-                ev.getTimeDate(), ev.getTimeDuration());
+                ev.getTimeDate(), ev.getTimeDuration(), ev.getPayload());
     }
 
     public CreateEventAction(String definitionId, String elementId) {
-        this(definitionId, elementId, null, null, null, null);
+        this(definitionId, elementId, null, null, null, null, null);
     }
 
     public CreateEventAction(String definitionId, String elementId, String messageRef,
-                             String messageRefExpression, String timeDate, String timeDuration) {
+                             String messageRefExpression, String timeDate, String timeDuration,
+                             Object payload) {
 
         this.definitionId = definitionId;
         this.elementId = elementId;
@@ -32,6 +34,7 @@ public class CreateEventAction implements Action {
         this.messageRefExpression = messageRefExpression;
         this.timeDate = timeDate;
         this.timeDuration = timeDuration;
+        this.payload = payload;
     }
 
     public String getDefinitionId() {
@@ -58,6 +61,10 @@ public class CreateEventAction implements Action {
         return timeDuration;
     }
 
+    public Object getPayload() {
+        return payload;
+    }
+
     @Override
     @CoverageIgnore
     public String toString() {
@@ -68,6 +75,7 @@ public class CreateEventAction implements Action {
                 ", messageRefExpression=" + messageRefExpression +
                 ", timeDate=" + timeDate +
                 ", timeDuration=" + timeDuration +
+                ", payload=" + payload +
                 ']';
     }
 }

@@ -48,4 +48,9 @@ public interface Event extends Serializable {
      * @return expiration date of the event. Can be null.
      */
     Date getExpiredAt();
+
+    /**
+     * @return event's payload
+     */
+    Object getPayload();
 }
