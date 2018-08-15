@@ -58,17 +58,21 @@ public class ScriptReducer extends BpmnErrorHandlingReducer {
             throw new ExecutionException("Script engine not found: " + t.getLanguage());
         }
 
-        Variables vars = VariablesHelper.applyInVariables(contextFactory, state.getVariables(), t.getIn(), t.isCopyAllVariables());
-        ExecutionContextImpl ctx = contextFactory.create(vars, a.getDefinitionId(), a.getElementId());
+        ExecutionContextImpl ctx = null;
 
-        // expose all available variables plus the context
-        Bindings b = engine.createBindings();
-        b.put("execution", ctx);
-        b.put("tasks", new TaskAccessor(taskRegistry));
-        b.putAll(ctx.toMap());
+        try {
+            Variables vars = VariablesHelper.applyInVariables(contextFactory, state.getVariables(), t.getIn(), t.isCopyAllVariables());
+            ctx = contextFactory.create(vars, a.getDefinitionId(), a.getElementId());
 
-        try (Reader input = openReader(t)) {
-            engine.eval(input, b);
+            // expose all available variables plus the context
+            Bindings b = engine.createBindings();
+            b.put("execution", ctx);
+            b.put("tasks", new TaskAccessor(taskRegistry));
+            b.putAll(ctx.toMap());
+
+            try (Reader input = openReader(t)) {
+                engine.eval(input, b);
+            }
 
             // continue the process execution
             state = StateHelper.push(state, new FollowFlowsAction(a.getDefinitionId(), a.getElementId()));

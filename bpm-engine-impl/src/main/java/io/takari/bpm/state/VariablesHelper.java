@@ -58,7 +58,7 @@ public final class VariablesHelper {
 
     public static Variables applyInVariables(ExecutionContextFactory<?> contextFactory, Variables src,
                                              Set<VariableMapping> in,
-                                             boolean appendCurrentVariablesIntoInVariables) throws ExecutionException {
+                                             boolean appendCurrentVariablesIntoInVariables) {
 
         if (in == null) {
             // if there is no IN variables, we will use the original process-level variables
@@ -73,7 +73,11 @@ public final class VariablesHelper {
     }
 
     public static ProcessInstance applyOutVariables(ExecutionContextFactory<?> contextFactory, ProcessInstance state,
-                                                    ExecutionContextImpl ctx, Set<VariableMapping> out) throws ExecutionException {
+                                                    ExecutionContextImpl ctx, Set<VariableMapping> out) {
+
+        if (ctx == null) {
+            return state;
+        }
 
         if (out != null) {
             // we need to apply actions immediately and filter the result according to

@@ -1,5 +1,14 @@
 # Change Log
 
+## [Unreleased]
+
+### Changed
+
+- exceptions thrown while resolving IN variables are now correctly
+handled and can trigger boundary error events.
+
+
+
 ## [0.47.0] - 2018-08-07
 
 ### Added
