@@ -5,8 +5,11 @@ import io.takari.bpm.api.ExecutionContextFactory;
 import io.takari.bpm.api.Variables;
 import io.takari.bpm.el.ExpressionManager;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class DefaultExecutionContextFactory implements ExecutionContextFactory<ExecutionContextImpl> {
 
@@ -71,7 +74,12 @@ public class DefaultExecutionContextFactory implements ExecutionContextFactory<E
 
         @Override
         public Set<String> getVariableNames() {
-            throw new IllegalStateException("Not supported");
+            Set<String> result = new HashSet<>(delegate.getVariableNames());
+            result.addAll(overrides.keySet().stream()
+                    .filter(k -> k instanceof String)
+                    .map(k -> (String)k)
+                    .collect(Collectors.toSet()));
+            return result;
         }
 
         @Override
@@ -81,7 +89,13 @@ public class DefaultExecutionContextFactory implements ExecutionContextFactory<E
 
         @Override
         public Map<String, Object> toMap() {
-            throw new IllegalStateException("Not supported");
+            Map<String, Object> result = new HashMap<>(delegate.toMap());
+            for(Map.Entry<Object, Object> e : overrides.entrySet()) {
+                if (e.getKey() instanceof String) {
+                    result.put((String) e.getKey(), e.getValue());
+                }
+            }
+            return result;
         }
 
         @Override
@@ -101,12 +115,12 @@ public class DefaultExecutionContextFactory implements ExecutionContextFactory<E
 
         @Override
         public String getProcessDefinitionId() {
-            throw new IllegalStateException("Not supported");
+            return delegate.getProcessDefinitionId();
         }
 
         @Override
         public String getElementId() {
-            throw new IllegalStateException("Not supported");
+            return delegate.getElementId();
         }
     }
 }
