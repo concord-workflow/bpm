@@ -1,5 +1,14 @@
 # Change Log
 
+## [Unreleased]
+
+### Added
+
+- implemented `MapBackedExecutionContext#getVariableNames` and
+`#toMap` allowing tasks to enumerate all available variables.
+
+
+
 ## [0.47.1] - 2018-08-14
 
 ### Changed
