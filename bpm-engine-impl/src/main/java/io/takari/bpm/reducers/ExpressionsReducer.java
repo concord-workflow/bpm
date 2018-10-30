@@ -54,6 +54,7 @@ public class ExpressionsReducer extends BpmnErrorHandlingReducer {
 
         final EvalExpressionAction a = (EvalExpressionAction) action;
 
+        boolean hasError = false;
         ExecutionContextImpl ctx = null;
         try {
             Variables vars = VariablesHelper.applyInVariables(contextFactory, state.getVariables(), a.getIn(), a.isCopyAllVariables());
@@ -91,17 +92,21 @@ public class ExpressionsReducer extends BpmnErrorHandlingReducer {
             } else {
                 state = handleException(state, a, e);
             }
+            hasError = true;
         } catch (BpmnError e) {
             state = handleBpmnError(state, a, e);
+            hasError = true;
         } catch (ExecutionException e) {
             throw e;
         } catch (Exception e) {
             state = handleException(state, a, e);
+            hasError = true;
         }
 
         // we apply new state of variables regardless of whether the call was
         // successful or not
-        state = VariablesHelper.applyOutVariables(contextFactory, state, ctx, a.getOut());
+        boolean ignoreMappingErrors = hasError;
+        state = VariablesHelper.applyOutVariables(contextFactory, state, ctx, a.getOut(), ignoreMappingErrors);
 
         return state;
     }

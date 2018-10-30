@@ -1,5 +1,13 @@
 # Change Log
 
+## [Unreleased]
+
+### Changed
+
+- if a task fails, ignore OUT expression evaluation errors.
+
+
+
 ## [0.48.0] - 2018-10-17
 
 ### Added
