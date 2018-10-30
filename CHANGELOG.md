@@ -4,6 +4,7 @@
 
 ### Changed
 
+- implement `eval` and `interpolate` for read-only contexts;
 - if a task fails, ignore OUT expression evaluation errors.
 
 
