@@ -1,6 +1,7 @@
 package io.takari.bpm;
 
 import io.takari.bpm.api.ExecutionContext;
+import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.api.JavaDelegate;
 import io.takari.bpm.model.*;
 import org.junit.Test;
@@ -26,9 +27,13 @@ public class VariablesInterpolationTest extends AbstractEngineTest {
 
         getServiceTaskRegistry().register("testBean", new TestBean(beanValue));
 
-        JavaDelegate helloTask = spy(ctx -> {
-            Object v = ctx.getVariable(varKey);
-            assertEquals("test", v);
+        JavaDelegate helloTask = spy(new JavaDelegate() {
+
+            @Override
+            public void execute(ExecutionContext ctx) throws ExecutionException {
+                Object v = ctx.getVariable(varKey);
+                assertEquals("test", v);
+            }
         });
         getServiceTaskRegistry().register("hello", helloTask);
 
