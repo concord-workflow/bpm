@@ -36,7 +36,7 @@ public class ExecutionContextTest {
         assertEquals(234, ctx.getVariable("a"));
 
         ctx.removeVariable("b");
-        assertEquals(null, ctx.getVariable("b"));
+        assertNull(ctx.getVariable("b"));
 
         // ---
 

@@ -31,15 +31,23 @@ public class DefaultExecutionContextFactory implements ExecutionContextFactory<E
 
     @Override
     public ExecutionContext withOverrides(ExecutionContext delegate, Map<Object, Object> overrides) {
-        return new MapBackedExecutionContext(delegate, overrides);
+        return new MapBackedExecutionContext(this, expressionManager, delegate, overrides);
     }
 
     public static class MapBackedExecutionContext implements ExecutionContext {
 
+        private final ExecutionContextFactory<? extends ExecutionContext> executionContextFactory;
+        private final ExpressionManager exprManager;
+
         private final ExecutionContext delegate;
         private final Map<Object, Object> overrides;
 
-        public MapBackedExecutionContext(ExecutionContext delegate, Map<Object, Object> overrides) {
+        public MapBackedExecutionContext(
+                ExecutionContextFactory<? extends ExecutionContext> executionContextFactory,
+                ExpressionManager exprManager,
+                ExecutionContext delegate, Map<Object, Object> overrides) {
+            this.executionContextFactory = executionContextFactory;
+            this.exprManager = exprManager;
             this.delegate = delegate;
             this.overrides = overrides;
         }
@@ -84,7 +92,7 @@ public class DefaultExecutionContextFactory implements ExecutionContextFactory<E
 
         @Override
         public <T> T eval(String expr, Class<T> type) {
-            throw new IllegalStateException("Not supported");
+            return exprManager.eval(this, expr, type);
         }
 
         @Override
@@ -100,7 +108,7 @@ public class DefaultExecutionContextFactory implements ExecutionContextFactory<E
 
         @Override
         public Object interpolate(Object v) {
-            throw new IllegalStateException("Not supported");
+            return exprManager.interpolate(executionContextFactory, this, v);
         }
 
         @Override
