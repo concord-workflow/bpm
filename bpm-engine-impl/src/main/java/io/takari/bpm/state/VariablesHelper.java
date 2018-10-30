@@ -2,20 +2,29 @@ package io.takari.bpm.state;
 
 import io.takari.bpm.actions.Action;
 import io.takari.bpm.api.ExecutionContext;
-import io.takari.bpm.api.ExecutionException;
+import io.takari.bpm.api.ExecutionContextFactory;
 import io.takari.bpm.api.Variables;
 import io.takari.bpm.commands.Command;
 import io.takari.bpm.commands.PerformActionsCommand;
-import io.takari.bpm.api.ExecutionContextFactory;
 import io.takari.bpm.context.ExecutionContextImpl;
 import io.takari.bpm.misc.CoverageIgnore;
 import io.takari.bpm.model.VariableMapping;
 
-import java.util.*;
+import javax.el.PropertyNotFoundException;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public final class VariablesHelper {
 
     public static Variables copyVariables(ExecutionContextFactory<?> contextFactory, Variables src, Variables dst, Set<VariableMapping> mapping) {
+        return copyVariables(contextFactory, src, dst, mapping, false);
+    }
+
+    public static Variables copyVariables(ExecutionContextFactory<?> contextFactory, Variables src,
+                                          Variables dst, Set<VariableMapping> mapping,
+                                          boolean ignoreMappingErrors) {
 
         if (mapping == null) {
             return dst;
@@ -26,22 +35,28 @@ public final class VariablesHelper {
             String sourceExpression = m.getSourceExpression();
             Object sourceValue = m.getSourceValue();
 
-            Object v = null;
-            if (sourceValue != null) {
-                if (m.isInterpolateValue()) {
+            try {
+                Object v = null;
+                if (sourceValue != null) {
+                    if (m.isInterpolateValue()) {
+                        ExecutionContext ctx = contextFactory.create(src);
+                        v = ctx.interpolate(sourceValue);
+                    } else {
+                        v = sourceValue;
+                    }
+                } else if (source != null) {
+                    v = src.getVariable(source);
+                } else if (sourceExpression != null) {
                     ExecutionContext ctx = contextFactory.create(src);
-                    v = ctx.interpolate(sourceValue);
-                } else {
-                    v = sourceValue;
+                    v = ctx.eval(sourceExpression, Object.class);
                 }
-            } else if (source != null) {
-                v = src.getVariable(source);
-            } else if (sourceExpression != null) {
-                ExecutionContext ctx = contextFactory.create(src);
-                v = ctx.eval(sourceExpression, Object.class);
-            }
 
-            dst = dst.setVariable(m.getTarget(), v);
+                dst = dst.setVariable(m.getTarget(), v);
+            } catch (PropertyNotFoundException e) {
+                if (!ignoreMappingErrors) {
+                    throw e;
+                }
+            }
         }
 
         return dst;
@@ -74,6 +89,12 @@ public final class VariablesHelper {
 
     public static ProcessInstance applyOutVariables(ExecutionContextFactory<?> contextFactory, ProcessInstance state,
                                                     ExecutionContextImpl ctx, Set<VariableMapping> out) {
+        return applyOutVariables(contextFactory, state, ctx, out, false);
+    }
+
+    public static ProcessInstance applyOutVariables(ExecutionContextFactory<?> contextFactory, ProcessInstance state,
+                                                    ExecutionContextImpl ctx, Set<VariableMapping> out,
+                                                    boolean ignoreMappingErrors) {
 
         if (ctx == null) {
             return state;
@@ -83,7 +104,7 @@ public final class VariablesHelper {
             // we need to apply actions immediately and filter the result according to
             // the supplied out variables mapping
             Variables src = ctx.toVariables();
-            Variables dst = copyVariables(contextFactory, src, state.getVariables(), out);
+            Variables dst = copyVariables(contextFactory, src, state.getVariables(), out, ignoreMappingErrors);
             return state.setVariables(dst);
         }
 
