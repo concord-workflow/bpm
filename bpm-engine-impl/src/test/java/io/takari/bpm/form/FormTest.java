@@ -264,4 +264,81 @@ public class FormTest extends AbstractFormTest {
 
         verify(t2, times(1)).execute(any(ExecutionContext.class));
     }
+
+    /**
+     * start --> t1 --> t2 --> end
+     */
+    @Test
+    public void testCustomFields() throws Exception {
+        String formId = "testForm";
+        String formField = "testValue";
+        String testValue = "test#" + System.currentTimeMillis();
+
+        // ---
+
+        JavaDelegate t2 = spy(new JavaDelegate() {
+
+            @Override
+            public void execute(ExecutionContext ctx) throws ExecutionException {
+                Object v = ctx.eval("${" + formId + "." + formField + "}", Object.class);
+                assertEquals(testValue, v);
+            }
+        });
+        getServiceTaskRegistry().register("t2", t2);
+
+        // ---
+
+        FormExtension x = new FormExtension(formId, Collections.singletonMap("fields", "${myFields}"));
+
+        String processId = "test";
+        deploy(new ProcessDefinition(processId,
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "t1"),
+                new UserTask("t1", x),
+                new SequenceFlow("f2", "t1", "t2"),
+                new ServiceTask("t2", ExpressionType.DELEGATE, "${t2}"),
+                new SequenceFlow("f3", "t2", "end"),
+                new EndEvent("end")
+        ));
+
+        // ---
+
+        List<FormField> fields = Collections.singletonList(new FormField.Builder(formField, StringField.TYPE)
+                        .option(StringField.PATTERN, testValue)
+                        .build());
+
+        Map<String, Object> args = new HashMap<>();
+        args.put("myFields", fields);
+
+        String key = UUID.randomUUID().toString();
+        getEngine().start(key, processId, args);
+
+        assertActivations(key, processId,
+                "start",
+                "f1",
+                "t1");
+
+        // ---
+
+        UUID formInstanceId = formRegistry.getForms().keySet().iterator().next();
+        assertNotNull(formInstanceId);
+
+        FormSubmitResult r = formService.submit(formInstanceId, Collections.singletonMap(formField, "abc"));
+        assertFalse(r.isValid());
+        assertEquals(1, r.getErrors().size());
+
+        ValidationError e = r.getErrors().get(0);
+        assertEquals(formField, e.getFieldName());
+
+        verifyZeroInteractions(t2);
+
+        // --
+
+        r = formService.submit(formInstanceId, Collections.singletonMap("testValue", testValue));
+        assertTrue(r.isValid());
+
+        // ---
+
+        verify(t2, times(1)).execute(any(ExecutionContext.class));
+    }
 }

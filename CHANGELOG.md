@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Added
+
+- support for custom form fields in form-based user tasks.
+
+
+
+## [0.49.0] - 2018-10-30
+
 ### Changed
 
 - implement `eval` and `interpolate` for read-only contexts;

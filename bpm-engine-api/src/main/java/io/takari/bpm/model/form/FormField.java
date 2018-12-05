@@ -12,11 +12,12 @@ public class FormField implements Serializable {
     private static transient final Map<String, OptionIndex> allowedOptions = new HashMap<>();
 
     @CoverageIgnore
-    public static final <T> Option<T> registerOption(String fieldType, String name, Class<T> type) {
+    @SuppressWarnings("unchecked")
+    public static <T> Option<T> registerOption(String fieldType, String name, Class<T> type) {
         synchronized (allowedOptions) {
             OptionIndex idx = allowedOptions.get(fieldType);
             if (idx == null) {
-                idx = new OptionIndex((n, t) -> new Option<>(n, t));
+                idx = new OptionIndex(Option::new);
                 allowedOptions.put(fieldType, idx);
             }
 
