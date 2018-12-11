@@ -15,7 +15,7 @@ public class DefaultExpressionManager implements ExpressionManager {
 
     private final String[] contextVariableNames;
     private final ExpressionFactory expressionFactory = ExpressionFactory.newInstance();
-    private final ELResolver[] resolvers;
+    protected final ELResolver[] resolvers;
 
     public DefaultExpressionManager(ServiceTaskRegistry serviceTaskRegistry) {
         this(DEFAULT_CONTEXT_VARIABLE_NAMES, serviceTaskRegistry);
@@ -32,15 +32,6 @@ public class DefaultExpressionManager implements ExpressionManager {
     public DefaultExpressionManager(String[] contextVariableNames, ELResolver... resolvers) {
         this.contextVariableNames = contextVariableNames;
         this.resolvers = resolvers;
-    }
-
-    private ELResolver createResolver(ExecutionContext ctx) {
-        CompositeELResolver cr = new CompositeELResolver();
-        for (ELResolver r : resolvers) {
-            cr.add(r);
-        }
-        cr.add(new ExecutionContextVariableResolver(ctx));
-        return cr;
     }
 
     @Override
@@ -68,5 +59,14 @@ public class DefaultExpressionManager implements ExpressionManager {
 
     public static String quote(String s) {
         return s.replace("'", "\'");
+    }
+
+    protected ELResolver createResolver(ExecutionContext ctx) {
+        CompositeELResolver cr = new CompositeELResolver();
+        for (ELResolver r : resolvers) {
+            cr.add(r);
+        }
+        cr.add(new ExecutionContextVariableResolver(ctx));
+        return cr;
     }
 }

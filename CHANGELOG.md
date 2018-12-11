@@ -1,5 +1,13 @@
 # Change Log
 
+## [Unreleased]
+
+### Added
+
+- ability to override the order of EL resolvers.
+
+
+
 ## [0.50.0] - 2018-11-05
 
 ### Added
