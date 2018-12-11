@@ -42,6 +42,8 @@ public final class Interpolator {
             for (Object vv : src) {
                 dst.add(interpolate(f, em, ctx, vv));
             }
+
+            return dst;
         } if (v instanceof Object[]) {
             Object[] src = (Object[]) v;
             if (src.length == 0) {

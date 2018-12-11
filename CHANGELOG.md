@@ -6,6 +6,10 @@
 
 - ability to override the order of EL resolvers.
 
+### Changed
+
+- fixed handling of Sets in `Interpolator`.
+
 
 
 ## [0.50.0] - 2018-11-05
