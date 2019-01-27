@@ -2,12 +2,10 @@ package io.takari.bpm.reducers;
 
 import io.takari.bpm.Configuration;
 import io.takari.bpm.actions.Action;
-import io.takari.bpm.actions.CreateEventAction;
 import io.takari.bpm.actions.EvalExpressionAction;
 import io.takari.bpm.api.*;
 import io.takari.bpm.commands.Command;
-import io.takari.bpm.commands.CommandStack;
-import io.takari.bpm.commands.PerformActionsCommand;
+import io.takari.bpm.context.ContextUtils;
 import io.takari.bpm.context.ExecutionContextImpl;
 import io.takari.bpm.model.ExpressionType;
 import io.takari.bpm.model.ServiceTask;
@@ -16,8 +14,6 @@ import io.takari.bpm.state.VariablesHelper;
 import io.takari.bpm.task.JavaDelegateHandler;
 import io.takari.bpm.utils.Timeout;
 import io.takari.bpm.utils.TimeoutCallable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.el.ELException;
 import java.util.List;
@@ -25,8 +21,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
 public class ExpressionsReducer extends BpmnErrorHandlingReducer {
-
-    private static final Logger log = LoggerFactory.getLogger(ExpressionsReducer.class);
 
     private final ExecutionContextFactory<? extends ExecutionContextImpl> contextFactory;
     private final Configuration cfg;
@@ -69,22 +63,8 @@ public class ExpressionsReducer extends BpmnErrorHandlingReducer {
                 fn = new TimeoutCallable<>(executor, timeouts, fn);
             }
 
-            Command result = fn.call();
-
-            CommandStack stack = state.getStack();
-
-            String messageRef = ctx.getSuspendMessageRef();
-            if (messageRef == null) {
-                log.debug("reduce ['{}', '{}'] -> next action is '{}'", state.getBusinessKey(), a, result);
-                stack = stack.push(result);
-            } else {
-                log.debug("reduce ['{}', '{}'] -> suspend is requested '{}'", state.getBusinessKey(), a, messageRef);
-                stack = stack.push(new PerformActionsCommand(
-                        new CreateEventAction(a.getDefinitionId(), a.getElementId(), messageRef, null, null, null,
-                                ctx.getSuspendPayload())));
-            }
-
-            state = state.setStack(stack);
+            Command next = fn.call();
+            state = ContextUtils.handleSuspend(state ,ctx, a.getDefinitionId(), a.getElementId(), next);
         } catch (ELException e) {
             Throwable cause = e.getCause();
             if (cause instanceof BpmnError) {

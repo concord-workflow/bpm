@@ -70,6 +70,49 @@ public class ForceSuspendTest extends AbstractEngineTest {
     }
 
     /**
+     * start --> t1 --> end
+     */
+    @Test
+    public void testSimpleWithScript() throws Exception {
+        String messageRef = "test#" + System.currentTimeMillis();
+
+        // ---
+
+        String processId = "test";
+        deploy(new ProcessDefinition(processId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "t1"),
+                new ScriptTask("t1", ScriptTask.Type.CONTENT, "javascript", "execution.suspend('" + messageRef + "')"),
+                new SequenceFlow("f2", "t1", "end"),
+                new EndEvent("end")
+        )));
+
+        // ---
+
+        String key = UUID.randomUUID().toString();
+        getEngine().start(key, processId, null);
+
+        // ---
+
+        assertActivations(key, processId,
+                "start",
+                "f1",
+                "t1");
+        assertNoMoreActivations();
+
+        // ---
+
+        getEngine().resume(key, messageRef, null);
+
+        // ---
+
+        assertActivations(key, processId,
+                "f2",
+                "end");
+        assertNoMoreActivations();
+    }
+
+    /**
      * start --> gw1 --> ev1 --> gw2 --> end
      *              \           /
      *               --> ev2 -->

@@ -6,6 +6,9 @@ import io.takari.bpm.actions.Action;
 import io.takari.bpm.actions.ExecuteScriptAction;
 import io.takari.bpm.actions.FollowFlowsAction;
 import io.takari.bpm.api.*;
+import io.takari.bpm.commands.Command;
+import io.takari.bpm.commands.PerformActionsCommand;
+import io.takari.bpm.context.ContextUtils;
 import io.takari.bpm.context.ExecutionContextImpl;
 import io.takari.bpm.model.ProcessDefinition;
 import io.takari.bpm.model.ScriptTask;
@@ -75,7 +78,8 @@ public class ScriptReducer extends BpmnErrorHandlingReducer {
             }
 
             // continue the process execution
-            state = StateHelper.push(state, new FollowFlowsAction(a.getDefinitionId(), a.getElementId()));
+            Command next = new PerformActionsCommand(new FollowFlowsAction(a.getDefinitionId(), a.getElementId()));
+            state = ContextUtils.handleSuspend(state, ctx, a.getDefinitionId(), a.getElementId(), next);
         } catch (BpmnError e) {
             state = handleBpmnError(state, a, e);
         } catch (ExecutionException e) {

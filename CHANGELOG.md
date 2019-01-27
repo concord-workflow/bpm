@@ -1,5 +1,14 @@
 # Change Log
 
+## [Unreleased]
+
+### Changed
+
+- fixed the handling of the `execution#suspend()` flag when running
+a `ScriptTask`.
+
+
+
 ## [0.51.0] - 2018-12-11
 
 ### Added
