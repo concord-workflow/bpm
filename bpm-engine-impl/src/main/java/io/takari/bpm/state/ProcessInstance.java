@@ -23,6 +23,11 @@ public class ProcessInstance implements Serializable {
     private final Scopes scopes;
     private final Events events;
 
+    public ProcessInstance(UUID id, String businessKey, IndexedProcessDefinition definition, Variables variables) {
+        this(id, businessKey, new Definitions(definition), ProcessStatus.RUNNING, new CommandStack(), variables,
+                new Activations(), new Forks(), new Scopes(), new Events());
+    }
+
     public ProcessInstance(UUID id, String businessKey, IndexedProcessDefinition definition) {
         this(id, businessKey, new Definitions(definition), ProcessStatus.RUNNING, new CommandStack(), new Variables(),
                 new Activations(), new Forks(), new Scopes(), new Events());

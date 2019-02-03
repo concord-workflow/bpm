@@ -31,12 +31,25 @@ public final class StateHelper {
     private static final Logger log = LoggerFactory.getLogger(StateHelper.class);
     private static final boolean PRINT_ACTIVATIONS = false;
 
+    /**
+     * Creates a new process instance using the provided process definition and variables.
+     * {@code args} will overwrite the same key variables in {@code vars}.
+     *
+     * @param id ID to use
+     * @param businessKey the process' business key
+     * @param pd the process' definition
+     * @param vars initial variables (optional)
+     * @param args arguments (extra variables)
+     * @return
+     * @throws ExecutionException
+     */
     public static ProcessInstance createInitialState(UUID id,
                                                      String businessKey,
                                                      IndexedProcessDefinition pd,
+                                                     Variables vars,
                                                      Map<String, Object> args) throws ExecutionException {
 
-        ProcessInstance state = new ProcessInstance(id, businessKey, pd);
+        ProcessInstance state = new ProcessInstance(id, businessKey, pd, vars != null ? vars : new Variables());
         StartEvent start = ProcessDefinitionUtils.findStartEvent(pd);
 
         // initial scope removal
@@ -49,7 +62,7 @@ public final class StateHelper {
         state = push(state, new PerformActionsCommand(new PushScopeAction(pd.getId(), start.getId(), false)));
 
         // set external variables
-        state = applyVariables(state, pd.getAttributes(), args, false);
+        state = applyArguments(state, pd.getAttributes(), args, false);
 
         // fire interceptors
         state = push(state, new FireOnStartInterceptorsAction(pd.getId()));
@@ -57,7 +70,8 @@ public final class StateHelper {
         return state;
     }
 
-    public static ProcessInstance applyVariables(ProcessInstance state, Map<String, String> attr, Map<String, Object> args, boolean merge) {
+    @SuppressWarnings("unchecked")
+    public static ProcessInstance applyArguments(ProcessInstance state, Map<String, String> attr, Map<String, Object> args, boolean merge) {
         Variables vars = state.getVariables();
 
         if (attr != null) {

@@ -1,5 +1,13 @@
 # Change Log
 
+## [Unreleased]
+
+### Added
+
+- new version of `Engine#start` method: allow passing in predefined `Variables`.
+
+
+
 ## [0.51.1] - 2019-01-27
 
 ### Changed

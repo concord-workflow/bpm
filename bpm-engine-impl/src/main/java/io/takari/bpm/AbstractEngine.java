@@ -1,10 +1,7 @@
 package io.takari.bpm;
 
 import io.takari.bpm.actions.*;
-import io.takari.bpm.api.BpmnError;
-import io.takari.bpm.api.Engine;
-import io.takari.bpm.api.ExecutionException;
-import io.takari.bpm.api.NoEventFoundException;
+import io.takari.bpm.api.*;
 import io.takari.bpm.api.interceptors.ExecutionInterceptor;
 import io.takari.bpm.event.Event;
 import io.takari.bpm.event.EventPersistenceManager;
@@ -47,14 +44,19 @@ public abstract class AbstractEngine implements Engine {
     protected abstract Configuration getConfiguration();
 
     @Override
-    public void start(String processBusinessKey, String processDefinitionId, Map<String, Object> variables) throws ExecutionException {
+    public void start(String processBusinessKey, String processDefinitionId, Map<String, Object> arguments) throws ExecutionException {
+        start(processBusinessKey, processDefinitionId, new Variables(), arguments);
+    }
+
+    @Override
+    public void start(String processBusinessKey, String processDefinitionId, Variables variables, Map<String, Object> arguments) throws ExecutionException {
         IndexedProcessDefinitionProvider pdp = getProcessDefinitionProvider();
         IndexedProcessDefinition pd = pdp.getById(processDefinitionId);
 
         UuidGenerator idg = getUuidGenerator();
         UUID instanceId = idg.generate();
 
-        ProcessInstance state = StateHelper.createInitialState(instanceId, processBusinessKey, pd, variables);
+        ProcessInstance state = StateHelper.createInitialState(instanceId, processBusinessKey, pd, variables, arguments);
 
         LockManager lm = getLockManager();
         lm.lock(processBusinessKey);
@@ -170,7 +172,7 @@ public abstract class AbstractEngine implements Engine {
         state = state.setStatus(ProcessStatus.RUNNING);
 
         // apply the external variables (no additional attributes provided)
-        state = StateHelper.applyVariables(state, null, variables, merge);
+        state = StateHelper.applyArguments(state, null, variables, merge);
 
         // fire the interceptors
         // TODO move to the planner?
