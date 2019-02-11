@@ -1,6 +1,15 @@
 # Change Log
 
-## [0.52.2] - 2019-02-03
+## [Unreleased]
+
+### Changed
+
+- change the visibility the utility methods of `DefaultFormValidatorLocale` for easier
+subclassing.
+
+ 
+
+## [0.52.0] - 2019-02-03
 
 ### Added
 

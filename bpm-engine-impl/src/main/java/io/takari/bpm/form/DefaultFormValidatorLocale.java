@@ -55,7 +55,7 @@ public class DefaultFormValidatorLocale implements FormValidatorLocale {
         return String.format("%s: value '%s' is not allowed, valid values: %s", fieldName(field, idx), value, allowed);
     }
 
-    private static String fieldName(FormField field, Integer idx) {
+    protected static String fieldName(FormField field, Integer idx) {
         String s = field.getLabel();
         if (s == null) {
             s = field.getName();
@@ -68,7 +68,7 @@ public class DefaultFormValidatorLocale implements FormValidatorLocale {
         return s;
     }
 
-    private static String spell(Cardinality c) {
+    protected static String spell(Cardinality c) {
         if (c == null) {
             throw new IllegalArgumentException("Cardinality can't be null");
         }
@@ -87,7 +87,7 @@ public class DefaultFormValidatorLocale implements FormValidatorLocale {
         }
     }
 
-    private static String bounds(Object min, Object max) {
+    protected static String bounds(Object min, Object max) {
         if (min != null && max != null) {
             return String.format("within %s and %s (inclusive)", min, max);
         } else if (min == null) {
