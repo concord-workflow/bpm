@@ -1,5 +1,13 @@
 # Change Log
 
+## [Unreleased]
+
+### Changed
+
+- refactor `Interpolator` to make it more useful outside of the tasks.
+
+
+
 ## [0.52.1] - 2019-02-10g
 
 ### Changed
