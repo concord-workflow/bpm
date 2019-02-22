@@ -56,16 +56,18 @@ public class ScriptReducer extends BpmnErrorHandlingReducer {
         ProcessDefinition pd = state.getDefinition(a.getDefinitionId());
         ScriptTask t = (ScriptTask) ProcessDefinitionUtils.findElement(pd, a.getElementId());
 
-        ScriptEngine engine = getEngine(t);
-        if (engine == null) {
-            throw new ExecutionException("Script engine not found: " + t.getLanguage());
-        }
-
         ExecutionContextImpl ctx = null;
 
         try {
             Variables vars = VariablesHelper.applyInVariables(contextFactory, state.getVariables(), t.getIn(), t.isCopyAllVariables());
             ctx = contextFactory.create(vars, a.getDefinitionId(), a.getElementId());
+
+            t = interpolateScriptRef(ctx, t);
+
+            ScriptEngine engine = getEngine(t);
+            if (engine == null) {
+                throw new ExecutionException("Script engine not found: " + t.getLanguage());
+            }
 
             // expose all available variables plus the context
             Bindings b = engine.createBindings();
@@ -92,6 +94,15 @@ public class ScriptReducer extends BpmnErrorHandlingReducer {
         state = VariablesHelper.applyOutVariables(contextFactory, state, ctx, t.getOut());
 
         return state;
+    }
+
+    private ScriptTask interpolateScriptRef(ExecutionContext ctx, ScriptTask t) {
+        if (t.getType() != Type.REFERENCE) {
+            return t;
+        }
+
+        String ref = (String) ctx.interpolate(t.getContent());
+        return new ScriptTask(t.getId(), t.getType(), t.getLanguage(), ref, t.getIn(), t.getOut());
     }
 
     private ScriptEngine getEngine(ScriptTask t) throws ExecutionException {

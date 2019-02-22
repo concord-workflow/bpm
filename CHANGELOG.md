@@ -1,5 +1,13 @@
 # Change Log
 
+## [Unreleased]
+
+### Added
+
+- allow expressions in script names in `ScriptTask`.
+
+
+
 ## [0.53.0] - 2019-02-19
 
 ### Changed

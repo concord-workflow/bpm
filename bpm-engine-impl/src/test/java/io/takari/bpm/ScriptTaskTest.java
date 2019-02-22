@@ -222,6 +222,36 @@ public class ScriptTaskTest extends AbstractEngineTest {
     }
 
     /**
+     * start --> t1 --> end
+     */
+    @Test
+    public void testNameExpression() throws Exception {
+        String processId = "test";
+        deploy(new ProcessDefinition(processId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "t1"),
+                new ScriptTask("t1", ScriptTask.Type.REFERENCE, null, "${myScript}"),
+                new SequenceFlow("f2", "t1", "end"),
+                new EndEvent("end")
+        )));
+
+        // ---
+
+        String key = UUID.randomUUID().toString();
+        getEngine().start(key, processId, Collections.singletonMap("myScript", "test.js"));
+
+        // ---
+
+        assertActivations(key, processId,
+                "start",
+                "f1",
+                "t1",
+                "f2",
+                "end");
+        assertNoMoreActivations();
+    }
+
+    /**
      * start --> sub1 --------> end
      * \       /
      * bev1 --
