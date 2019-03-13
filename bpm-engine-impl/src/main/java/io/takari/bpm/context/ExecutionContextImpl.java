@@ -19,6 +19,7 @@ public class ExecutionContextImpl implements ExecutionContext {
 
     private String suspendMessageRef = null;
     private Object suspendPayload = null;
+    private boolean resumeFromSameStep;
 
     private final String processDefinitionId;
     private final String elementId;
@@ -159,9 +160,10 @@ public class ExecutionContextImpl implements ExecutionContext {
     }
 
     @Override
-    public void suspend(String messageRef, Object payload) {
+    public void suspend(String messageRef, Object payload, boolean resumeFromSameStep) {
         this.suspendMessageRef = messageRef;
         this.suspendPayload = payload;
+        this.resumeFromSameStep = resumeFromSameStep;
     }
 
     public String getSuspendMessageRef() {
@@ -170,6 +172,10 @@ public class ExecutionContextImpl implements ExecutionContext {
 
     public Object getSuspendPayload() {
         return suspendPayload;
+    }
+
+    public boolean isResumeFromSameStep() {
+        return resumeFromSameStep;
     }
 
     @Override

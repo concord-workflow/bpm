@@ -64,7 +64,7 @@ public class FormTaskHandler implements UserTaskHandler {
 
         formService.create(pk, fId, eventName, fd, options, env);
 
-        return StateHelper.push(state, new CreateEventAction(definitionId, elementId, eventName, null, null, null, null));
+        return StateHelper.push(state, new CreateEventAction(definitionId, elementId, eventName, null, null, null, null, false));
     }
 
     @SuppressWarnings("unchecked")

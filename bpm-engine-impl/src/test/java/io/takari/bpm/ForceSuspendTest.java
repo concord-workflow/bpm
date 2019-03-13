@@ -190,4 +190,66 @@ public class ForceSuspendTest extends AbstractEngineTest {
                 "end");
         assertNoMoreActivations();
     }
+
+    /**
+     * start --> t1 --> end
+     */
+    @Test
+    public void testResumeFromSameStep() throws Exception {
+        String messageRef = "test#" + System.currentTimeMillis();
+
+        JavaDelegate t1 = spy(new JavaDelegate() {
+
+            @Override
+            public void execute(ExecutionContext ctx) throws ExecutionException {
+                Object isResume = ctx.getVariable("resume");
+                if (Boolean.TRUE.equals(isResume)) {
+                    return;
+                }
+                ctx.suspend(messageRef, null, true);
+                ctx.setVariable("resume", true);
+            }
+        });
+        getServiceTaskRegistry().register("t1", t1);
+
+        // ---
+
+        String processId = "test";
+        deploy(new ProcessDefinition(processId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "t1"),
+                new ServiceTask("t1", ExpressionType.DELEGATE, "${t1}"),
+                new SequenceFlow("f2", "t1", "end"),
+                new EndEvent("end")
+        )));
+
+        // ---
+
+        String key = UUID.randomUUID().toString();
+        getEngine().start(key, processId, null);
+
+        // ---
+
+        assertActivations(key, processId,
+                "start",
+                "f1",
+                "t1");
+        assertNoMoreActivations();
+
+        // ---
+
+        verify(t1, times(1)).execute(any(ExecutionContext.class));
+
+        // ---
+
+        getEngine().resume(key, messageRef, null);
+
+        // ---
+
+        assertActivations(key, processId,
+                "t1",
+                "f2",
+                "end");
+        assertNoMoreActivations();
+    }
 }

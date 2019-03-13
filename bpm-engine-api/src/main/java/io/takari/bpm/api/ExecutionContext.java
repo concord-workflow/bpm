@@ -35,7 +35,7 @@ public interface ExecutionContext {
 
     void suspend(String messageRef);
 
-    void suspend(String messageRef, Object payload);
+    void suspend(String messageRef, Object payload, boolean resumeFromSameStep);
 
     String getProcessDefinitionId();
 
