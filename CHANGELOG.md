@@ -6,6 +6,11 @@
 
 - allow expressions in script names in `ScriptTask`.
 
+### Breaking
+
+- `ExecutionContext#suspend(String messageRef, Object payload)` replaced
+with `#suspend(String messageRef, Object payload, boolean resumeFromSameStep)`.
+
 
 
 ## [0.53.0] - 2019-02-19
