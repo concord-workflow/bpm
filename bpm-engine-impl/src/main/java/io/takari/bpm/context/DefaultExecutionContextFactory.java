@@ -117,7 +117,7 @@ public class DefaultExecutionContextFactory implements ExecutionContextFactory<E
         }
 
         @Override
-        public void suspend(String messageRef, Object payload) {
+        public void suspend(String messageRef, Object payload, boolean resumeFromSameStep) {
             throw new IllegalStateException("Not supported");
         }
 

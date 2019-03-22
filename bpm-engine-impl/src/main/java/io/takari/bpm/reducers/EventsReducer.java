@@ -61,7 +61,11 @@ public class EventsReducer implements Reducer {
         addScopeClosingActions(cmds, scopes);
 
         // evaluate the following element after the event
-        cmds.add(new ProcessElementCommand(pd.getId(), next.getId()));
+        if (a.isResumeFromSameStep()) {
+            cmds.add(new ProcessElementCommand(pd.getId(), a.getElementId()));
+        } else {
+            cmds.add(new ProcessElementCommand(pd.getId(), next.getId()));
+        }
 
         // restore the scope on resume
         cmds.add(new PerformActionsCommand(new SetCurrentScopeAction(scope.getId())));
@@ -69,7 +73,7 @@ public class EventsReducer implements Reducer {
         // create and save an event
         Events events = state.getEvents();
         Event ev = makeEvent(state, a);
-        state = state.setEvents(events.addEvent(ev.getScopeId(), ev.getId(), ev.getName(), cmds.toArray(new Command[cmds.size()])));
+        state = state.setEvents(events.addEvent(ev.getScopeId(), ev.getId(), ev.getName(), cmds.toArray(new Command[0])));
         eventManager.add(ev);
 
         return state;

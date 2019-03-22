@@ -33,7 +33,7 @@ public final class ContextUtils {
         } else {
             log.debug("handleSuspend ['{}'] -> suspend is requested '{}'", state.getBusinessKey(), messageRef);
             stack = stack.push(new PerformActionsCommand(
-                    new CreateEventAction(definitionId, elementId, messageRef, null, null, null, ctx.getSuspendPayload())));
+                    new CreateEventAction(definitionId, elementId, messageRef, null, null, null, ctx.getSuspendPayload(), ctx.isResumeFromSameStep())));
         }
 
         return state.setStack(stack);
