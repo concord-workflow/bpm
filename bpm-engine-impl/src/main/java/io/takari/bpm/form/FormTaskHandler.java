@@ -52,9 +52,10 @@ public class FormTaskHandler implements UserTaskHandler {
 
         Map<String, Object> options = getOptions(x, state.getVariables());
 
-        FormDefinition fd = getOrCreateFormDefinition(x, options);
+        String formId = resolveFormId(x, state.getVariables());
+        FormDefinition fd = getOrCreateFormDefinition(formId, options);
         if (fd == null) {
-            throw new ExecutionException("Form definition not found: " + x.getFormId());
+            throw new ExecutionException("Form definition not found: " + formId);
         }
 
         String pk = state.getBusinessKey();
@@ -73,17 +74,26 @@ public class FormTaskHandler implements UserTaskHandler {
         return (Map<String, Object>) ctx.interpolate(x.getOptions());
     }
 
-    private FormDefinition getOrCreateFormDefinition(FormExtension x, Map<String, Object> options) throws ExecutionException {
+    private String resolveFormId(FormExtension x, Variables vars) {
+        if (x.getFormIdExpression() == null) {
+            return x.getFormId();
+        }
+
+        ExecutionContext ctx = contextFactory.create(vars);
+        return (String) ctx.interpolate(x.getFormIdExpression());
+    }
+
+    private FormDefinition getOrCreateFormDefinition(String formId, Map<String, Object> options) throws ExecutionException {
         Object v = options != null ? options.get("fields") : null;
         if (v == null) {
-            return formDefinitionProvider.getById(x.getFormId());
+            return formDefinitionProvider.getById(formId);
         }
 
         if (!(v instanceof List)) {
-            throw new IllegalArgumentException("Expected a list of fields in form '" + x.getFormId() + "', got: " + v.getClass());
+            throw new IllegalArgumentException("Expected a list of fields in form '" + formId + "', got: " + v.getClass());
         }
 
-        return new FormDefinition(x.getFormId(), coerceToFormFields((List<?>) v));
+        return new FormDefinition(formId, coerceToFormFields((List<?>) v));
     }
 
     @SuppressWarnings("unchecked")

@@ -341,4 +341,45 @@ public class FormTest extends AbstractFormTest {
 
         verify(t2, times(1)).execute(any(ExecutionContext.class));
     }
+
+    @Test
+    public void testFormCallWithExpression() throws Exception {
+        String formId = "testForm";
+        String formIdExpression = "${formNameVar}";
+        String formField = "testValue";
+
+        formDefinitionProvider.deploy(new FormDefinition(formId,
+                new FormField.Builder(formField, StringField.TYPE)
+                        .allowedValue(Arrays.asList("a", "b", "c"))
+                        .build()));
+
+        // ---
+
+        String processId = "test";
+        deploy(new ProcessDefinition(processId,
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "t1"),
+                new UserTask("t1", new FormExtension(null, formIdExpression)),
+                new SequenceFlow("f2", "t1", "end"),
+                new EndEvent("end")
+        ));
+
+        // ---
+
+        String key = UUID.randomUUID().toString();
+        getEngine().start(key, processId, Collections.singletonMap("formNameVar", formId));
+
+        assertActivations(key, processId,
+                "start",
+                "f1",
+                "t1");
+
+        // ---
+
+        UUID formInstanceId = formRegistry.getForms().keySet().iterator().next();
+        assertNotNull(formInstanceId);
+
+        FormSubmitResult r = formService.submit(formInstanceId, Collections.singletonMap(formField, "b"));
+        assertTrue(r.isValid());
+    }
 }
