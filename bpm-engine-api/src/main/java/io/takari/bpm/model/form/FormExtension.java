@@ -7,6 +7,8 @@ import java.util.Map;
 
 public class FormExtension implements Extension {
 
+    private static final long serialVersionUID = -6059980075281292420L;
+
     private final String formId;
     private final String formIdExpression;
     private final Map<String, Object> options;
