@@ -1,5 +1,7 @@
 package io.takari.bpm.el;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import io.takari.bpm.api.ExecutionContext;
@@ -13,10 +15,7 @@ import io.takari.bpm.task.ServiceTaskRegistry;
 import org.junit.Test;
 
 import java.security.spec.ECField;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -25,6 +24,91 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
 public class ExpressionManagerTest {
+
+    /**
+     {
+       "x" : {
+         "y" : {
+           "zz" : "11",
+           "z" : "${x.y.zz}"
+         }
+       }
+     }
+     */
+    @Test
+    public void test1() throws Exception {
+        Map<String, Object> m = new LinkedHashMap<>();
+        Map<String, Object> m1 = new LinkedHashMap<>();
+        m1.put("zz", "11");
+        m1.put("z", "${x.y.zz}");
+        m.put("x", Collections.singletonMap("y", m1));
+
+        Map<String, Object> expected = new LinkedHashMap<>();
+        Map<String, Object>  e1 = new LinkedHashMap<>();
+        e1.put("z", "11");
+        e1.put("zz", "11");
+        expected.put("x", Collections.singletonMap("y", e1));
+
+        // ---
+        assertInterpolate(expected, m);
+    }
+
+    @Test
+    public void test2() throws Exception {
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("x", Collections.singletonMap("y", Collections.singletonMap("z", Arrays.asList("a", "${x}"))));
+
+        Map<String, Object> expected = Collections.singletonMap("x",
+                Collections.singletonMap("y",
+                        Collections.singletonMap("z", Arrays.asList("a", 123))));
+
+        Map<String, Object> currentVariables = Collections.singletonMap("x", 123);
+
+        // ---
+        assertInterpolate(expected, currentVariables, m);
+    }
+
+
+
+    /**
+     - set:
+     x: 123
+     y: ${x}
+     */
+    @Test
+    public void testDependentInterpolate() throws Exception {
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("x", 123);
+        m.put("y", "${x}");
+
+        Map<String, Object> expected = new LinkedHashMap<>();
+        expected.put("x", 123);
+        expected.put("y", 123);
+
+        // ---
+        assertInterpolate(expected, m);
+    }
+
+    /**
+     * - set:
+     *   x: 123
+     *
+     * - set:
+     *   x:
+     *     y: "${x}"
+     */
+    @Test
+    public void testDependentOuterInterpolate() throws Exception {
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("x", Collections.singletonMap("y", "${x}"));
+
+        Map<String, Object> expected = Collections.singletonMap("x", Collections.singletonMap("y", 123));
+
+        Map<String, Object> currentVariables = Collections.singletonMap("x", 123);
+
+        // ---
+        assertInterpolate(expected, currentVariables, m);
+    }
 
     @Test
     public void testInterpolation() throws Exception {
@@ -49,11 +133,10 @@ public class ExpressionManagerTest {
         ExpressionManager em = new DefaultExpressionManager(mock(ServiceTaskRegistry.class));
         DefaultExecutionContextFactory ctxFactory = new DefaultExecutionContextFactory(em);
 
-        ExecutionContext ctx = new ExecutionContextImpl(ctxFactory, em, new Variables(m));
+        ExecutionContext ctx = new ExecutionContextImpl(ctxFactory, em, new Variables());
         m = (Map<String, Object>) Interpolator.interpolate(ctxFactory, em, ctx, m);
 
         // ---
-
         assertEquals(2, m.size());
 
         Object[] as = (Object[]) ((Map<String, Object>) ((Map<String, Object>) m.get("landscape")).get("active")).get("servers");
@@ -199,6 +282,36 @@ public class ExpressionManagerTest {
         Boolean result = em.eval(context, exp, Boolean.class);
 
         assertEquals(true, result);
+    }
+
+    private void assertInterpolate(Map<String, Object> expected, Map<String, Object> i) throws Exception {
+        assertInterpolate(expected, Collections.emptyMap(), i);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void assertInterpolate(Map<String, Object> expected, Map<String, Object> vars, Map<String, Object> i) throws Exception {
+        System.out.println(new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
+                .writeValueAsString(i));
+
+        ExpressionManager em = new DefaultExpressionManager(mock(ServiceTaskRegistry.class));
+        DefaultExecutionContextFactory ctxFactory = new DefaultExecutionContextFactory(em);
+
+        ExecutionContext ctx = new ExecutionContextImpl(ctxFactory, em, new Variables(vars));
+        Map<String, Object> result = (Map<String, Object>) Interpolator.interpolate(ctxFactory, em, ctx, i);
+        assertEquals(expected, result);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> convert(Map<String, Object> in) {
+        Map<String, Object> result = new HashMap<>();
+        for (Map.Entry<String, Object> e : in.entrySet()) {
+            Object v = e.getValue();
+            if (v instanceof Map) {
+                v = convert((Map<String, Object>) v);
+            }
+            result.put(e.getKey(), v);
+        }
+        return result;
     }
 
     class TestTask implements JavaDelegate {

@@ -73,14 +73,14 @@ public final class Interpolator {
 
         for (Map.Entry<?, ?> e : m.entrySet()) {
             Object k = e.getKey();
-            mm.put(k, _interpolate(evaluator, ctx, mm, k, e.getValue()));
+            mm.put(k, _interpolate(evaluator, ctx, mm, k, e.getValue(), mm));
         }
 
         return mm;
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> Object _interpolate(Evaluator<T> evaluator, T ctx, Map<Object, Object> container, Object k, Object v) {
+    private static <T> Object _interpolate(Evaluator<T> evaluator, T ctx, Map<Object, Object> container, Object k, Object v, Map<Object, Object> overrides) {
         if (v instanceof String) {
             String s = (String) v;
             if (evaluator.hasExpression(s)) {
@@ -96,7 +96,15 @@ public final class Interpolator {
 
                 for (Map.Entry<Object, Object> e : m.entrySet()) {
                     Object kk = e.getKey();
-                    mm.put(kk, _interpolate(evaluator, ctx, mm, kk, e.getValue()));
+                    Object interpolatedValue = _interpolate(evaluator, ctx, mm, kk, e.getValue(), overrides);
+                    if (contains(mm, interpolatedValue)) {
+                        // got cycle, try outer variable
+                        Map<Object, Object> oldOverrides = new HashMap<>(overrides);
+                        overrides.clear();
+                        interpolatedValue = _interpolate(evaluator, ctx, mm, kk, e.getValue(), overrides);
+                        overrides.putAll(oldOverrides);
+                    }
+                    mm.put(kk, interpolatedValue);
                 }
 
                 v = mm;
@@ -106,7 +114,7 @@ public final class Interpolator {
             if (!src.isEmpty()) {
                 List dst = new ArrayList(src.size());
                 for (Object vv : src) {
-                    dst.add(_interpolate(evaluator, ctx, null, null, vv));
+                    dst.add(_interpolate(evaluator, ctx, null, null, vv, overrides));
                 }
 
                 v = dst;
@@ -116,7 +124,7 @@ public final class Interpolator {
             if (!src.isEmpty()) {
                 Set dst = new HashSet(src.size());
                 for (Object vv : src) {
-                    dst.add(_interpolate(evaluator, ctx, null, null, vv));
+                    dst.add(_interpolate(evaluator, ctx, null, null, vv, overrides));
                 }
 
                 v = dst;
@@ -127,7 +135,7 @@ public final class Interpolator {
             if (src.length != 0) {
                 Object[] dst = new Object[src.length];
                 for (int i = 0; i < src.length; i++) {
-                    dst[i] = _interpolate(evaluator, ctx, null, null, src[i]);
+                    dst[i] = _interpolate(evaluator, ctx, null, null, src[i], overrides);
                 }
                 v = dst;
             }
@@ -136,6 +144,28 @@ public final class Interpolator {
         return v;
     }
 
+    @SuppressWarnings("unchecked")
+    private static boolean contains(Object o, Object interpolatedValue) {
+        if (o == interpolatedValue) {
+            return true;
+        }
+
+        if (interpolatedValue instanceof Map) {
+            for (Map.Entry<Object, Object> e : ((Map<Object, Object>) interpolatedValue).entrySet()) {
+                if (contains(o, e.getValue())) {
+                    return true;
+                }
+            }
+        } else if (interpolatedValue instanceof Collection) {
+            for (Object e : (Collection<Object>)interpolatedValue) {
+                if (contains(o, e)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
 
     public interface Evaluator<T> {
 
