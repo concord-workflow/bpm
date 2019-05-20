@@ -1,5 +1,16 @@
 # Change Log
 
+## [Unreleased]
+
+### Changed
+
+- improved behavior of the `Interpolator` in case of circular
+references;
+- fixed `FormExtension` serialization issue - make it compatible with
+previously serialized versions.
+
+
+
 ## [0.56.0] - 2019-05-17
 
 ### Added
@@ -16,8 +27,9 @@
 
 ### Breaking
 
-- `ExecutionContext#suspend(String messageRef, Object payload)` replaced
-with `#suspend(String messageRef, Object payload, boolean resumeFromSameStep)`.
+- `ExecutionContext#suspend(String messageRef, Object payload)`
+replaced with
+`#suspend(String messageRef, Object payload, boolean resumeFromSameStep)`.
 
 
 
@@ -25,7 +37,8 @@ with `#suspend(String messageRef, Object payload, boolean resumeFromSameStep)`.
 
 ### Changed
 
-- refactor `Interpolator` to make it more useful outside of the tasks.
+- refactor `Interpolator` to make it more useful outside of the
+tasks.
 
 
 
@@ -33,8 +46,8 @@ with `#suspend(String messageRef, Object payload, boolean resumeFromSameStep)`.
 
 ### Changed
 
-- change the visibility the utility methods of `DefaultFormValidatorLocale` for easier
-subclassing.
+- change the visibility the utility methods of
+`DefaultFormValidatorLocale` for easier subclassing.
 
  
 
