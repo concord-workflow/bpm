@@ -1,5 +1,13 @@
 # Change Log
 
+## [Unreleased]
+
+### Changed
+
+- detect cycles in arrays when interpolating values.
+
+
+
 ## [0.56.1] - 2019-05-20
 
 ### Changed

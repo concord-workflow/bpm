@@ -157,7 +157,13 @@ public final class Interpolator {
                 }
             }
         } else if (interpolatedValue instanceof Collection) {
-            for (Object e : (Collection<Object>)interpolatedValue) {
+            for (Object e : (Collection<Object>) interpolatedValue) {
+                if (contains(o, e)) {
+                    return true;
+                }
+            }
+        } else if (interpolatedValue instanceof Object[]) {
+            for (Object e : (Object[]) interpolatedValue) {
                 if (contains(o, e)) {
                     return true;
                 }
