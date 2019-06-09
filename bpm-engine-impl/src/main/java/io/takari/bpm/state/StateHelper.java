@@ -26,6 +26,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
+import static io.takari.bpm.api.ExecutionContext.CURRENT_FLOW_NAME_KEY;
+
 public final class StateHelper {
 
     private static final Logger log = LoggerFactory.getLogger(StateHelper.class);
@@ -66,6 +68,9 @@ public final class StateHelper {
 
         // fire interceptors
         state = push(state, new FireOnStartInterceptorsAction(pd.getId()));
+
+        // store current flow name
+        state = state.setVariables(state.getVariables().setVariable(CURRENT_FLOW_NAME_KEY, pd.getId()));
 
         return state;
     }

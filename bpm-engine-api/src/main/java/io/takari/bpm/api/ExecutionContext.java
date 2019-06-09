@@ -15,6 +15,8 @@ public interface ExecutionContext {
 
     String PROCESS_BUSINESS_KEY = "__processBusinessKey";
 
+    String CURRENT_FLOW_NAME_KEY = "__currentFlow";
+
     Object getVariable(String key);
     
     Map<String, Object> getVariables();

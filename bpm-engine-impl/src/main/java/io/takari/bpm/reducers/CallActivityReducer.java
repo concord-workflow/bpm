@@ -17,6 +17,8 @@ import io.takari.bpm.commands.ProcessElementCommand;
 import io.takari.bpm.model.StartEvent;
 import io.takari.bpm.state.ProcessInstance;
 
+import static io.takari.bpm.api.ExecutionContext.CURRENT_FLOW_NAME_KEY;
+
 public class CallActivityReducer implements Reducer {
 
     private static final Logger log = LoggerFactory.getLogger(CallActivityReducer.class);
@@ -52,6 +54,8 @@ public class CallActivityReducer implements Reducer {
 
         // add the found definition to the process state
         state = state.setDefinitions(state.getDefinitions().put(sub));
+
+        state = state.setVariables(state.getVariables().setVariable(CURRENT_FLOW_NAME_KEY, sub.getId()));
 
         log.debug("reduce ['{}'] -> new child process '{}'", state.getBusinessKey(), sub.getId());
 

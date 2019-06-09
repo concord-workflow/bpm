@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Added
+
+- new variable `Execution#CURRENT_FLOW_NAME_KEY`: contains the name
+of the current flow.
+
 ### Changed
 
 - detect cycles in arrays when interpolating values.
