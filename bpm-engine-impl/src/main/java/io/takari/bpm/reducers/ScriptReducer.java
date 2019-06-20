@@ -146,11 +146,11 @@ public class ScriptReducer extends BpmnErrorHandlingReducer {
     }
 
     private ProcessInstance handleException(ProcessInstance state, ExecuteScriptAction a, Exception e) throws ExecutionException {
-        return handleException(state, a.getDefinitionId(), a.getElementId(), e, null, null);
+        return handleException(state, a.getDefinitionId(), a.getElementId(), e, a.getErrors(), a.getDefaultError());
     }
 
     private ProcessInstance handleBpmnError(ProcessInstance state, ExecuteScriptAction a, BpmnError e) throws ExecutionException {
-        return handleBpmnError(state, a.getDefinitionId(), a.getElementId(), e, null, null);
+        return handleBpmnError(state, a.getDefinitionId(), a.getElementId(), e, a.getErrors(), a.getDefaultError());
     }
 
     private static String getExtension(String s) {
