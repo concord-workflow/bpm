@@ -1,5 +1,13 @@
 # Change Log
 
+## [Unreleased]
+
+## Added
+
+- boundary error events support for ScriptTasks.
+
+
+
 ## [0.57.0] - 2019-06-09
 
 ### Added
