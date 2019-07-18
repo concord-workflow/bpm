@@ -1,8 +1,11 @@
 package io.takari.bpm.reducers;
 
 import io.takari.bpm.Configuration;
+import io.takari.bpm.actions.SetVariableAction;
 import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.ExecutionContextFactory;
+import io.takari.bpm.commands.CommandStack;
+import io.takari.bpm.commands.PerformActionsCommand;
 import io.takari.bpm.state.Definitions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,9 +58,16 @@ public class CallActivityReducer implements Reducer {
         // add the found definition to the process state
         state = state.setDefinitions(state.getDefinitions().put(sub));
 
+        Object currentFlowName = state.getVariables().getVariable(ExecutionContext.CURRENT_FLOW_NAME_KEY);
+
         state = state.setVariables(state.getVariables().setVariable(CURRENT_FLOW_NAME_KEY, sub.getId()));
 
         log.debug("reduce ['{}'] -> new child process '{}'", state.getBusinessKey(), sub.getId());
+
+        // restore flow name variable
+        CommandStack stack = state.getStack()
+                .push(new PerformActionsCommand(new SetVariableAction(ExecutionContext.CURRENT_FLOW_NAME_KEY, currentFlowName)));
+        state = state.setStack(stack);
 
         // push the start event of the child process to the stack
         StartEvent ev = ProcessDefinitionUtils.findStartEvent(sub);

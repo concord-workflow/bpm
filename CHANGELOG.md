@@ -1,8 +1,17 @@
 # Change Log
 
+## [Unreleased]
+
+### Changed
+
+- fixed the `ExecutionContext#CURRENT_FLOW_NAME_KEY` variable state
+when `copyAllCallActivityOutVariables` is enabled.
+
+
+
 ## [0.58.0] - 2019-06-20
 
-## Added
+### Added
 
 - boundary error events support for ScriptTasks.
 
