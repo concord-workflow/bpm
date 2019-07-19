@@ -21,6 +21,11 @@ public abstract class ProcessDefinitionBuilder {
     public interface Seq {
 
         /**
+         * Adds an arbitrary element given a stepId
+         */
+        Seq add(Function<String, AbstractElement> elemFun);
+
+        /**
          * Adds a ServiceTask element
          */
         Seq task(ExpressionType expType, String expr);
@@ -86,6 +91,11 @@ public abstract class ProcessDefinitionBuilder {
          * Adds a CallActivity element
          */
         Seq call(String calledElement, Set<VariableMapping> in, Set<VariableMapping> out, boolean copyAllVariables);
+        
+        /**
+         * Adds a CallActivity element
+         */
+        Seq call(String calledElement, String calledElementExpr, Set<VariableMapping> in, Set<VariableMapping> out, boolean copyAllVariables);
 
         /**
          * Adds an EventBasedGateway element
@@ -403,6 +413,10 @@ public abstract class ProcessDefinitionBuilder {
 
         T add(AbstractElement elem);
 
+        default T add(Function<String, AbstractElement> elemFun) {
+            return add(elemFun.apply(nextStepId()));
+        }
+
         @Override
         default T task(ExpressionType expType, String expr) {
             return task(expType, expr, null, null);
@@ -467,6 +481,11 @@ public abstract class ProcessDefinitionBuilder {
         @Override
         default T call(String calledElement, Set<VariableMapping> in, Set<VariableMapping> out, boolean copyAllVariables) {
             return add(new CallActivity(nextStepId(), calledElement, in, out, copyAllVariables));
+        }
+
+        @Override
+        default T call(String calledElement, String calledElementExpr, Set<VariableMapping> in, Set<VariableMapping> out, boolean copyAllVariables) {
+            return add(new CallActivity(nextStepId(), calledElement, calledElementExpr, in, out, copyAllVariables));
         }
 
         @Override
