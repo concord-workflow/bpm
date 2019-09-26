@@ -129,7 +129,7 @@ public class FormServiceTest {
         FormSubmitResult r = submit(new FormField[]{f});
         assertFalse(r.isValid());
 
-        verify(formLocale, times(1)).invalidCardinality(anyString(), eq(f), anyObject());
+        verify(formLocale, times(1)).invalidCardinality(anyString(), any(FormField.class), anyObject());
     }
 
     @Test
@@ -145,7 +145,7 @@ public class FormServiceTest {
                 "a", new String[0]);
         assertFalse(r.isValid());
 
-        verify(formLocale, times(1)).invalidCardinality(anyString(), eq(f), anyObject());
+        verify(formLocale, times(1)).invalidCardinality(anyString(), any(FormField.class), anyObject());
     }
 
     @Test
@@ -168,7 +168,7 @@ public class FormServiceTest {
                 "a", new Object[]{"a", 1, false});
         assertFalse(r.isValid());
 
-        verify(formLocale, times(1)).expectedString(anyString(), eq(f), eq(1), anyObject());
+        verify(formLocale, times(1)).expectedString(anyString(), any(FormField.class), eq(1), anyObject());
     }
 
     @Test
@@ -178,7 +178,7 @@ public class FormServiceTest {
                 "a", Arrays.asList("a", "b", 123));
         assertFalse(r.isValid());
 
-        verify(formLocale, times(1)).expectedString(anyString(), eq(f), eq(2), anyObject());
+        verify(formLocale, times(1)).expectedString(anyString(), any(FormField.class), eq(2), anyObject());
     }
 
     @Test
@@ -188,7 +188,7 @@ public class FormServiceTest {
                 "a", "abc");
         assertFalse(r.isValid());
 
-        verify(formLocale, times(1)).doesntMatchPattern(anyString(), eq(f), any(Integer.class), anyString(), anyObject());
+        verify(formLocale, times(1)).doesntMatchPattern(anyString(), any(FormField.class), any(Integer.class), anyString(), anyObject());
     }
 
     @Test
@@ -198,7 +198,7 @@ public class FormServiceTest {
                 "a", 123);
         assertFalse(r.isValid());
 
-        verify(formLocale, times(1)).expectedString(anyString(), eq(f), any(Integer.class), anyObject());
+        verify(formLocale, times(1)).expectedString(anyString(), any(FormField.class), any(Integer.class), anyObject());
     }
 
     @Test
@@ -267,7 +267,7 @@ public class FormServiceTest {
                 "a", 0.525);
         assertFalse(r.isValid());
 
-        verify(formLocale, times(1)).decimalRangeError(anyString(), eq(f), any(Integer.class), any(Double.class), any(Double.class), anyObject());
+        verify(formLocale, times(1)).decimalRangeError(anyString(), any(FormField.class), any(Integer.class), any(Double.class), any(Double.class), anyObject());
     }
 
     @Test

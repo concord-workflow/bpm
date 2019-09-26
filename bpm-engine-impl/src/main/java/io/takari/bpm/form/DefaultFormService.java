@@ -89,6 +89,8 @@ public class DefaultFormService implements FormService {
         Map<String, Object> allowedValues = form.getAllowedValues();
         allowedValues = new LinkedHashMap<>(allowedValues != null ? allowedValues : Collections.emptyMap());
 
+        List<FormField> formFields = new ArrayList<>();
+
         for (FormField f : fd.getFields()) {
             String k = f.getName();
             Object v = defaults.get(k);
@@ -112,6 +114,9 @@ public class DefaultFormService implements FormService {
                 }
             }
 
+            FormField ff = interpolateFormField(env, contextFactory, f);
+            formFields.add(ff);
+
             if (v == null) {
                 continue;
             }
@@ -130,8 +135,21 @@ public class DefaultFormService implements FormService {
         env = new LinkedHashMap<>();
         env.put(formName, values);
 
+        FormDefinition formDefinition = new FormDefinition(formName, formFields);
+
         Map<String, Object> options = form.getOptions();
-        return new Form(form, env, allowedValues);
+        return new Form(form.getProcessBusinessKey(), form.getFormInstanceId(), form.getEventName(),
+                formDefinition, env, allowedValues, options);
+    }
+
+    public static FormField interpolateFormField(Map<String, Object> env, ExecutionContextFactory contextFactory, FormField field) {
+        Variables vars = new Variables(env);
+        ExecutionContext ctx = contextFactory.create(vars);
+
+        String label = (String) ctx.interpolate(field.getLabel());
+
+        FormField.Builder interpolatedField = new FormField.Builder(field).label(label);
+        return interpolatedField.build();
     }
 
     public static FormSubmitResult submit(ResumeHandler resumeHandler,
