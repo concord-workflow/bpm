@@ -1,9 +1,9 @@
 package io.takari.bpm.form;
 
 import io.takari.bpm.api.Engine;
+import io.takari.bpm.api.ExecutionContextFactory;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.context.DefaultExecutionContextFactory;
-import io.takari.bpm.api.ExecutionContextFactory;
 import io.takari.bpm.el.DefaultExpressionManager;
 import io.takari.bpm.el.ExpressionManager;
 import io.takari.bpm.form.DefaultFormService.ResumeHandler;
@@ -28,7 +28,6 @@ import static org.mockito.Mockito.*;
 public class FormServiceTest {
 
     private FormValidatorLocale formLocale;
-    private FormStorage formStorage;
     private FormService formService;
 
     @Before
@@ -38,7 +37,7 @@ public class FormServiceTest {
         ServiceTaskRegistry taskRegistry = mock(ServiceTaskRegistry.class);
         ExpressionManager expressionManager = new DefaultExpressionManager(taskRegistry);
 
-        formStorage = new InMemFormStorage();
+        FormStorage formStorage = new InMemFormStorage();
 
         ExecutionContextFactory contextFactory = new DefaultExecutionContextFactory(expressionManager);
         ResumeHandler resumeHandler = (form, args) -> engine.resume(form.getProcessBusinessKey(), form.getEventName(), args);
@@ -296,6 +295,7 @@ public class FormServiceTest {
         return submit(fd, env, m);
     }
 
+    @SuppressWarnings("unchecked")
     private FormSubmitResult submit(FormDefinition fd, Map<String, Object> env, Map<String, Object> values) throws ExecutionException {
         String key = UUID.randomUUID().toString();
         String eventName = UUID.randomUUID().toString();

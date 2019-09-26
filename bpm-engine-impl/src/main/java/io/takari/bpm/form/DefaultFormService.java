@@ -67,6 +67,7 @@ public class DefaultFormService implements FormService {
         return result;
     }
 
+    @SuppressWarnings("unchecked")
     public static Form prepare(ExecutionContextFactory contextFactory,
                                FormValidator validator, Form form) throws ExecutionException {
 
