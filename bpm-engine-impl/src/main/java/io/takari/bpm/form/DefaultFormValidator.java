@@ -254,7 +254,7 @@ public class DefaultFormValidator implements FormValidator {
             throw new IllegalArgumentException("Unsupported integer type: " + v.getClass());
         }
 
-        return low & high;
+        return low && high;
     }
 
     private static boolean withinBounds(Object v, Double min, Double max) {
@@ -290,7 +290,7 @@ public class DefaultFormValidator implements FormValidator {
             throw new IllegalArgumentException("Unsupported decimal type: " + v.getClass());
         }
 
-        return low & high;
+        return low && high;
     }
 
     private static boolean validInt(Long l) {
