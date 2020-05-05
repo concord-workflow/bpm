@@ -19,4 +19,10 @@ public class EngineListenerHolder {
         }
         return state;
     }
+
+    public void fireOnUnhandledException(ProcessInstance state) {
+        for (EngineListener l : listeners) {
+            l.onUnhandledException(state);
+        }
+    }
 }

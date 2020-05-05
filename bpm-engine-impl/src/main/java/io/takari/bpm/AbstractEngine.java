@@ -199,13 +199,18 @@ public abstract class AbstractEngine implements Engine {
     private void runLockSafe(ProcessInstance state) throws ExecutionException {
         log.debug("runLockSafe ['{}'] -> started...", state.getBusinessKey());
 
-        while (state.getStatus() == ProcessStatus.RUNNING) {
-            if (log.isTraceEnabled()) {
-                StateHelper.dump(state);
-            }
+        try {
+            while (state.getStatus() == ProcessStatus.RUNNING) {
+                if (log.isTraceEnabled()) {
+                    StateHelper.dump(state);
+                }
 
-            List<Action> actions = getPlanner().eval(state);
-            state = getExecutor().eval(state, actions);
+                List<Action> actions = getPlanner().eval(state);
+                state = getExecutor().eval(state, actions);
+            }
+        } catch (Exception e) {
+            getListenerHolder().fireOnUnhandledException(state);
+            throw e;
         }
 
         // fire the listeners
