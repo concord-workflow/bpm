@@ -6,5 +6,6 @@ public interface EngineListener {
 
     ProcessInstance onFinalize(ProcessInstance state);
 
-    void onUnhandledException(ProcessInstance state);
+    default void onUnhandledException(ProcessInstance state) {
+    }
 }
