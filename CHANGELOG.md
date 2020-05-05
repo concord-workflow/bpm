@@ -1,5 +1,13 @@
 # Change Log
 
+## [Unreleased]
+
+### Added
+
+- new EngineListener method `onUnhandledException`.
+
+
+
 ## [0.58.2] - 2019-09-26
 
 ### Changed
