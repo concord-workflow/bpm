@@ -1,18 +1,9 @@
-version: 2
-executorType: machine
-jobs:
-  build:
-    steps:
-      - checkout
+version: 2.1
 
-      - restore_cache:
-          key: bpm-{{ checksum "pom.xml" }}
+orbs:
+  maven: circleci/maven@0.0.12
 
-      - run: ./mvnw -B dependency:go-offline
-
-      - save_cache:
-          paths:
-            - ~/.m2
-          key: bpm-{{ checksum "pom.xml" }}
-
-      - run: ./mvnw -B clean install
+workflows:
+  maven_test:
+    jobs:
+      - maven/test
