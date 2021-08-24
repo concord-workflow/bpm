@@ -10,7 +10,7 @@
 
     <groupId>io.takari.bpm</groupId>
     <artifactId>parent</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <licenses>
@@ -203,6 +203,6 @@
 
     <scm>
         <developerConnection>scm:git:git@github.com:concord-workflow/bpm.git</developerConnection>
-        <tag>1.0.0</tag>
+        <tag>HEAD</tag>
     </scm>
 </project>
