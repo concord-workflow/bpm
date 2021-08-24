@@ -15,7 +15,6 @@ import io.takari.bpm.model.ScriptTask;
 import io.takari.bpm.model.ScriptTask.Type;
 import io.takari.bpm.resource.ResourceResolver;
 import io.takari.bpm.state.ProcessInstance;
-import io.takari.bpm.state.StateHelper;
 import io.takari.bpm.state.VariablesHelper;
 import io.takari.bpm.task.ServiceTaskRegistry;
 
@@ -71,6 +70,7 @@ public class ScriptReducer extends BpmnErrorHandlingReducer {
 
             // expose all available variables plus the context
             Bindings b = engine.createBindings();
+            b.put("polyglot.js.allowAllAccess", true);
             b.put("execution", ctx);
             b.put("tasks", new TaskAccessor(taskRegistry));
             b.putAll(ctx.toMap());
