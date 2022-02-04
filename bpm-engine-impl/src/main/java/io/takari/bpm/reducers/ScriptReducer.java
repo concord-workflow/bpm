@@ -1,5 +1,7 @@
 package io.takari.bpm.reducers;
 
+import com.oracle.truffle.js.scriptengine.GraalJSEngineFactory;
+import com.oracle.truffle.js.scriptengine.GraalJSScriptEngine;
 import io.takari.bpm.Configuration;
 import io.takari.bpm.ProcessDefinitionUtils;
 import io.takari.bpm.actions.Action;
@@ -17,11 +19,16 @@ import io.takari.bpm.resource.ResourceResolver;
 import io.takari.bpm.state.ProcessInstance;
 import io.takari.bpm.state.VariablesHelper;
 import io.takari.bpm.task.ServiceTaskRegistry;
+import org.graalvm.polyglot.Engine;
+import org.graalvm.polyglot.HostAccess;
+import org.graalvm.polyglot.Value;
 
 import javax.script.Bindings;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import java.io.*;
+import java.util.LinkedList;
+import java.util.List;
 
 @Impure
 public class ScriptReducer extends BpmnErrorHandlingReducer {
@@ -107,6 +114,10 @@ public class ScriptReducer extends BpmnErrorHandlingReducer {
 
     private ScriptEngine getEngine(ScriptTask t) throws ExecutionException {
         if (t.getLanguage() != null) {
+            if (new GraalJSEngineFactory().getNames().contains(t.getLanguage())) {
+                return initializeGraalVm();
+            }
+
             return scriptEngineManager.getEngineByName(t.getLanguage());
         }
 
@@ -117,6 +128,10 @@ public class ScriptReducer extends BpmnErrorHandlingReducer {
         String ext = getExtension(t.getContent());
         if (ext == null) {
             throw new ExecutionException("Unknown external script extension: " + t.getContent());
+        }
+
+        if (new GraalJSEngineFactory().getExtensions().contains(ext)) {
+            return initializeGraalVm();
         }
 
         return scriptEngineManager.getEngineByExtension(ext);
@@ -152,6 +167,22 @@ public class ScriptReducer extends BpmnErrorHandlingReducer {
     private ProcessInstance handleBpmnError(ProcessInstance state, ExecuteScriptAction a, BpmnError e) throws ExecutionException {
         return handleBpmnError(state, a.getDefinitionId(), a.getElementId(), e, a.getErrors(), a.getDefaultError());
     }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private static ScriptEngine initializeGraalVm() {
+        // Javascript array is converted in Java to an empty map #214 (https://github.com/oracle/graaljs/issues/214)
+        HostAccess access = HostAccess.newBuilder(HostAccess.ALL)
+                .targetTypeMapping(Value.class, Object.class, Value::hasArrayElements, v -> new LinkedList<>(v.as(List.class))).build();
+
+        return GraalJSScriptEngine.create(Engine.newBuilder()
+                        .allowExperimentalOptions(true)
+                        .option("engine.WarnInterpreterOnly", "false")
+                        .option("js.nashorn-compat", "true")
+                        .build(),
+                org.graalvm.polyglot.Context.newBuilder("js")
+                        .allowHostAccess(access));
+    }
+
 
     private static String getExtension(String s) {
         if (s == null) {
