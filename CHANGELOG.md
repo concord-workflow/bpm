@@ -1,5 +1,13 @@
 # Change Log
 
+## [Unreleased]
+
+### Changed
+
+- use GraalVM JS's Nashorn compatibility mode.
+
+
+
 ## [1.0.0] - 2021-08-24
 
 ### Changed
