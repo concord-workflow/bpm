@@ -1,5 +1,13 @@
 # Change Log
 
+## [1.0.0] - 2021-08-24
+
+### Changed
+
+- use GraalVM JS as the default JavaScript runtime.
+
+
+
 ## [0.59.0] - 2020-05-05
 
 ### Added
