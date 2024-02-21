@@ -7,6 +7,7 @@ import io.takari.bpm.model.*;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.UUID;
 
 import static org.mockito.Mockito.*;
@@ -204,6 +205,7 @@ public class ForceSuspendTest extends AbstractEngineTest {
             public void execute(ExecutionContext ctx) throws ExecutionException {
                 Object isResume = ctx.getVariable("resume");
                 if (Boolean.TRUE.equals(isResume)) {
+                    ctx.setVariable("result", 42);;
                     return;
                 }
                 ctx.suspend(messageRef, null, true);
@@ -214,11 +216,13 @@ public class ForceSuspendTest extends AbstractEngineTest {
 
         // ---
 
+        VariableMapping out = new VariableMapping(null, "${result}", "myResult");
+
         String processId = "test";
         deploy(new ProcessDefinition(processId, Arrays.asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "t1"),
-                new ServiceTask("t1", ExpressionType.DELEGATE, "${t1}"),
+                new ServiceTask("t1", ExpressionType.DELEGATE, "${t1}", null, Collections.singleton(out)),
                 new SequenceFlow("f2", "t1", "end"),
                 new EndEvent("end")
         )));

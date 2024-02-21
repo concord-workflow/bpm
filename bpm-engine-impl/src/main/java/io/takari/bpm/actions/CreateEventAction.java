@@ -3,6 +3,8 @@ package io.takari.bpm.actions;
 import io.takari.bpm.misc.CoverageIgnore;
 import io.takari.bpm.model.IntermediateCatchEvent;
 
+import java.util.Map;
+
 public class CreateEventAction implements Action {
 
     private static final long serialVersionUID = 1L;
@@ -15,6 +17,7 @@ public class CreateEventAction implements Action {
     private final String timeDuration;
     private final Object payload;
     private final boolean resumeFromSameStep;
+    private final Map<String, Object> resumeVars;
 
     public CreateEventAction(String definitionId, IntermediateCatchEvent ev) {
         this(definitionId, ev.getId(), ev.getMessageRef(), ev.getMessageRefExpression(),
@@ -28,6 +31,13 @@ public class CreateEventAction implements Action {
     public CreateEventAction(String definitionId, String elementId, String messageRef,
                              String messageRefExpression, String timeDate, String timeDuration,
                              Object payload, boolean resumeFromSameStep) {
+        this(definitionId, elementId, messageRef, messageRefExpression, timeDate, timeDuration, payload, resumeFromSameStep, null);
+    }
+
+    public CreateEventAction(String definitionId, String elementId, String messageRef,
+                             String messageRefExpression, String timeDate, String timeDuration,
+                             Object payload, boolean resumeFromSameStep,
+                             Map<String, Object> resumeVars) {
 
         this.definitionId = definitionId;
         this.elementId = elementId;
@@ -37,6 +47,7 @@ public class CreateEventAction implements Action {
         this.timeDuration = timeDuration;
         this.payload = payload;
         this.resumeFromSameStep = resumeFromSameStep;
+        this.resumeVars = resumeVars;
     }
 
     public String getDefinitionId() {
@@ -71,6 +82,10 @@ public class CreateEventAction implements Action {
         return resumeFromSameStep;
     }
 
+    public Map<String, Object> getResumeVars() {
+        return resumeVars;
+    }
+
     @Override
     @CoverageIgnore
     public String toString() {
@@ -83,6 +98,7 @@ public class CreateEventAction implements Action {
                 ", timeDuration=" + timeDuration +
                 ", payload=" + payload +
                 ", resumeFromSameStep=" + resumeFromSameStep +
+                ", resumeVars=" + resumeVars +
                 ']';
     }
 }

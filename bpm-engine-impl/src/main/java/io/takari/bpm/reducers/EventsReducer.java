@@ -4,16 +4,14 @@ import com.google.common.collect.Lists;
 import io.takari.bpm.IndexedProcessDefinition;
 import io.takari.bpm.ProcessDefinitionUtils;
 import io.takari.bpm.UuidGenerator;
-import io.takari.bpm.actions.Action;
-import io.takari.bpm.actions.CreateEventAction;
-import io.takari.bpm.actions.PopScopeAction;
-import io.takari.bpm.actions.SetCurrentScopeAction;
+import io.takari.bpm.actions.*;
 import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.commands.Command;
 import io.takari.bpm.commands.PerformActionsCommand;
 import io.takari.bpm.commands.ProcessElementCommand;
 import io.takari.bpm.api.ExecutionContextFactory;
+import io.takari.bpm.commands.ResumeElementCommand;
 import io.takari.bpm.event.Event;
 import io.takari.bpm.event.EventPersistenceManager;
 import io.takari.bpm.model.SequenceFlow;
@@ -62,7 +60,7 @@ public class EventsReducer implements Reducer {
 
         // evaluate the following element after the event
         if (a.isResumeFromSameStep()) {
-            cmds.add(new ProcessElementCommand(pd.getId(), a.getElementId()));
+            cmds.add(new ResumeElementCommand(pd.getId(), a.getElementId(), a.getResumeVars()));
         } else {
             cmds.add(new ProcessElementCommand(pd.getId(), next.getId()));
         }

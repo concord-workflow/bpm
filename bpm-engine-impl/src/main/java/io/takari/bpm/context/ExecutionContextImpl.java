@@ -110,6 +110,10 @@ public class ExecutionContextImpl implements ExecutionContext {
         return actions;
     }
 
+    public Map<String, Change> getChanges() {
+        return changes;
+    }
+
     public Variables toVariables() {
         Variables dst = source;
 

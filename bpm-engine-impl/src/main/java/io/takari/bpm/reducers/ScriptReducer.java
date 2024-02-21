@@ -98,7 +98,10 @@ public class ScriptReducer extends BpmnErrorHandlingReducer {
         }
 
         // apply the changes before continuing the execution
-        state = VariablesHelper.applyOutVariables(contextFactory, state, ctx, t.getOut());
+        boolean resumeFromSameStep = ctx != null && ctx.getSuspendMessageRef() != null && ctx.isResumeFromSameStep();
+        if (!resumeFromSameStep) {
+            state = VariablesHelper.applyOutVariables(contextFactory, state, ctx, t.getOut());
+        }
 
         return state;
     }
