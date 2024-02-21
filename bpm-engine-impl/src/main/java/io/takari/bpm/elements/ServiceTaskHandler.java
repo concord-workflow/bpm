@@ -9,6 +9,7 @@ import io.takari.bpm.actions.PopCommandAction;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.commands.Command;
 import io.takari.bpm.commands.ProcessElementCommand;
+import io.takari.bpm.commands.ResumeElementCommand;
 import io.takari.bpm.model.ExpressionType;
 import io.takari.bpm.model.SequenceFlow;
 import io.takari.bpm.model.ServiceTask;
@@ -18,9 +19,7 @@ import io.takari.bpm.utils.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class ServiceTaskHandler implements ElementHandler {
 
@@ -52,11 +51,16 @@ public class ServiceTaskHandler implements ElementHandler {
             // collect all boundary error events that have an errorRef
             Map<String, Command> errors = ProcessDefinitionUtils.findErrors(pd, cmd);
 
+            Map<String, Object> commandInput = null;
+            if (cmd instanceof ResumeElementCommand) {
+                commandInput = ((ResumeElementCommand) cmd).getInput();
+            }
+
             actions.add(new EvalExpressionAction.Builder(cmd.getDefinitionId(), t.getId(), t.getType(), t.getExpression(), defaultCommand)
                     .withTimeouts(timeouts)
                     .withDefaultError(defaultError)
                     .withErrors(errors)
-                    .withInVariables(notEmpty(t.getIn()))
+                    .withInVariables(notEmpty(append(t.getIn(), commandInput)))
                     .withOutVariables(notEmpty(t.getOut()))
                     .withCopyAllVariables(t.isCopyAllVariables())
                     .build());
@@ -68,6 +72,18 @@ public class ServiceTaskHandler implements ElementHandler {
         }
 
         return actions;
+    }
+
+    private Set<VariableMapping> append(Set<VariableMapping> in, Map<String, Object> commandInput) {
+        if (commandInput == null || commandInput.isEmpty()) {
+            return in;
+        }
+
+        Set<VariableMapping> result = new HashSet<>(in != null ? in : Collections.emptySet());
+        for (Map.Entry<String, Object> e : commandInput.entrySet()) {
+            result.add(new VariableMapping(null, null, e.getValue(), e.getKey()));
+        }
+        return result;
     }
 
     private static Set<VariableMapping> notEmpty(Set<VariableMapping> s) {

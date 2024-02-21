@@ -85,8 +85,11 @@ public class ExpressionsReducer extends BpmnErrorHandlingReducer {
 
         // we apply new state of variables regardless of whether the call was
         // successful or not
-        boolean ignoreMappingErrors = hasError;
-        state = VariablesHelper.applyOutVariables(contextFactory, state, ctx, a.getOut(), ignoreMappingErrors);
+        boolean resumeFromSameStep = ctx != null && ctx.getSuspendMessageRef() != null && ctx.isResumeFromSameStep();
+        if (!resumeFromSameStep) {
+            boolean ignoreMappingErrors = hasError;
+            state = VariablesHelper.applyOutVariables(contextFactory, state, ctx, a.getOut(), ignoreMappingErrors);
+        }
 
         return state;
     }
