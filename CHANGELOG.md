@@ -1,5 +1,14 @@
 # Change Log
 
+## [1.0.2] - Unreleased
+
+### Changed
+
+- fix resume from the same step when out variables
+  are present.
+
+
+
 ## [1.0.1] - 2022-02-04
 
 ### Changed
