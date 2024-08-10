@@ -60,7 +60,7 @@ public class EventsReducer implements Reducer {
 
         // evaluate the following element after the event
         if (a.isResumeFromSameStep()) {
-            cmds.add(new ResumeElementCommand(pd.getId(), a.getElementId(), a.getResumeVars()));
+            cmds.add(new ResumeElementCommand(pd.getId(), a.getElementId(), a.getCtxChangesBeforeSuspend()));
         } else {
             cmds.add(new ProcessElementCommand(pd.getId(), next.getId()));
         }

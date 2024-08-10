@@ -8,10 +8,6 @@ import io.takari.bpm.state.ProcessInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
 public final class ContextUtils {
 
     private static final Logger log = LoggerFactory.getLogger(ContextUtils.class);
@@ -38,24 +34,10 @@ public final class ContextUtils {
             log.debug("handleSuspend ['{}'] -> suspend is requested '{}'", state.getBusinessKey(), messageRef);
             stack = stack.push(new PerformActionsCommand(
                     new CreateEventAction(definitionId, elementId, messageRef, null, null, null, ctx.getSuspendPayload(),
-                            ctx.isResumeFromSameStep(), changesToVariablesMap(ctx.getChanges()))));
+                            ctx.isResumeFromSameStep(), ctx.changes())));
         }
 
         return state.setStack(stack);
-    }
-
-    private static Map<String, Object> changesToVariablesMap(Map<String, Change> changes) {
-        if (changes.isEmpty()) {
-            return Collections.emptyMap();
-        }
-
-        Map<String, Object> result = new HashMap<>();
-        for (Map.Entry<String, Change> e : changes.entrySet()) {
-            if (e.getValue().getType() == ChangeType.SET) {
-                result.put(e.getKey(), e.getValue().getValue());
-            }
-        }
-        return result;
     }
 
     private ContextUtils() {

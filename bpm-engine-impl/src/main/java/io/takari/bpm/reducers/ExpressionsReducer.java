@@ -54,6 +54,10 @@ public class ExpressionsReducer extends BpmnErrorHandlingReducer {
             Variables vars = VariablesHelper.applyInVariables(contextFactory, state.getVariables(), a.getIn(), a.isCopyAllVariables());
             ctx = contextFactory.create(vars, a.getDefinitionId(), a.getElementId());
 
+            if (a.getCtxChanges() != null) {
+                ctx.addChanges(a.getCtxChanges());
+            }
+
             boolean storeResult = cfg.isStoreExpressionEvalResultsInContext();
             Callable<Command> fn = new DelegateFn(javaDelegateHandler, ctx, a.getType(), a.getExpression(), a.getDefaultCommand(), storeResult);
 

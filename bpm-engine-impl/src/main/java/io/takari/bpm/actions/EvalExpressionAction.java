@@ -1,6 +1,7 @@
 package io.takari.bpm.actions;
 
 import io.takari.bpm.commands.Command;
+import io.takari.bpm.context.Change;
 import io.takari.bpm.misc.CoverageIgnore;
 import io.takari.bpm.model.ExpressionType;
 import io.takari.bpm.model.VariableMapping;
@@ -25,10 +26,11 @@ public class EvalExpressionAction implements Action {
     private final Set<VariableMapping> in;
     private final Set<VariableMapping> out;
     private final boolean copyAllVariables;
+    private final Map<String, Change> ctxChanges;
 
     private EvalExpressionAction(String definitionId, String elementId, ExpressionType type, String expression,
                                  Command defaultCommand, List<Timeout<Command>> timeouts, Command defaultError, Map<String, Command> errors,
-                                 Set<VariableMapping> in, Set<VariableMapping> out, boolean copyAllVariables) {
+                                 Set<VariableMapping> in, Set<VariableMapping> out, boolean copyAllVariables,  Map<String, Change> ctxChanges) {
         this.definitionId = definitionId;
         this.elementId = elementId;
         this.type = type;
@@ -40,6 +42,7 @@ public class EvalExpressionAction implements Action {
         this.in = in;
         this.out = out;
         this.copyAllVariables = copyAllVariables;
+        this.ctxChanges = ctxChanges;
     }
 
     public String getDefinitionId() {
@@ -86,6 +89,10 @@ public class EvalExpressionAction implements Action {
         return copyAllVariables;
     }
 
+    public Map<String, Change> getCtxChanges() {
+        return ctxChanges;
+    }
+
     @Override
     @CoverageIgnore
     public String toString() {
@@ -101,6 +108,7 @@ public class EvalExpressionAction implements Action {
                 ", in=" + in +
                 ", out=" + out +
                 ", copyAllVariables=" + copyAllVariables +
+                ", ctxChanges=" + ctxChanges +
                 ']';
     }
 
@@ -118,6 +126,7 @@ public class EvalExpressionAction implements Action {
         private Set<VariableMapping> in;
         private Set<VariableMapping> out;
         private boolean copyAllVariables;
+        private Map<String, Change> changes;
 
         public Builder(String definitionId, String elementId, ExpressionType type, String expression, Command defaultCommand) {
             this.definitionId = definitionId;
@@ -157,8 +166,13 @@ public class EvalExpressionAction implements Action {
             return this;
         }
 
+        public Builder withChanges(Map<String, Change> changes) {
+            this.changes = changes;
+            return this;
+        }
+
         public EvalExpressionAction build() {
-            return new EvalExpressionAction(definitionId, elementId, type, expression, defaultCommand, timeouts, defaultError, errors, in, out, copyAllVariables);
+            return new EvalExpressionAction(definitionId, elementId, type, expression, defaultCommand, timeouts, defaultError, errors, in, out, copyAllVariables, changes);
         }
     }
 }

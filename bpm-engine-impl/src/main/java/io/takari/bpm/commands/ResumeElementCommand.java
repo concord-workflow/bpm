@@ -1,20 +1,22 @@
 package io.takari.bpm.commands;
 
+import io.takari.bpm.context.Change;
+
 import java.util.Map;
 
 public class ResumeElementCommand extends ProcessElementCommand {
 
     private static final long serialVersionUID = 1L;
 
-    private final Map<String, Object> input;
+    private final Map<String, Change> ctxChangesBeforeSuspend;
 
-    public ResumeElementCommand(String definitionId, String elementId, Map<String, Object> input) {
+    public ResumeElementCommand(String definitionId, String elementId, Map<String, Change> ctxChangesBeforeSuspend) {
         super(definitionId, elementId);
 
-        this.input = input;
+        this.ctxChangesBeforeSuspend = ctxChangesBeforeSuspend;
     }
 
-    public Map<String, Object> getInput() {
-        return input;
+    public Map<String, Change> getCtxChangesBeforeSuspend() {
+        return ctxChangesBeforeSuspend;
     }
 }
