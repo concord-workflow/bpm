@@ -1,5 +1,6 @@
 package io.takari.bpm.actions;
 
+import io.takari.bpm.context.Change;
 import io.takari.bpm.misc.CoverageIgnore;
 import io.takari.bpm.model.IntermediateCatchEvent;
 
@@ -17,7 +18,7 @@ public class CreateEventAction implements Action {
     private final String timeDuration;
     private final Object payload;
     private final boolean resumeFromSameStep;
-    private final Map<String, Object> resumeVars;
+    private final Map<String, Change> ctxChangesBeforeSuspend;
 
     public CreateEventAction(String definitionId, IntermediateCatchEvent ev) {
         this(definitionId, ev.getId(), ev.getMessageRef(), ev.getMessageRefExpression(),
@@ -35,9 +36,8 @@ public class CreateEventAction implements Action {
     }
 
     public CreateEventAction(String definitionId, String elementId, String messageRef,
-                             String messageRefExpression, String timeDate, String timeDuration,
-                             Object payload, boolean resumeFromSameStep,
-                             Map<String, Object> resumeVars) {
+                String messageRefExpression, String timeDate, String timeDuration,
+                Object payload, boolean resumeFromSameStep, Map<String, Change> ctxChangesBeforeSuspend) {
 
         this.definitionId = definitionId;
         this.elementId = elementId;
@@ -47,7 +47,7 @@ public class CreateEventAction implements Action {
         this.timeDuration = timeDuration;
         this.payload = payload;
         this.resumeFromSameStep = resumeFromSameStep;
-        this.resumeVars = resumeVars;
+        this.ctxChangesBeforeSuspend = ctxChangesBeforeSuspend;
     }
 
     public String getDefinitionId() {
@@ -82,8 +82,8 @@ public class CreateEventAction implements Action {
         return resumeFromSameStep;
     }
 
-    public Map<String, Object> getResumeVars() {
-        return resumeVars;
+    public Map<String, Change> getCtxChangesBeforeSuspend() {
+        return ctxChangesBeforeSuspend;
     }
 
     @Override
@@ -98,7 +98,7 @@ public class CreateEventAction implements Action {
                 ", timeDuration=" + timeDuration +
                 ", payload=" + payload +
                 ", resumeFromSameStep=" + resumeFromSameStep +
-                ", resumeVars=" + resumeVars +
+                ", ctxChangesBeforeSuspend=" + ctxChangesBeforeSuspend +
                 ']';
     }
 }

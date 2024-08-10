@@ -110,10 +110,6 @@ public class ExecutionContextImpl implements ExecutionContext {
         return actions;
     }
 
-    public Map<String, Change> getChanges() {
-        return changes;
-    }
-
     public Variables toVariables() {
         Variables dst = source;
 
@@ -190,6 +186,14 @@ public class ExecutionContextImpl implements ExecutionContext {
     @Override
     public String getElementId() {
         return elementId;
+    }
+
+    public Map<String, Change> changes() {
+        return changes;
+    }
+
+    public void addChanges(Map<String, Change> changes) {
+        this.changes.putAll(changes);
     }
 
     private static List<Variables> stack(Variables tail) {
