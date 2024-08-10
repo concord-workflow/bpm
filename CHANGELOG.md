@@ -1,5 +1,12 @@
 # Change Log
 
+## [1.0.3] - 2024-08-09
+
+- save context changes before suspend and apply to
+  new context after resume.
+
+
+
 ## [1.0.2] - 2024-02-21
 
 ### Changed
