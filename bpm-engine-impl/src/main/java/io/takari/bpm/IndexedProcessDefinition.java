@@ -1,7 +1,5 @@
 package io.takari.bpm;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import io.takari.bpm.model.AbstractElement;
 import io.takari.bpm.model.BoundaryEvent;
 import io.takari.bpm.model.ProcessDefinition;
@@ -34,14 +32,14 @@ public class IndexedProcessDefinition extends ProcessDefinition {
     private Map<String, List<SequenceFlow>> indexOutgoingFlows() {
         Map<String, List<SequenceFlow>> m = new HashMap<>();
         indexOutgoingFlows0(this, m);
-        return ImmutableMap.copyOf(m);
+        return Map.copyOf(m);
     }
 
     private static void indexOutgoingFlows0(ProcessDefinition pd, Map<String, List<SequenceFlow>> accumulator) {
         for (AbstractElement e : pd.getChildren()) {
             String id = e.getId();
             List<SequenceFlow> l = findOutgoingFlows(pd, id);
-            accumulator.put(id, ImmutableList.copyOf(l));
+            accumulator.put(id, List.copyOf(l));
 
             if (e instanceof ProcessDefinition) {
                 indexOutgoingFlows0((ProcessDefinition) e, accumulator);

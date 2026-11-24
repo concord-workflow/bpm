@@ -3,14 +3,13 @@ package io.takari.bpm;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.commands.Command;
 import io.takari.bpm.commands.ProcessElementCommand;
-import io.takari.bpm.misc.CoverageIgnore;
 import io.takari.bpm.model.*;
 import io.takari.bpm.state.Activations;
 import io.takari.bpm.state.ProcessInstance;
 import io.takari.bpm.state.Scopes;
 import io.takari.bpm.utils.Timeout;
-import org.joda.time.Duration;
 
+import java.time.Duration;
 import java.util.*;
 
 public final class ProcessDefinitionUtils {
@@ -328,11 +327,11 @@ public final class ProcessDefinitionUtils {
             if (ev.getTimeDuration() != null) {
                 Duration d = Duration.parse(ev.getTimeDuration());
                 Command c = new ProcessElementCommand(pd.getId(), ev.getId());
-                l.add(new Timeout<>(d.getMillis(), c));
+                l.add(new Timeout<>(d.toMillis(), c));
             }
         }
 
-        l.sort((o1, o2) -> (int) (o1.getDuration() - o2.getDuration()));
+        l.sort(Comparator.comparingLong(Timeout::getDuration));
 
         return l;
     }
@@ -361,7 +360,6 @@ public final class ProcessDefinitionUtils {
         return m;
     }
 
-    @CoverageIgnore
     private ProcessDefinitionUtils() {
     }
 }

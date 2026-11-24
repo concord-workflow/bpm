@@ -1,16 +1,15 @@
 package io.takari.bpm.reducers;
 
-import com.google.common.collect.Lists;
 import io.takari.bpm.IndexedProcessDefinition;
 import io.takari.bpm.ProcessDefinitionUtils;
 import io.takari.bpm.UuidGenerator;
 import io.takari.bpm.actions.*;
 import io.takari.bpm.api.ExecutionContext;
+import io.takari.bpm.api.ExecutionContextFactory;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.commands.Command;
 import io.takari.bpm.commands.PerformActionsCommand;
 import io.takari.bpm.commands.ProcessElementCommand;
-import io.takari.bpm.api.ExecutionContextFactory;
 import io.takari.bpm.commands.ResumeElementCommand;
 import io.takari.bpm.event.Event;
 import io.takari.bpm.event.EventPersistenceManager;
@@ -18,9 +17,15 @@ import io.takari.bpm.model.SequenceFlow;
 import io.takari.bpm.state.Events;
 import io.takari.bpm.state.ProcessInstance;
 import io.takari.bpm.state.Scopes.Scope;
-import org.joda.time.DateTime;
-import org.joda.time.Period;
 
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.Period;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 
 @Impure
@@ -40,11 +45,9 @@ public class EventsReducer implements Reducer {
 
     @Override
     public ProcessInstance reduce(ProcessInstance state, Action action) throws ExecutionException {
-        if (!(action instanceof CreateEventAction)) {
+        if (!(action instanceof CreateEventAction a)) {
             return state;
         }
-
-        CreateEventAction a = (CreateEventAction) action;
 
         IndexedProcessDefinition pd = state.getDefinition(a.getDefinitionId());
         SequenceFlow next = ProcessDefinitionUtils.findOutgoingFlow(pd, a.getElementId());
@@ -97,8 +100,7 @@ public class EventsReducer implements Reducer {
     }
 
     private static void addScopeClosingActions(Collection<Command> cmds, List<Scope> currentStack) {
-
-        for (Scope s : Lists.reverse(currentStack)) {
+        for (Scope s : currentStack.reversed()) {
             // scope finishers must pop their scopes themselves
             if (s.getFinishers() == null) {
                 cmds.add(new PerformActionsCommand(new PopScopeAction()));
@@ -132,10 +134,10 @@ public class EventsReducer implements Reducer {
             return null;
         }
 
-        if (v instanceof String) {
-            return parseIso8601(s);
-        } else if (v instanceof Date) {
-            return (Date) v;
+        if (v instanceof String str) {
+            return parseIso8601(str);
+        } else if (v instanceof Date date) {
+            return date;
         } else {
             throw new ExecutionException("Invalid timeDate format in the process '%s' in the element '%s': '%s'",
                     definitionId, elementId, s);
@@ -156,8 +158,8 @@ public class EventsReducer implements Reducer {
             return null;
         }
 
-        if (v instanceof String && isDuration(v.toString())) {
-            return DateTime.now().plus(Period.parse(v.toString())).toDate();
+        if (v instanceof String str && isDuration(str)) {
+            return parseIso8601DurationFromNow(str);
         } else {
             throw new ExecutionException("Invalid duration format in the process '%s' in the element '%s': '%s'",
                     definitionId, elementId, s);
@@ -172,7 +174,30 @@ public class EventsReducer implements Reducer {
     }
 
     public static Date parseIso8601(String s) {
-        return DateTime.parse(s).toDate();
+        try {
+            return Date.from(OffsetDateTime.parse(s).toInstant());
+        } catch (DateTimeParseException ignored) {
+        }
+        try {
+            return Date.from(LocalDateTime.parse(s).atZone(ZoneId.systemDefault()).toInstant());
+        } catch (DateTimeParseException ignored) {
+        }
+        return Date.from(LocalDate.parse(s).atStartOfDay(ZoneId.systemDefault()).toInstant());
+    }
+
+    private static Date parseIso8601DurationFromNow(String s) {
+        ZonedDateTime now = ZonedDateTime.now();
+        int tIndex = s.indexOf('T');
+        if (tIndex < 0) {
+            return Date.from(now.plus(Period.parse(s)).toInstant());
+        }
+        if (tIndex == 1 || (tIndex == 2 && (s.charAt(0) == '+' || s.charAt(0) == '-'))) {
+            return Date.from(now.plus(Duration.parse(s)).toInstant());
+        }
+        String datePart = s.substring(0, tIndex);
+        String sign = s.startsWith("-") ? "-" : "";
+        String timePart = sign + "P" + s.substring(tIndex);
+        return Date.from(now.plus(Period.parse(datePart)).plus(Duration.parse(timePart)).toInstant());
     }
 
     private static boolean isDuration(String time) {
