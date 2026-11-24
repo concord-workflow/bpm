@@ -17,6 +17,8 @@ import static io.takari.bpm.state.Scopes.Scope;
 
 public class Events implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     private static final Logger log = LoggerFactory.getLogger(Events.class);
 
     private final PMap<UUID, PMap<UUID, EventRecord>> events;
@@ -123,6 +125,8 @@ public class Events implements Serializable {
     }
 
     public static final class EventRecord implements Serializable {
+
+        private static final long serialVersionUID = 1L;
 
         private final String name;
         private final Command[] commands;

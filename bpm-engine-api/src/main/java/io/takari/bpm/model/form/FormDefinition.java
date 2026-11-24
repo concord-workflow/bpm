@@ -6,6 +6,8 @@ import java.util.List;
 
 public class FormDefinition implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     private final String name;
     private final List<FormField> fields;
 

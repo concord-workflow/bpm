@@ -9,6 +9,8 @@ import java.util.*;
 
 public class Scopes implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     private final UUID currentId;
     private final PMap<UUID, Scope> scopes;
 
@@ -111,6 +113,8 @@ public class Scopes implements Serializable {
     }
 
     public static class Scope implements Serializable {
+
+        private static final long serialVersionUID = 1L;
 
         private final UUID parentId;
         private final UUID id;
