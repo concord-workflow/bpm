@@ -32,6 +32,7 @@
         <module>bpm-engine-api</module>
         <module>bpm-engine-impl</module>
         <module>activiti-compat</module>
+        <module>persistence/mvstore</module>
         <module>testkit</module>
         <module>examples/async</module>
     </modules>
@@ -52,6 +53,7 @@
         <expressly.version>6.0.0</expressly.version>
         <graalvm.version>25.5.5.0.3</graalvm.version>
         <groovy.version>6.0.0</groovy.version>
+        <h2-mvstore.version>2.5.252</h2-mvstore.version>
         <junit.version>6.1.3</junit.version>
         <mockito.version>5.24.0</mockito.version>
 
@@ -93,6 +95,11 @@
             <dependency>
                 <groupId>io.takari.bpm</groupId>
                 <artifactId>activiti-compat</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.takari.bpm</groupId>
+                <artifactId>persistence-mvstore</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -141,6 +148,11 @@
                 <groupId>org.apache.groovy</groupId>
                 <artifactId>groovy-jsr223</artifactId>
                 <version>${groovy.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.h2database</groupId>
+                <artifactId>h2-mvstore</artifactId>
+                <version>${h2-mvstore.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
