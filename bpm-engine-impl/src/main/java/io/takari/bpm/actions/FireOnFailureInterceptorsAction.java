@@ -1,6 +1,5 @@
 package io.takari.bpm.actions;
 
-import io.takari.bpm.misc.CoverageIgnore;
 
 public class FireOnFailureInterceptorsAction implements Action {
 
@@ -17,7 +16,6 @@ public class FireOnFailureInterceptorsAction implements Action {
     }
 
     @Override
-    @CoverageIgnore
     public String toString() {
         return "FireOnFailureInterceptorsAction [errorRef=" + errorRef + "]";
     }

@@ -1,6 +1,5 @@
 package io.takari.bpm.actions;
 
-import io.takari.bpm.misc.CoverageIgnore;
 
 public class InclusiveForkAction implements Action {
 
@@ -23,7 +22,6 @@ public class InclusiveForkAction implements Action {
     }
 
     @Override
-    @CoverageIgnore
     public String toString() {
         return "InclusiveForkAction [" +
                 "definitionId=" + definitionId +

@@ -1,7 +1,6 @@
 package io.takari.bpm.actions;
 
 import io.takari.bpm.commands.Command;
-import io.takari.bpm.misc.CoverageIgnore;
 
 import java.util.Map;
 
@@ -36,7 +35,6 @@ public class ExecuteScriptAction implements Action {
     }
 
     @Override
-    @CoverageIgnore
     public String toString() {
         return "ExecuteScriptAction{" +
                 "definitionId='" + definitionId + '\'' +

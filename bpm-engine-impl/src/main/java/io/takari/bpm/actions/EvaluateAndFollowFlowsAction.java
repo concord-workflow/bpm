@@ -1,6 +1,5 @@
 package io.takari.bpm.actions;
 
-import io.takari.bpm.misc.CoverageIgnore;
 
 public class EvaluateAndFollowFlowsAction implements Action {
 
@@ -29,7 +28,6 @@ public class EvaluateAndFollowFlowsAction implements Action {
     }
 
     @Override
-    @CoverageIgnore
     public String toString() {
         return "EvaluateAndFollowFlowsAction [definitionId=" + definitionId + ", elementId=" + elementId + ", defaultFlow=" + defaultFlow
                 + "]";

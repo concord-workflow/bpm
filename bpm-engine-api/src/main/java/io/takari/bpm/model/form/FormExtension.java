@@ -1,6 +1,5 @@
 package io.takari.bpm.model.form;
 
-import io.takari.bpm.misc.CoverageIgnore;
 import io.takari.bpm.model.UserTask.Extension;
 
 import java.util.Map;
@@ -44,7 +43,6 @@ public class FormExtension implements Extension {
     }
 
     @Override
-    @CoverageIgnore
     public String toString() {
         return "FormExtension{" +
                 "formId='" + formId + '\'' +

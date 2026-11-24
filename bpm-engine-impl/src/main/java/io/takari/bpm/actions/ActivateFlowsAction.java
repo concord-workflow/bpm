@@ -1,6 +1,5 @@
 package io.takari.bpm.actions;
 
-import io.takari.bpm.misc.CoverageIgnore;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -60,7 +59,6 @@ public class ActivateFlowsAction implements Action {
     }
 
     @Override
-    @CoverageIgnore
     public String toString() {
         return "ActivateFlowsAction [definitionId=" + definitionId + ", flows=" + flows + "]";
     }
@@ -86,7 +84,6 @@ public class ActivateFlowsAction implements Action {
         }
 
         @Override
-        @CoverageIgnore
         public String toString() {
             return "Flow [elementId=" + elementId + ", count=" + count + "]";
         }

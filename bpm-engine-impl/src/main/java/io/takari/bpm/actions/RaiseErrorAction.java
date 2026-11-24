@@ -1,6 +1,5 @@
 package io.takari.bpm.actions;
 
-import io.takari.bpm.misc.CoverageIgnore;
 
 public class RaiseErrorAction implements Action {
 
@@ -35,7 +34,6 @@ public class RaiseErrorAction implements Action {
     }
 
     @Override
-    @CoverageIgnore
     public String toString() {
         return "RaiseErrorAction [" +
                 "definitionId=" + definitionId +

@@ -1,6 +1,5 @@
 package io.takari.bpm.actions;
 
-import io.takari.bpm.misc.CoverageIgnore;
 
 public class FindAndCallActivityAction implements Action {
 
@@ -28,7 +27,6 @@ public class FindAndCallActivityAction implements Action {
     }
 
     @Override
-    @CoverageIgnore
     public String toString() {
         return "FindAndCallActivityAction [" +
                 "calledElement=" + calledElement + ',' +

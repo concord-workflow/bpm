@@ -1,6 +1,5 @@
 package io.takari.bpm.commands;
 
-import io.takari.bpm.misc.CoverageIgnore;
 
 public class ProcessElementCommand implements Command {
 
@@ -23,7 +22,6 @@ public class ProcessElementCommand implements Command {
     }
 
     @Override
-    @CoverageIgnore
     public String toString() {
         return "ProcessElementCommand [" +
                 "definitionId='" + definitionId + '\'' +

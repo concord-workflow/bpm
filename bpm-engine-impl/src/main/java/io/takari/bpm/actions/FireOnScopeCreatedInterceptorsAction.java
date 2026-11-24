@@ -1,6 +1,5 @@
 package io.takari.bpm.actions;
 
-import io.takari.bpm.misc.CoverageIgnore;
 
 import java.util.UUID;
 
@@ -29,7 +28,6 @@ public class FireOnScopeCreatedInterceptorsAction implements Action {
     }
 
     @Override
-    @CoverageIgnore
     public String toString() {
         return "FireOnScopeCreatedInterceptorsAction [" +
                 "scopeId=" + scopeId +

@@ -1,6 +1,5 @@
 package io.takari.bpm.model.form;
 
-import io.takari.bpm.misc.CoverageIgnore;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -11,7 +10,6 @@ public class FormField implements Serializable {
 
     private static transient final Map<String, OptionIndex> allowedOptions = new HashMap<>();
 
-    @CoverageIgnore
     @SuppressWarnings("unchecked")
     public static <T> Option<T> registerOption(String fieldType, String name, Class<T> type) {
         synchronized (allowedOptions) {
@@ -163,7 +161,6 @@ public class FormField implements Serializable {
         }
 
         @Override
-        @CoverageIgnore
         public String toString() {
             return "Option{" +
                     "name='" + name + '\'' +

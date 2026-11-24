@@ -1,6 +1,5 @@
 package io.takari.bpm.actions;
 
-import io.takari.bpm.misc.CoverageIgnore;
 
 public class ActivateElementAction implements Action {
 
@@ -29,7 +28,6 @@ public class ActivateElementAction implements Action {
     }
 
     @Override
-    @CoverageIgnore
     public String toString() {
         return "ActivateElementAction [definitionId=" + definitionId + ", elementId=" + elementId + ", count=" + count + "]";
     }
