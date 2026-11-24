@@ -1,10 +1,7 @@
 package io.takari.bpm.task;
 
-import java.beans.FeatureDescriptor;
-import java.util.Iterator;
-
-import javax.el.ELContext;
-import javax.el.ELResolver;
+import jakarta.el.ELContext;
+import jakarta.el.ELResolver;
 
 public class ServiceTaskResolver extends ELResolver {
 
@@ -20,19 +17,13 @@ public class ServiceTaskResolver extends ELResolver {
     }
 
     @Override
-    public Iterator<FeatureDescriptor> getFeatureDescriptors(ELContext context, Object base) {
-        return null;
-    }
-
-    @Override
     public Class<?> getType(ELContext context, Object base, Object property) {
         return Object.class;
     }
 
     @Override
     public Object getValue(ELContext context, Object base, Object property) {
-        if (base == null) {
-            String key = (String) property;
+        if (base == null && property instanceof String key) {
             Object o = registry.getByKey(key);
             if (o != null) {
                 context.setPropertyResolved(true);
@@ -51,5 +42,4 @@ public class ServiceTaskResolver extends ELResolver {
     @Override
     public void setValue(ELContext context, Object base, Object property, Object value) {
     }
-
 }

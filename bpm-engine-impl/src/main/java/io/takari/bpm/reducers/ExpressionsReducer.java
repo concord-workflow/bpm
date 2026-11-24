@@ -15,7 +15,7 @@ import io.takari.bpm.task.JavaDelegateHandler;
 import io.takari.bpm.utils.Timeout;
 import io.takari.bpm.utils.TimeoutCallable;
 
-import javax.el.ELException;
+import jakarta.el.ELException;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;

@@ -7,7 +7,6 @@ import java.util.UUID;
 import org.pcollections.HashTreePMap;
 import org.pcollections.OrderedPSet;
 import org.pcollections.PMap;
-import org.pcollections.POrderedSet;
 
 public class Forks implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -46,7 +45,7 @@ public class Forks implements Serializable {
     public static class Fork implements Serializable {
         private static final long serialVersionUID = 1L;
 
-        private final POrderedSet<String> flows;
+        private final OrderedPSet<String> flows;
         private final PMap<String, Integer> flowCounts;
 
         public Fork() {
@@ -61,7 +60,7 @@ public class Forks implements Serializable {
             return flowCounts.get(flowId);
         }
 
-        private Fork(POrderedSet<String> flows, PMap<String, Integer> flowCounts) {
+        private Fork(OrderedPSet<String> flows, PMap<String, Integer> flowCounts) {
             this.flows = flows;
             this.flowCounts = flowCounts;
         }
