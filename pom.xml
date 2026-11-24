@@ -230,8 +230,8 @@
                     <extensions>true</extensions>
                     <configuration>
                         <publishingServerId>central</publishingServerId>
-                        <!-- validation may take quite a while, check central console for status -->
-                        <waitUntil>uploaded</waitUntil>
+                        <autoPublish>true</autoPublish>
+                        <waitUntil>published</waitUntil>
                     </configuration>
                 </plugin>
                 <plugin>
