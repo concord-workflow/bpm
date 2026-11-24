@@ -7,10 +7,9 @@ import io.takari.bpm.api.Variables;
 import io.takari.bpm.commands.Command;
 import io.takari.bpm.commands.PerformActionsCommand;
 import io.takari.bpm.context.ExecutionContextImpl;
-import io.takari.bpm.misc.CoverageIgnore;
 import io.takari.bpm.model.VariableMapping;
 
-import javax.el.PropertyNotFoundException;
+import jakarta.el.PropertyNotFoundException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -131,7 +130,6 @@ public final class VariablesHelper {
         return state.setVariables(interpolated);
     }
 
-    @CoverageIgnore
     private VariablesHelper() {
     }
 }

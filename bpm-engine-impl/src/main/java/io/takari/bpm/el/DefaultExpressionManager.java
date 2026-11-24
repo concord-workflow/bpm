@@ -6,7 +6,7 @@ import io.takari.bpm.task.ServiceTaskResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.el.*;
+import jakarta.el.*;
 
 public class DefaultExpressionManager implements ExpressionManager {
 
