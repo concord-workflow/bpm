@@ -1,20 +1,22 @@
-[![Build Status](https://circleci.com/gh/concord-workflow/bpm.svg?style=svg)](https://circleci.com/gh/concord-workflow/bpm)
-[![Coverage Status](https://coveralls.io/repos/github/takari/bpm/badge.svg?branch=master)](https://coveralls.io/github/takari/bpm?branch=master)
-[![Maven Central](https://img.shields.io/maven-central/v/io.takari.bpm/parent.svg?maxAge=28800)](http://central.maven.org/maven2/io/takari/bpm/)
+[![Maven Central](https://img.shields.io/maven-central/v/io.takari.bpm/parent.svg?maxAge=28800)](https://central.sonatype.com/artifact/io.takari.bpm/parent)
 
 # BPM Engine
 
 A simple implementation of a BPM engine, designed to mimic Activiti's behaviour. Optimized for high performance
 (rather than strict following of the BPMN specification).
 
+## Requirements
+- Java 25+
+- Maven 3.9+ (supports `mvnd`)
+
 ## Main features
 - a lightweight BPM engine, inspired by Activiti BPM engine;
-- high-performance on-disk persistence;
+- pluggable state and event persistence;
 - event scheduling (e.g. "timers");
 - supports Activiti's XML format (both process and visual elements);
-- supports JUEL in flow expressions, task delegates, etc;
+- supports Jakarta Expression Language (EL) in flow expressions, task delegates, etc;
 - form service API for creating form-based user tasks;
-- JUnit support (and easy unit testing in general).
+- JUnit Jupiter support (and easy unit testing in general).
 
 ## Supported elements:
 - boundary event (errors and timers);
@@ -25,7 +27,7 @@ A simple implementation of a BPM engine, designed to mimic Activiti's behaviour.
 - inclusive gateway;
 - intermediate catch event;
 - parallel gateway;
-- script task (JSR-223);
+- script task (JSR-223, GraalJS);
 - sequence flow;
 - service task;
 - start event;
