@@ -8,6 +8,8 @@ import java.util.function.BiFunction;
 
 public class FormField implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     private static transient final Map<String, OptionIndex> allowedOptions = new HashMap<>();
 
     @SuppressWarnings("unchecked")

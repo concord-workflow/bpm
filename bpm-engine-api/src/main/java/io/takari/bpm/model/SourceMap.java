@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 public class SourceMap implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     private final Significance significance;
     private final String source;
     private final int line;
