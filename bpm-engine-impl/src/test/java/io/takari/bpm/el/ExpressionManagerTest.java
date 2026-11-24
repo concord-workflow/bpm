@@ -1,26 +1,20 @@
 package io.takari.bpm.el;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import io.takari.bpm.api.ExecutionContext;
-import io.takari.bpm.api.ExecutionContextFactory;
 import io.takari.bpm.api.JavaDelegate;
 import io.takari.bpm.api.Variables;
 import io.takari.bpm.context.DefaultExecutionContextFactory;
 import io.takari.bpm.context.ExecutionContextImpl;
 import io.takari.bpm.task.KeyAwareServiceTaskRegistry;
 import io.takari.bpm.task.ServiceTaskRegistry;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import java.security.spec.ECField;
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 public class ExpressionManagerTest {
@@ -254,7 +248,7 @@ public class ExpressionManagerTest {
         String exp = "${[1, 2, 3]}";
         List<Long> result = em.eval(context, exp, List.class);
 
-        assertEquals(ImmutableList.of(1L, 2L, 3L), result);
+        assertEquals(List.of(1L, 2L, 3L), result);
     }
 
     @Test
@@ -268,7 +262,7 @@ public class ExpressionManagerTest {
         String exp = "${{1, 2, 3}}";
         Set<Long> result = em.eval(context, exp, Set.class);
 
-        assertEquals(ImmutableSet.of(1L, 2L, 3L), result);
+        assertEquals(Set.of(1L, 2L, 3L), result);
     }
 
     @Test
@@ -290,9 +284,6 @@ public class ExpressionManagerTest {
 
     @SuppressWarnings("unchecked")
     private void assertInterpolate(Map<String, Object> expected, Map<String, Object> vars, Map<String, Object> i) throws Exception {
-        System.out.println(new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
-                .writeValueAsString(i));
-
         ExpressionManager em = new DefaultExpressionManager(mock(ServiceTaskRegistry.class));
         DefaultExecutionContextFactory ctxFactory = new DefaultExecutionContextFactory(em);
 

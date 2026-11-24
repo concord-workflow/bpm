@@ -12,13 +12,13 @@ import io.takari.bpm.model.form.DefaultFormFields.StringField;
 import io.takari.bpm.model.form.FormDefinition;
 import io.takari.bpm.model.form.FormExtension;
 import io.takari.bpm.model.form.FormField;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.util.*;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 public class FormTest extends AbstractFormTest {
@@ -84,7 +84,7 @@ public class FormTest extends AbstractFormTest {
         ValidationError e = r.getErrors().get(0);
         assertEquals(formField, e.getFieldName());
 
-        verifyZeroInteractions(t2);
+        verifyNoInteractions(t2);
 
         // --
 
@@ -330,7 +330,7 @@ public class FormTest extends AbstractFormTest {
         ValidationError e = r.getErrors().get(0);
         assertEquals(formField, e.getFieldName());
 
-        verifyZeroInteractions(t2);
+        verifyNoInteractions(t2);
 
         // --
 

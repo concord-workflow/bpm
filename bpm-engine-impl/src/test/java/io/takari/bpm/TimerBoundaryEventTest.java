@@ -13,9 +13,11 @@ import io.takari.bpm.model.ServiceTask;
 import io.takari.bpm.model.StartEvent;
 import java.util.Arrays;
 import java.util.UUID;
-import static org.junit.Assert.fail;
-import org.junit.Test;
-import static org.mockito.Matchers.any;
+import java.util.concurrent.TimeUnit;
+import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -27,7 +29,8 @@ public class TimerBoundaryEventTest extends AbstractEngineTest {
      *            \
      *             timer1 --> end2
      */
-    @Test(timeout = 10000)
+    @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testAsUsual() throws Exception {
         JavaDelegate longTask = spy(new JavaDelegate() {
 
@@ -82,7 +85,8 @@ public class TimerBoundaryEventTest extends AbstractEngineTest {
      *            \
      *             timer1 --> end2
      */
-    @Test(timeout = 10000)
+    @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testTimeout() throws Exception {
         JavaDelegate longTask = spy(new JavaDelegate() {
 
@@ -139,7 +143,8 @@ public class TimerBoundaryEventTest extends AbstractEngineTest {
      *            \
      *             timer1 --> end2
      */
-    @Test(timeout = 10000)
+    @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testTimeoutWithExpression() throws Exception {
         TestBean testBean = spy(new TestBean());
         getServiceTaskRegistry().register("bean", testBean);

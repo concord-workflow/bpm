@@ -4,7 +4,7 @@ import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.api.JavaDelegate;
 import io.takari.bpm.model.*;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -71,7 +71,7 @@ public class InVariablesErrorTest extends AbstractEngineTest {
         // ---
 
         verify(varTask, times(1)).getValue();
-        verifyZeroInteractions(helloTask);
+        verifyNoInteractions(helloTask);
     }
 
     public interface VarTask {

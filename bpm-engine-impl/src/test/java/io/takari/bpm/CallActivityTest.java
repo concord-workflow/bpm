@@ -4,12 +4,12 @@ import io.takari.bpm.api.BpmnError;
 import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.JavaDelegate;
 import io.takari.bpm.model.*;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.*;
 
 public class CallActivityTest extends AbstractEngineTest {
@@ -915,7 +915,7 @@ public class CallActivityTest extends AbstractEngineTest {
         getEngine().resume(key, ev, null);
         getEngine().resume(key, ev, null);
 
-        verifyZeroInteractions(getProcessDefinitionProvider());
+        verifyNoInteractions(getProcessDefinitionProvider());
     }
 
     /**

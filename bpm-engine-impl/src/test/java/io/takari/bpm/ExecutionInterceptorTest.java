@@ -9,23 +9,23 @@ import io.takari.bpm.api.interceptors.InterceptorScopeCreatedEvent;
 import io.takari.bpm.api.interceptors.InterceptorScopeDestroyedEvent;
 import io.takari.bpm.api.interceptors.InterceptorStartEvent;
 import io.takari.bpm.model.*;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.*;
 
 public class ExecutionInterceptorTest extends AbstractEngineTest {
 
     private ExecutionInterceptor interceptor;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         interceptor = mock(ExecutionInterceptor.class);
         getEngine().addInterceptor(interceptor);

@@ -9,7 +9,7 @@ import io.takari.bpm.el.ExpressionManager;
 import io.takari.bpm.form.DefaultFormService.DirectResumeHandler;
 import io.takari.bpm.form.DefaultFormService.ResumeHandler;
 import io.takari.bpm.task.ServiceTaskRegistry;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.util.function.Function;
 
@@ -33,7 +33,7 @@ public class AbstractFormTest extends AbstractEngineTest {
         this.resumeHandlerFn = resumeHandlerFn;
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         ServiceTaskRegistry taskRegistry = mock(ServiceTaskRegistry.class);
         ExpressionManager expressionManager = new DefaultExpressionManager(taskRegistry);

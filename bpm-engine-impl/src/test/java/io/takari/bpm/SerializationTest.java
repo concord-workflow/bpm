@@ -1,21 +1,20 @@
 package io.takari.bpm;
 
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.Output;
 import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.JavaDelegate;
 import io.takari.bpm.model.*;
 import io.takari.bpm.persistence.InMemPersistenceManager;
 import io.takari.bpm.persistence.PersistenceManager;
 import io.takari.bpm.state.ProcessInstance;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.ObjectOutputStream;
 import java.util.UUID;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 public class SerializationTest extends AbstractEngineTest {
@@ -29,10 +28,8 @@ public class SerializationTest extends AbstractEngineTest {
         PersistenceManager pm = getPersistenceManager();
         doAnswer(i -> {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            Kryo kryo = new Kryo();
-            kryo.setReferences(true);
-            try (Output out = new Output(bos)) {
-                kryo.writeObject(out, i.getArguments()[0]);
+            try (ObjectOutputStream out = new ObjectOutputStream(bos)) {
+                out.writeObject(i.getArguments()[0]);
             }
             return i.callRealMethod();
         }).when(pm).save(any(ProcessInstance.class));

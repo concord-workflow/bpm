@@ -10,8 +10,8 @@ import io.takari.bpm.model.SequenceFlow;
 import io.takari.bpm.model.StartEvent;
 import java.util.Arrays;
 import java.util.UUID;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 public class ParallelGatewayTest extends AbstractEngineTest {
 
@@ -101,7 +101,7 @@ public class ParallelGatewayTest extends AbstractEngineTest {
      *               --
      */
     @Test
-    @Ignore
+    @Disabled
     public void testPartialInJoin() throws Exception {
         String processId = "test";
         deploy(new ProcessDefinition(processId, Arrays.asList(

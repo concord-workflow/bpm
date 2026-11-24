@@ -5,8 +5,8 @@ import io.takari.bpm.model.SequenceFlow;
 import io.takari.bpm.model.SubProcess;
 import io.takari.bpm.xml.Parser;
 import java.io.InputStream;
-import static org.junit.Assert.*;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 public class ActivitiParserTest {
 

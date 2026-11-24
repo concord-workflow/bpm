@@ -7,23 +7,20 @@ import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.event.EventPersistenceManager;
 import io.takari.bpm.event.EventPersistenceManagerImpl;
 import io.takari.bpm.event.InMemEventStorage;
-import io.takari.bpm.leveldb.Configuration;
-import io.takari.bpm.leveldb.LevelDbPersistenceManager;
 import io.takari.bpm.lock.StripedLockManagerImpl;
 import io.takari.bpm.model.ProcessDefinition;
+import io.takari.bpm.persistence.InMemPersistenceManager;
 import io.takari.bpm.xml.Parser;
-import org.iq80.leveldb.DBFactory;
-import org.iq80.leveldb.impl.Iq80DBFactory;
-import org.junit.rules.TestRule;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
+import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
 
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.UUID;
 
-public class EngineRule implements TestRule {
+public class EngineExtension implements BeforeEachCallback, AfterEachCallback {
 
     private final DeploymentProcessor deploymentProcessor;
 
@@ -31,11 +28,11 @@ public class EngineRule implements TestRule {
     private EventPersistenceManager eventManager;
     private Engine engine;
 
-    public EngineRule(DeploymentProcessor deploymentProcessor) {
+    public EngineExtension(DeploymentProcessor deploymentProcessor) {
         this.deploymentProcessor = deploymentProcessor;
     }
 
-    public EngineRule(Parser parser) {
+    public EngineExtension(Parser parser) {
         this.deploymentProcessor = (in, provider) -> {
             ProcessDefinition pd = parser.parse(in);
             IndexedProcessDefinition ipd = new IndexedProcessDefinition(pd);
@@ -44,55 +41,33 @@ public class EngineRule implements TestRule {
     }
 
     @Override
-    public Statement apply(final Statement base, final Description description) {
-        return new Statement() {
-            @Override
-            public void evaluate() throws Throwable {
-                before(description);
-                try {
-                    base.evaluate();
-                } finally {
-                    after(description);
-                }
-            }
-        };
-    }
-
-    protected void before(Description description) throws Exception {
+    public void beforeEach(ExtensionContext context) throws Exception {
         if (engine == null) {
             processDefinitionProvider = new TestProcessDefinitionProvider();
             eventManager = new EventPersistenceManagerImpl(new InMemEventStorage());
-            Configuration cfg = new Configuration();
-            cfg.setExecutionPath("/tmp/bpm/" + System.currentTimeMillis());
-            DBFactory f = new Iq80DBFactory();
-            LevelDbPersistenceManager levelDbPersistenceManager = new LevelDbPersistenceManager(cfg, f);
-            levelDbPersistenceManager.init();
 
             engine = new EngineBuilder()
                     .withDefinitionProvider(processDefinitionProvider)
                     .withTaskRegistry(new Mocks.Registry())
                     .withEventManager(eventManager)
-                    .withPersistenceManager(levelDbPersistenceManager)
+                    .withPersistenceManager(new InMemPersistenceManager())
                     .withLockManager(new StripedLockManagerImpl(1))
                     .build();
         }
 
-        Class<?> k = description.getTestClass();
-        String n = description.getMethodName();
-        for (Method m : k.getDeclaredMethods()) {
-            if (m.getName().equals(n)) {
-                Deployment d = m.getAnnotation(Deployment.class);
-                if (d != null) {
-                    for (String s : d.resources()) {
-                        InputStream in = ClassLoader.getSystemResourceAsStream(s);
-                        deploymentProcessor.handle(in, processDefinitionProvider);
-                    }
+        Method m = context.getRequiredTestMethod();
+        Deployment d = m.getAnnotation(Deployment.class);
+        if (d != null) {
+            for (String s : d.resources()) {
+                try (InputStream in = ClassLoader.getSystemResourceAsStream(s)) {
+                    deploymentProcessor.handle(in, processDefinitionProvider);
                 }
             }
         }
     }
 
-    protected void after(Description description) {
+    @Override
+    public void afterEach(ExtensionContext context) {
         engine = null;
     }
 

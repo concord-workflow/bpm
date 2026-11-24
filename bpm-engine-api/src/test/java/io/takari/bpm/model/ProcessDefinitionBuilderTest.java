@@ -1,12 +1,11 @@
 package io.takari.bpm.model;
 
 import io.takari.bpm.model.ProcessDefinitionBuilder.Seq;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ProcessDefinitionBuilderTest {
 
@@ -39,16 +38,16 @@ public class ProcessDefinitionBuilderTest {
         Iterator<AbstractElement> it = def.getChildren().iterator();
         s = validateStart(it);
         sp = validateElemFlow(it, SubProcess.class, s);
-        assertThat(sp.isUseSeparateContext(), is(false));
+        assertFalse(sp.isUseSeparateContext());
         assertElements(sp.getChildren());
         sp = validateElemFlow(it, SubProcess.class, sp);
-        assertThat(sp.isUseSeparateContext(), is(true));
-        assertThat(sp.getOutVariables().isEmpty(), is(true));
+        assertTrue(sp.isUseSeparateContext());
+        assertTrue(sp.getOutVariables().isEmpty());
         sp = validateElemFlow(it, SubProcess.class, sp);
-        assertThat(sp.isUseSeparateContext(), is(true));
-        assertThat(sp.getOutVariables(), is(Collections.singleton(new VariableMapping("src", "srcExpr", "target"))));
+        assertTrue(sp.isUseSeparateContext());
+        assertEquals(Collections.singleton(new VariableMapping("src", "srcExpr", "target")), sp.getOutVariables());
         validateEndFlow(it, sp);
-        assertThat(it.hasNext(), is(false));
+        assertFalse(it.hasNext());
 
     }
 
@@ -81,7 +80,7 @@ public class ProcessDefinitionBuilderTest {
         t = validateTaskFlow(it, "t4", t1);
         validateEndFlow(it, t);
 
-        assertThat(it.hasNext(), is(false));
+        assertFalse(it.hasNext());
     }
 
     @Test
@@ -110,12 +109,12 @@ public class ProcessDefinitionBuilderTest {
 
         String ft2 = validateFlow(it, t2);
         String ft3 = validateFlow(it, t3);
-        assertThat(ft2.equals(ft3), is(true));
+        assertTrue(ft2.equals(ft3));
         t = validateTask(it, "t4", ft2);
 
         validateEndFlow(it, t);
 
-        assertThat(it.hasNext(), is(false));
+        assertFalse(it.hasNext());
     }
 
     @Test
@@ -146,16 +145,16 @@ public class ProcessDefinitionBuilderTest {
 
         String ft2 = validateFlow(it, t2);
         String ft3 = validateFlow(it, t3);
-        assertThat(ft2.equals(ft3), is(true));
+        assertTrue(ft2.equals(ft3));
         t4 = validateTask(it, "t4", ft2);
 
         t5 = validateTaskFlow(it, "t5", t4);
         String ft5 = validateFlow(it, t5);
-        assertThat(ft5, is(t4.getId()));
+        assertEquals(t4.getId(), ft5);
 
         validateEndFlow(it, t4);
 
-        assertThat(it.hasNext(), is(false));
+        assertFalse(it.hasNext());
     }
 
     @Test
@@ -180,11 +179,11 @@ public class ProcessDefinitionBuilderTest {
 
         String ft2 = validateFlow(it, t2);
         String ft3 = validateFlow(it, t3);
-        assertThat(ft2.equals(ft3), is(true));
+        assertTrue(ft2.equals(ft3));
 
         validateEnd(it, ft2);
 
-        assertThat(it.hasNext(), is(false));
+        assertFalse(it.hasNext());
     }
 
     @Test
@@ -213,13 +212,13 @@ public class ProcessDefinitionBuilderTest {
         String ft2 = validateFlow(it, t2);
         String ft3 = validateFlow(it, t3);
         String ft1 = validateFlow(it, t1);
-        assertThat(ft1.equals(ft2), is(true));
-        assertThat(ft2.equals(ft3), is(true));
+        assertTrue(ft1.equals(ft2));
+        assertTrue(ft2.equals(ft3));
         t = validateTask(it, "t4", ft1);
 
         validateEndFlow(it, t);
 
-        assertThat(it.hasNext(), is(false));
+        assertFalse(it.hasNext());
     }
 
     @Test
@@ -248,12 +247,12 @@ public class ProcessDefinitionBuilderTest {
 
         String ft2 = validateFlow(it, t2);
         String ft3 = validateFlow(it, t3);
-        assertThat(ft2.equals(ft3), is(true));
+        assertTrue(ft2.equals(ft3));
         t = validateTask(it, "t4", ft2);
 
         validateEndFlow(it, t);
 
-        assertThat(it.hasNext(), is(false));
+        assertFalse(it.hasNext());
     }
 
     @Test
@@ -285,13 +284,13 @@ public class ProcessDefinitionBuilderTest {
         String ft2 = validateFlow(it, t2, null, "foo");
         String ft3 = validateFlow(it, t3, null, "bar");
         String ft1 = validateFlow(it, t1, null, "baz");
-        assertThat(ft1.equals(ft2), is(true));
-        assertThat(ft2.equals(ft3), is(true));
+        assertTrue(ft1.equals(ft2));
+        assertTrue(ft2.equals(ft3));
         t = validateTask(it, "t4", ft1);
 
         validateEndFlow(it, t);
 
-        assertThat(it.hasNext(), is(false));
+        assertFalse(it.hasNext());
     }
 
     @Test
@@ -308,7 +307,7 @@ public class ProcessDefinitionBuilderTest {
         t = validateTaskFlow(it, "t1", s);
         validateEndFlow(it, t);
 
-        assertThat(it.hasNext(), is(false));
+        assertFalse(it.hasNext());
     }
 
     @Test
@@ -333,12 +332,12 @@ public class ProcessDefinitionBuilderTest {
         String ft1 = validateFlow(it, t1);
         String ft2 = validateFlow(it, t2);
         String ft3 = validateFlow(it, t3);
-        assertThat(ft1.equals(ft2), is(true));
-        assertThat(ft2.equals(ft3), is(true));
+        assertTrue(ft1.equals(ft2));
+        assertTrue(ft2.equals(ft3));
 
         validateEnd(it, ft1);
 
-        assertThat(it.hasNext(), is(false));
+        assertFalse(it.hasNext());
     }
 
     private static Seq fillSeq(Seq seq) {
@@ -384,68 +383,68 @@ public class ProcessDefinitionBuilderTest {
 
 
         call = validateElemFlow(it, CallActivity.class, s);
-        assertThat(call.getCalledElement(), is("c1"));
-        assertThat(call.isCopyAllVariables(), is(false));
-        assertThat(call.getIn(), nullValue());
-        assertThat(call.getOut(), nullValue());
+        assertEquals("c1", call.getCalledElement());
+        assertFalse(call.isCopyAllVariables());
+        assertNull(call.getIn());
+        assertNull(call.getOut());
 
         call = validateElemFlow(it, CallActivity.class, call);
-        assertThat(call.getCalledElement(), is("c2"));
-        assertThat(call.isCopyAllVariables(), is(true));
-        assertThat(call.getIn(), nullValue());
-        assertThat(call.getOut(), nullValue());
+        assertEquals("c2", call.getCalledElement());
+        assertTrue(call.isCopyAllVariables());
+        assertNull(call.getIn());
+        assertNull(call.getOut());
 
         call = validateElemFlow(it, CallActivity.class, call);
-        assertThat(call.getCalledElement(), is("c3"));
-        assertThat(call.isCopyAllVariables(), is(false));
-        assertThat(call.getIn(), sameInstance(vars1));
-        assertThat(call.getOut(), sameInstance(vars2));
+        assertEquals("c3", call.getCalledElement());
+        assertFalse(call.isCopyAllVariables());
+        assertSame(vars1, call.getIn());
+        assertSame(vars2, call.getOut());
 
         call = validateElemFlow(it, CallActivity.class, call);
-        assertThat(call.getCalledElement(), is("c4"));
-        assertThat(call.isCopyAllVariables(), is(true));
-        assertThat(call.getIn(), sameInstance(vars1));
-        assertThat(call.getOut(), sameInstance(vars2));
+        assertEquals("c4", call.getCalledElement());
+        assertTrue(call.isCopyAllVariables());
+        assertSame(vars1, call.getIn());
+        assertSame(vars2, call.getOut());
 
 
         ct = validateElemFlow(it, IntermediateCatchEvent.class, call);
-        assertThat(ct.getMessageRef(), nullValue());
-        assertThat(ct.getMessageRefExpression(), nullValue());
-        assertThat(ct.getTimeDate(), nullValue());
-        assertThat(ct.getTimeDuration(), nullValue());
+        assertNull(ct.getMessageRef());
+        assertNull(ct.getMessageRefExpression());
+        assertNull(ct.getTimeDate());
+        assertNull(ct.getTimeDuration());
 
         ct = validateElemFlow(it, IntermediateCatchEvent.class, ct);
-        assertThat(ct.getMessageRef(), is("catch2"));
-        assertThat(ct.getMessageRefExpression(), nullValue());
-        assertThat(ct.getTimeDate(), nullValue());
-        assertThat(ct.getTimeDuration(), nullValue());
+        assertEquals("catch2", ct.getMessageRef());
+        assertNull(ct.getMessageRefExpression());
+        assertNull(ct.getTimeDate());
+        assertNull(ct.getTimeDuration());
 
         ct = validateElemFlow(it, IntermediateCatchEvent.class, ct);
-        assertThat(ct.getMessageRef(), is("catch3"));
-        assertThat(ct.getMessageRefExpression(), nullValue());
-        assertThat(ct.getTimeDate(), is("time3"));
-        assertThat(ct.getTimeDuration(), is("dur3"));
+        assertEquals("catch3", ct.getMessageRef());
+        assertNull(ct.getMessageRefExpression());
+        assertEquals("time3", ct.getTimeDate());
+        assertEquals("dur3", ct.getTimeDuration());
 
         ct = validateElemFlow(it, IntermediateCatchEvent.class, ct);
-        assertThat(ct.getMessageRef(), nullValue());
-        assertThat(ct.getMessageRefExpression(), is("catch4"));
-        assertThat(ct.getTimeDate(), nullValue());
-        assertThat(ct.getTimeDuration(), nullValue());
+        assertNull(ct.getMessageRef());
+        assertEquals("catch4", ct.getMessageRefExpression());
+        assertNull(ct.getTimeDate());
+        assertNull(ct.getTimeDuration());
 
         ct = validateElemFlow(it, IntermediateCatchEvent.class, ct);
-        assertThat(ct.getMessageRef(), nullValue());
-        assertThat(ct.getMessageRefExpression(), is("catch5"));
-        assertThat(ct.getTimeDate(), is("time5"));
-        assertThat(ct.getTimeDuration(), is("dur5"));
+        assertNull(ct.getMessageRef());
+        assertEquals("catch5", ct.getMessageRefExpression());
+        assertEquals("time5", ct.getTimeDate());
+        assertEquals("dur5", ct.getTimeDuration());
 
 
         eg = validateElemFlow(it, EventBasedGateway.class, ct);
 
         xg = validateElemFlow(it, ExclusiveGateway.class, eg);
-        assertThat(xg.getDefaultFlow(), nullValue());
+        assertNull(xg.getDefaultFlow());
 
         xg = validateElemFlow(it, ExclusiveGateway.class, xg);
-        assertThat(xg.getDefaultFlow(), is("excl"));
+        assertEquals("excl", xg.getDefaultFlow());
 
         ig = validateElemFlow(it, InclusiveGateway.class, xg);
 
@@ -453,42 +452,42 @@ public class ProcessDefinitionBuilderTest {
 
 
         t = validateElemFlow(it, ServiceTask.class, pg);
-        assertThat(t.getExpression(), is("t1"));
-        assertThat(t.getType(), is(ExpressionType.SIMPLE));
+        assertEquals("t1", t.getExpression());
+        assertEquals(ExpressionType.SIMPLE, t.getType());
 
         t = validateElemFlow(it, ServiceTask.class, t);
-        assertThat(t.getExpression(), is("t2"));
-        assertThat(t.getType(), is(ExpressionType.NONE));
+        assertEquals("t2", t.getExpression());
+        assertEquals(ExpressionType.NONE, t.getType());
 
         t = validateElemFlow(it, ServiceTask.class, t);
-        assertThat(t.getExpression(), is("t3"));
-        assertThat(t.getType(), is(ExpressionType.DELEGATE));
+        assertEquals("t3", t.getExpression());
+        assertEquals(ExpressionType.DELEGATE, t.getType());
 
         BoundaryEvent be;
         be = validateBoundaryEvent(it, t);
-        assertThat(be.getErrorRef(), nullValue());
-        assertThat(be.getTimeDuration(), nullValue());
+        assertNull(be.getErrorRef());
+        assertNull(be.getTimeDuration());
         validateEndFlow(it, be);
 
         be = validateBoundaryEvent(it, t);
-        assertThat(be.getErrorRef(), is("errorRef"));
-        assertThat(be.getTimeDuration(), nullValue());
+        assertEquals("errorRef", be.getErrorRef());
+        assertNull(be.getTimeDuration());
         validateEndFlow(it, be);
 
         be = validateBoundaryEvent(it, t);
-        assertThat(be.getErrorRef(), is("errorRef"));
-        assertThat(be.getTimeDuration(), is("timeDuration"));
+        assertEquals("errorRef", be.getErrorRef());
+        assertEquals("timeDuration", be.getTimeDuration());
         validateEndFlow(it, be);
 
         validateEndFlow(it, t);
 
-        assertThat(it.hasNext(), is(false));
+        assertFalse(it.hasNext());
     }
 
     private static StartEvent validateStart(Iterator<AbstractElement> it) {
-        assertThat(it.hasNext(), is(true));
+        assertTrue(it.hasNext());
         AbstractElement elem = it.next();
-        assertThat(elem, instanceOf(StartEvent.class));
+        assertInstanceOf(StartEvent.class, elem);
         return (StartEvent) elem;
     }
 
@@ -510,19 +509,19 @@ public class ProcessDefinitionBuilderTest {
 
     private static void validateEnd(Iterator<AbstractElement> it, String id, String errorRef, String causeExpression) {
         EndEvent e = validateElem(it, EndEvent.class, id);
-        assertThat(e.getErrorRef(), is(errorRef));
-        assertThat(e.getCauseExpression(), is(causeExpression));
+        assertEquals(errorRef, e.getErrorRef());
+        assertEquals(causeExpression, e.getCauseExpression());
     }
 
     private static ServiceTask validateTaskFlow(Iterator<AbstractElement> it, String expr, AbstractElement prev) {
         ServiceTask t = validateElemFlow(it, ServiceTask.class, prev);
-        assertThat(t.getExpression(), is(expr));
+        assertEquals(expr, t.getExpression());
         return t;
     }
 
     private static ServiceTask validateTask(Iterator<AbstractElement> it, String expr, String id) {
         ServiceTask t = validateElem(it, ServiceTask.class, id);
-        assertThat(t.getExpression(), is(expr));
+        assertEquals(expr, t.getExpression());
         return t;
     }
 
@@ -532,11 +531,11 @@ public class ProcessDefinitionBuilderTest {
 
     private static <T extends AbstractElement> T validateElem(Iterator<AbstractElement> it, Class<T> cl, String id) {
 
-        assertThat(it.hasNext(), is(true));
+        assertTrue(it.hasNext());
         AbstractElement elem = it.next();
-        assertThat(elem, instanceOf(cl));
+        assertInstanceOf(cl, elem);
         if (id != null) {
-            assertThat(elem.getId(), is(id));
+            assertEquals(id, elem.getId());
         }
         return cl.cast(elem);
     }
@@ -546,29 +545,29 @@ public class ProcessDefinitionBuilderTest {
     }
 
     private static String validateFlow(Iterator<AbstractElement> it, AbstractElement prev, String flowName, String flowExpr) {
-        assertThat(prev, notNullValue());
-        assertThat(it.hasNext(), is(true));
+        assertNotNull(prev);
+        assertTrue(it.hasNext());
 
         AbstractElement elem = it.next();
-        assertThat(elem, instanceOf(SequenceFlow.class));
+        assertInstanceOf(SequenceFlow.class, elem);
         SequenceFlow f = (SequenceFlow) elem;
-        assertThat(f.getFrom(), is(prev.getId()));
+        assertEquals(prev.getId(), f.getFrom());
         if(flowName != null) {
-            assertThat(f.getId(), is(flowName));
+            assertEquals(flowName, f.getId());
         }
-        assertThat(f.getExpression(), is(flowExpr));
+        assertEquals(flowExpr, f.getExpression());
 
         return f.getTo();
     }
 
     private static BoundaryEvent validateBoundaryEvent(Iterator<AbstractElement> it, AbstractElement prev) {
-        assertThat(prev, notNullValue());
-        assertThat(it.hasNext(), is(true));
+        assertNotNull(prev);
+        assertTrue(it.hasNext());
 
         AbstractElement elem = it.next();
-        assertThat(elem, instanceOf(BoundaryEvent.class));
+        assertInstanceOf(BoundaryEvent.class, elem);
         BoundaryEvent be = (BoundaryEvent) elem;
-        assertThat(be.getAttachedToRef(), is(prev.getId()));
+        assertEquals(prev.getId(), be.getAttachedToRef());
 
         return be;
     }
