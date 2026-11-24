@@ -15,14 +15,15 @@ import io.takari.bpm.model.form.FormDefinition;
 import io.takari.bpm.model.form.FormField;
 import io.takari.bpm.model.form.FormField.Cardinality;
 import io.takari.bpm.task.ServiceTaskRegistry;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.eq;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 public class FormServiceTest {
@@ -30,7 +31,7 @@ public class FormServiceTest {
     private FormValidatorLocale formLocale;
     private FormService formService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         Engine engine = mock(Engine.class);
 
@@ -108,11 +109,10 @@ public class FormServiceTest {
                 .build();
     }
 
-    @Test(expected = ExecutionException.class)
-    public void testInvalidType() throws Exception {
-        FormSubmitResult r = submit(new FormField[]{new FormField.Builder("a", "zzz").build()},
-                "a", "test");
-        assertFalse(r.isValid());
+    @Test
+    public void testInvalidType() {
+        assertThrows(ExecutionException.class, () ->
+                submit(new FormField[]{new FormField.Builder("a", "zzz").build()}, "a", "test"));
     }
 
     @Test
@@ -128,7 +128,7 @@ public class FormServiceTest {
         FormSubmitResult r = submit(new FormField[]{f});
         assertFalse(r.isValid());
 
-        verify(formLocale, times(1)).invalidCardinality(anyString(), any(FormField.class), anyObject());
+        verify(formLocale, times(1)).invalidCardinality(anyString(), any(FormField.class), any());
     }
 
     @Test
@@ -144,7 +144,7 @@ public class FormServiceTest {
                 "a", new String[0]);
         assertFalse(r.isValid());
 
-        verify(formLocale, times(1)).invalidCardinality(anyString(), any(FormField.class), anyObject());
+        verify(formLocale, times(1)).invalidCardinality(anyString(), any(FormField.class), any());
     }
 
     @Test
@@ -167,7 +167,7 @@ public class FormServiceTest {
                 "a", new Object[]{"a", 1, false});
         assertFalse(r.isValid());
 
-        verify(formLocale, times(1)).expectedString(anyString(), any(FormField.class), eq(1), anyObject());
+        verify(formLocale, times(1)).expectedString(anyString(), any(FormField.class), eq(1), any());
     }
 
     @Test
@@ -177,7 +177,7 @@ public class FormServiceTest {
                 "a", Arrays.asList("a", "b", 123));
         assertFalse(r.isValid());
 
-        verify(formLocale, times(1)).expectedString(anyString(), any(FormField.class), eq(2), anyObject());
+        verify(formLocale, times(1)).expectedString(anyString(), any(FormField.class), eq(2), any());
     }
 
     @Test
@@ -187,7 +187,7 @@ public class FormServiceTest {
                 "a", "abc");
         assertFalse(r.isValid());
 
-        verify(formLocale, times(1)).doesntMatchPattern(anyString(), any(FormField.class), any(Integer.class), anyString(), anyObject());
+        verify(formLocale, times(1)).doesntMatchPattern(anyString(), any(FormField.class), nullable(Integer.class), anyString(), any());
     }
 
     @Test
@@ -197,7 +197,7 @@ public class FormServiceTest {
                 "a", 123);
         assertFalse(r.isValid());
 
-        verify(formLocale, times(1)).expectedString(anyString(), any(FormField.class), any(Integer.class), anyObject());
+        verify(formLocale, times(1)).expectedString(anyString(), any(FormField.class), nullable(Integer.class), any());
     }
 
     @Test
@@ -212,16 +212,15 @@ public class FormServiceTest {
         assertTrue(r.isValid());
     }
 
-    @Test(expected = ExecutionException.class)
-    public void testInvalidDefaultValueString() throws Exception {
+    @Test
+    public void testInvalidDefaultValueString() {
         Map<String, Object> env = Collections.singletonMap("b", 123);
 
         FormField f = new FormField.Builder("a", StringField.TYPE)
                 .defaultValue("${b}")
                 .build();
 
-        FormSubmitResult r = submit(new FormField[]{f}, env);
-        assertFalse(r.isValid());
+        assertThrows(ExecutionException.class, () -> submit(new FormField[]{f}, env));
     }
 
     @Test
@@ -266,7 +265,7 @@ public class FormServiceTest {
                 "a", 0.525);
         assertFalse(r.isValid());
 
-        verify(formLocale, times(1)).decimalRangeError(anyString(), any(FormField.class), any(Integer.class), any(Double.class), any(Double.class), anyObject());
+        verify(formLocale, times(1)).decimalRangeError(anyString(), any(FormField.class), nullable(Integer.class), any(Double.class), any(Double.class), any());
     }
 
     @Test

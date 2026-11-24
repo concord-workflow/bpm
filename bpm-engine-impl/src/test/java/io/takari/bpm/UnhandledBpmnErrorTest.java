@@ -6,13 +6,13 @@ import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.api.JavaDelegate;
 import io.takari.bpm.model.*;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 public class UnhandledBpmnErrorTest extends AbstractEngineTest {
@@ -23,7 +23,7 @@ public class UnhandledBpmnErrorTest extends AbstractEngineTest {
     private JavaDelegate t1;
     private JavaDelegate t2;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         t1 = spy(new JavaDelegate() {
             @Override
@@ -139,7 +139,7 @@ public class UnhandledBpmnErrorTest extends AbstractEngineTest {
         // ---
 
         verify(t1, times(1)).execute(any(ExecutionContext.class));
-        verifyZeroInteractions(t2);
+        verifyNoInteractions(t2);
     }
 
     @Test
@@ -155,7 +155,7 @@ public class UnhandledBpmnErrorTest extends AbstractEngineTest {
         // ---
 
         verify(t1, times(1)).execute(any(ExecutionContext.class));
-        verifyZeroInteractions(t2);
+        verifyNoInteractions(t2);
     }
 
     @Test

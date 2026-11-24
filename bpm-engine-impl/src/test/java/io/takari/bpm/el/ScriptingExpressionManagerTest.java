@@ -2,9 +2,9 @@ package io.takari.bpm.el;
 
 import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.task.KeyAwareServiceTaskRegistry;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 public class ScriptingExpressionManagerTest {
@@ -22,7 +22,7 @@ public class ScriptingExpressionManagerTest {
 
         // ---
 
-        ExpressionManager em = new ScriptingExpressionManager("nashorn", taskRegistry);
+        ExpressionManager em = new ScriptingExpressionManager("js", taskRegistry);
 
         ExecutionContext ctx = mock(ExecutionContext.class);
         String expr = String.format("%s.doIt('%s')", taskKey, taskArg);
@@ -39,7 +39,7 @@ public class ScriptingExpressionManagerTest {
 
         // ---
 
-        ExpressionManager em = new ScriptingExpressionManager("nashorn", taskRegistry);
+        ExpressionManager em = new ScriptingExpressionManager("js", taskRegistry);
 
         ExecutionContext ctx = mock(ExecutionContext.class);
         when(ctx.hasVariable(eq("test"))).thenReturn(true);
@@ -63,7 +63,7 @@ public class ScriptingExpressionManagerTest {
 
         // ---
 
-        ExpressionManager em = new ScriptingExpressionManager("nashorn", taskRegistry);
+        ExpressionManager em = new ScriptingExpressionManager("js", taskRegistry);
 
         ExecutionContext ctx = mock(ExecutionContext.class);
         String expr = String.format("%s", taskKey);

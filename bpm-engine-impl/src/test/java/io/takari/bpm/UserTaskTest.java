@@ -3,7 +3,7 @@ package io.takari.bpm;
 import io.takari.bpm.actions.CreateEventAction;
 import io.takari.bpm.model.*;
 import io.takari.bpm.state.StateHelper;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.UUID;

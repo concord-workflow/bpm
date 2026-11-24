@@ -3,7 +3,7 @@ package io.takari.bpm;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.UUID;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import static org.mockito.Mockito.*;
 import org.mockito.invocation.InvocationOnMock;

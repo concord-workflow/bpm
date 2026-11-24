@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.spy;
 
 public class EngineHolder {
@@ -219,11 +219,11 @@ public class EngineHolder {
     private void assertActivation(String processBusinessKey, String processDefinitionId, String elementId) {
         String k = processBusinessKey + "/" + processDefinitionId;
         List<String> l = activations.get(k);
-        assertNotNull("No activations for " + k, l);
-        assertFalse("No more activations for " + k + ", element " + elementId, l.isEmpty());
+        assertNotNull(l, "No activations for " + k);
+        assertFalse(l.isEmpty(), "No more activations for " + k + ", element " + elementId);
 
         String s = l.remove(0);
-        assertTrue("Unexpected activation: '" + s + "' instead of '" + elementId + "'", elementId.equals(s));
+        assertTrue(elementId.equals(s), "Unexpected activation: '" + s + "' instead of '" + elementId + "'");
     }
 
     public void assertActivations(String processBusinessKey, String processDefinitionId, String... elementIds) {
@@ -237,7 +237,7 @@ public class EngineHolder {
         for (List<String> l : activations.values()) {
             s += l.size();
         }
-        assertTrue("We have " + s + " more activations: " + activations, s == 0);
+        assertTrue(s == 0, "We have " + s + " more activations: " + activations);
     }
 
     public void dumpActivations() {

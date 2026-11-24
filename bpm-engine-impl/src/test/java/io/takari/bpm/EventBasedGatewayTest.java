@@ -1,6 +1,6 @@
 package io.takari.bpm;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.util.Arrays;
@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import io.takari.bpm.api.NoEventFoundException;
@@ -284,7 +284,7 @@ public class EventBasedGatewayTest extends AbstractEngineTest {
     /**
      * start --> gw --> ev1 --> end
      */
-    @Test(expected = NoEventFoundException.class)
+    @Test
     public void testNoEventFound() throws Exception {
         String processId = "test";
         deploy(new ProcessDefinition(processId, Arrays.asList(
@@ -304,6 +304,6 @@ public class EventBasedGatewayTest extends AbstractEngineTest {
 
         // ---
 
-        getEngine().resume(key, "unknown_event", null);
+        assertThrows(NoEventFoundException.class, () -> getEngine().resume(key, "unknown_event", null));
     }
 }

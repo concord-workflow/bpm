@@ -1,19 +1,18 @@
 package io.takari.bpm;
 
-import com.google.common.collect.ImmutableSet;
 import io.takari.bpm.api.BpmnError;
 import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.api.JavaDelegate;
 import io.takari.bpm.model.*;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.net.ConnectException;
 import java.util.*;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 public class ServiceTaskTest extends AbstractEngineTest {
@@ -218,7 +217,7 @@ public class ServiceTaskTest extends AbstractEngineTest {
      *              error --
      */
     @Test
-    @Ignore
+    @Disabled
     public void testErrorCodeStoring() throws Exception {
         final String errorRef = "test#" + System.currentTimeMillis();
 
@@ -272,7 +271,7 @@ public class ServiceTaskTest extends AbstractEngineTest {
      * start --> t1 --> end
      */
     @Test
-    @Ignore
+    @Disabled
     public void testSimpleTaskExpression() throws Exception {
         SampleTask t = mock(SampleTask.class);
         getServiceTaskRegistry().register("hello", t);
@@ -433,7 +432,7 @@ public class ServiceTaskTest extends AbstractEngineTest {
     public void testCopyAllVariablesTaskExpression() throws Exception {
         SampleTask t = mock(SampleTask.class);
         getServiceTaskRegistry().register("hello", t);
-        Set<VariableMapping> inVars = ImmutableSet.of(VariableMapping.set("inVar1Value", "inVar1"));
+        Set<VariableMapping> inVars = Set.of(VariableMapping.set("inVar1Value", "inVar1"));
         // ---
 
         String processId = "test";

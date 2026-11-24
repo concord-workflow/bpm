@@ -3,14 +3,14 @@ package io.takari.bpm;
 import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.JavaDelegate;
 import io.takari.bpm.model.*;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.any;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 public class ScriptTaskTest extends AbstractEngineTest {
@@ -349,7 +349,7 @@ public class ScriptTaskTest extends AbstractEngineTest {
                 "end");
         assertNoMoreActivations();
 
-        verify(t1, times(1)).doSomething(anyObject());
+        verify(t1, times(1)).doSomething(any());
     }
 
     public interface TestTask {

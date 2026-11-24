@@ -7,14 +7,14 @@ import io.takari.bpm.model.form.DefaultFormFields.StringField;
 import io.takari.bpm.model.form.FormDefinition;
 import io.takari.bpm.model.form.FormExtension;
 import io.takari.bpm.model.form.FormField;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 public class FormMergeTest extends AbstractFormTest {
@@ -99,7 +99,7 @@ public class FormMergeTest extends AbstractFormTest {
 
         // ---
 
-        verify(t2, times(1)).test(anyObject(), anyObject());
+        verify(t2, times(1)).test(any(), any());
     }
 
     public interface TestBean {

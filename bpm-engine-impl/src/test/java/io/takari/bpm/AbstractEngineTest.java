@@ -7,13 +7,13 @@ import io.takari.bpm.model.ProcessDefinition;
 import io.takari.bpm.persistence.InMemPersistenceManager;
 import io.takari.bpm.persistence.PersistenceManager;
 import io.takari.bpm.task.ServiceTaskRegistryImpl;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.util.Map;
 import java.util.UUID;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class AbstractEngineTest {
 
@@ -28,7 +28,7 @@ public class AbstractEngineTest {
         this.persistenceManager = persistenceManager;
     }
 
-    @Before
+    @BeforeEach
     public void init() throws Exception {
         this.engineHolder = new EngineHolder(persistenceManager);
     }

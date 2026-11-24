@@ -1,17 +1,17 @@
 package io.takari.bpm.testkit;
 
 import io.takari.bpm.xml.activiti.ActivitiParser;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 public class TestKitTest {
 
-    @Rule
-    public final EngineRule engineRule = new EngineRule(new ActivitiParser());
+    @RegisterExtension
+    final EngineExtension engine = new EngineExtension(new ActivitiParser());
 
     @Test
     @Deployment(resources = "test.bpmn")
     public void test() throws Exception {
-        engineRule.startProcessInstanceByKey("test", null);
+        engine.startProcessInstanceByKey("test", null);
     }
 }

@@ -4,14 +4,14 @@ import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.api.interceptors.ExecutionInterceptor;
 import io.takari.bpm.api.interceptors.ExecutionInterceptorAdapter;
 import io.takari.bpm.dsl.*;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.mockito.Mockito.*;
 
 public class SimpleDSLTest extends AbstractEngineTest {
 
-    @Before
+    @BeforeEach
     public void initDsl() {
         SimpleDSL.registerDslTask(getServiceTaskRegistry());
     }

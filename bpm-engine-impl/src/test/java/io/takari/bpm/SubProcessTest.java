@@ -5,13 +5,13 @@ import io.takari.bpm.api.ExecutionContext;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.api.JavaDelegate;
 import io.takari.bpm.model.*;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.*;
 
 public class SubProcessTest extends AbstractEngineTest {
@@ -156,7 +156,7 @@ public class SubProcessTest extends AbstractEngineTest {
         // ---
 
         verify(t1, times(1)).execute(any(ExecutionContext.class));
-        verifyZeroInteractions(t2);
+        verifyNoInteractions(t2);
         verify(t3, times(1)).execute(any(ExecutionContext.class));
     }
 

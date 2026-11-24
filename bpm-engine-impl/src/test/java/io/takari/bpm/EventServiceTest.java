@@ -3,14 +3,14 @@ package io.takari.bpm;
 import io.takari.bpm.api.Event;
 import io.takari.bpm.api.EventService;
 import io.takari.bpm.model.*;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class EventServiceTest extends AbstractEngineTest {
 
