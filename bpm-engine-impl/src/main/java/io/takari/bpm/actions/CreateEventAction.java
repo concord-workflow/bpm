@@ -1,7 +1,6 @@
 package io.takari.bpm.actions;
 
 import io.takari.bpm.context.Change;
-import io.takari.bpm.misc.CoverageIgnore;
 import io.takari.bpm.model.IntermediateCatchEvent;
 
 import java.util.Map;
@@ -87,7 +86,6 @@ public class CreateEventAction implements Action {
     }
 
     @Override
-    @CoverageIgnore
     public String toString() {
         return "CreateEventAction [" +
                 "definitionId=" + definitionId +

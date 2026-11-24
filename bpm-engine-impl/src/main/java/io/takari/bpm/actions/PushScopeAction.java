@@ -1,7 +1,6 @@
 package io.takari.bpm.actions;
 
 import io.takari.bpm.commands.Command;
-import io.takari.bpm.misc.CoverageIgnore;
 
 import java.util.Arrays;
 
@@ -40,7 +39,6 @@ public class PushScopeAction implements Action {
     }
 
     @Override
-    @CoverageIgnore
     public String toString() {
         return "PushScopeAction [" +
                 "definitionId=" + definitionId +

@@ -1,6 +1,5 @@
 package io.takari.bpm.actions;
 
-import io.takari.bpm.misc.CoverageIgnore;
 
 public class ProcessUserTaskAction implements Action {
 
@@ -23,7 +22,6 @@ public class ProcessUserTaskAction implements Action {
     }
 
     @Override
-    @CoverageIgnore
     public String toString() {
         return "ProcessUserTaskAction[definitionId=" + definitionId + ", elementId=" + elementId + "]";
     }

@@ -1,7 +1,6 @@
 package io.takari.bpm.actions;
 
 import io.takari.bpm.api.BpmnError;
-import io.takari.bpm.misc.CoverageIgnore;
 
 public class FireOnUnhandledErrorAction implements Action {
 
@@ -18,7 +17,6 @@ public class FireOnUnhandledErrorAction implements Action {
     }
 
     @Override
-    @CoverageIgnore
     public String toString() {
         return "FireOnUnhandledErrorAction [" +
                 "error=" + error +

@@ -1,6 +1,5 @@
 package io.takari.bpm.actions;
 
-import io.takari.bpm.misc.CoverageIgnore;
 
 public class ProcessFlowListenersAction implements Action {
 
@@ -23,7 +22,6 @@ public class ProcessFlowListenersAction implements Action {
     }
 
     @Override
-    @CoverageIgnore
     public String toString() {
         return "ProcessFlowListeners [definitionId=" + definitionId + ", elementId=" + elementId + "]";
     }

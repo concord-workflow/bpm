@@ -2,7 +2,6 @@ package io.takari.bpm.actions;
 
 import io.takari.bpm.commands.Command;
 import io.takari.bpm.context.Change;
-import io.takari.bpm.misc.CoverageIgnore;
 import io.takari.bpm.model.ExpressionType;
 import io.takari.bpm.model.VariableMapping;
 import io.takari.bpm.utils.Timeout;
@@ -94,7 +93,6 @@ public class EvalExpressionAction implements Action {
     }
 
     @Override
-    @CoverageIgnore
     public String toString() {
         return "EvalExpressionAction [" +
                 "definitionId=" + definitionId +

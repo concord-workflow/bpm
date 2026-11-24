@@ -1,7 +1,6 @@
 package io.takari.bpm.actions;
 
 import io.takari.bpm.api.Variables;
-import io.takari.bpm.misc.CoverageIgnore;
 
 public class SetVariablesAction implements Action {
 
@@ -18,7 +17,6 @@ public class SetVariablesAction implements Action {
     }
 
     @Override
-    @CoverageIgnore
     public String toString() {
         return "SetVariablesAction [variables=" + variables + "]";
     }

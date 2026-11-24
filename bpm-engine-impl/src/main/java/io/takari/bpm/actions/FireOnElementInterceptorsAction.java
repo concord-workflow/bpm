@@ -1,6 +1,5 @@
 package io.takari.bpm.actions;
 
-import io.takari.bpm.misc.CoverageIgnore;
 
 public class FireOnElementInterceptorsAction implements Action {
 
@@ -23,7 +22,6 @@ public class FireOnElementInterceptorsAction implements Action {
     }
 
     @Override
-    @CoverageIgnore
     public String toString() {
         return "FireOnElementInterceptorsAction [definitionId=" + definitionId + ", elementId=" + elementId + "]";
     }
