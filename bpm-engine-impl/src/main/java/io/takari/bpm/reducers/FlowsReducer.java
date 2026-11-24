@@ -1,6 +1,5 @@
 package io.takari.bpm.reducers;
 
-import com.google.common.collect.Lists;
 import io.takari.bpm.IndexedProcessDefinition;
 import io.takari.bpm.ProcessDefinitionUtils;
 import io.takari.bpm.actions.Action;
@@ -36,7 +35,7 @@ public class FlowsReducer implements Reducer {
         }
 
         // reversed order is expected
-        for (SequenceFlow f : Lists.reverse(flows)) {
+        for (SequenceFlow f : flows.reversed()) {
             ProcessElementCommand cmd = new ProcessElementCommand(pd.getId(), f.getId());
             stack = stack.push(cmd);
         }

@@ -1,6 +1,5 @@
 package io.takari.bpm.reducers;
 
-import com.google.common.collect.Lists;
 import io.takari.bpm.IndexedProcessDefinition;
 import io.takari.bpm.ProcessDefinitionUtils;
 import io.takari.bpm.actions.*;
@@ -37,7 +36,7 @@ public class EventGatewayReducer implements Reducer {
             throw new ExecutionException("Invalid process definition '%s': event gateway '%s' must contain at least one event", a.getDefinitionId(), a.getElementId());
         }
 
-        for (SequenceFlow f : Lists.reverse(flows)) {
+        for (SequenceFlow f : flows.reversed()) {
             if (f.getExpression() != null) {
                 log.warn("reduce ['{}', '{}', '{}'] -> flow expressions are not supported for event gateways", state.getBusinessKey(), a);
             }
