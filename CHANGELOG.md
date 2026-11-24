@@ -1,5 +1,32 @@
 # Change Log
 
+## [2.0.0] - 2026-11-24
+
+### Added
+
+- `persistence-mvstore`: pure-Java embedded persistence and event storage backed by H2 MVStore (`2.5.252`), replacing the legacy LevelDB and MapDB modules.
+- GitHub Actions CI workflow (`.github/workflows/ci.yml`) building and testing `master` and pull requests on Java 25.
+- Maven Central release configuration using `central-publishing-maven-plugin` and the `release` profile.
+
+### Changed
+
+- bumped minimum Java version to 25 and Maven to 3.9+ (`mvnd`-compatible); dropped Takari parent POM and OSGi packaging.
+- migrated Expression Language from `javax.el` to `jakarta.el` (`jakarta.el-api` 6.0.1 + Expressly 6.0.0).
+- upgraded `pcollections` to 5.0.0 (`POrderedSet` -> `OrderedPSet`).
+- upgraded GraalJS to `25.5.5.0.3` and updated `ScriptingExpressionManager` for GraalJS 25 dynamic bindings.
+- upgraded SLF4J (`2.0.20`), Logback (`1.6.8`), Groovy JSR-223 (`6.0.0`), JUnit Jupiter (`6.1.3`), and Mockito (`5.24.0`).
+- replaced JUnit 4 `EngineRule` in `testkit` with JUnit Jupiter `EngineExtension`.
+- replaced Guava and Joda-Time usages with Java standard library equivalents.
+- added explicit `serialVersionUID` to serializable state and model classes.
+
+### Removed
+
+- removed legacy `persistence/leveldb`, `persistence/mapdb`, and `benchmark` modules.
+- removed unused `@CoverageIgnore` annotation, Jackson, Guava, Joda-Time, Kryo, and Hamcrest dependencies.
+- removed legacy CircleCI and Looper configurations.
+
+
+
 ## [1.0.3] - 2024-08-09
 
 - save context changes before suspend and apply to
