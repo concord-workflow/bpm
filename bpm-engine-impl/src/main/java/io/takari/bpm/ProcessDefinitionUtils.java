@@ -30,7 +30,9 @@ public final class ProcessDefinitionUtils {
      *                            process or any of its subprocesses.
      */
     public static ProcessDefinition findElementProcess(ProcessDefinition pd, String id) throws ExecutionException {
-        ProcessDefinition sub = findElementProcess0(pd, id);
+        ProcessDefinition sub = pd instanceof IndexedProcessDefinition ipd
+                ? ipd.findOptionalElementProcess(id)
+                : findElementProcess0(pd, id);
         if (sub == null) {
             throw new ExecutionException("Invalid process definition '%s': unknown element '%s'", pd.getId(), id);
         }
@@ -62,6 +64,14 @@ public final class ProcessDefinitionUtils {
      * @throws ExecutionException if the element is not found.
      */
     public static AbstractElement findElement(ProcessDefinition pd, String id) throws ExecutionException {
+        if (pd instanceof IndexedProcessDefinition ipd) {
+            AbstractElement e = ipd.findOptionalElement(id);
+            if (e == null) {
+                throw new ExecutionException("Invalid process definition '%s': unknown element '%s'", pd.getId(), id);
+            }
+            return e;
+        }
+
         ProcessDefinition sub = findElementProcess(pd, id);
         return sub.getChild(id);
     }
@@ -124,6 +134,14 @@ public final class ProcessDefinitionUtils {
      * @throws ExecutionException if the element has no incoming flows..
      */
     public static List<SequenceFlow> findIncomingFlows(ProcessDefinition pd, String to) throws ExecutionException {
+        if (pd instanceof IndexedProcessDefinition ipd) {
+            List<SequenceFlow> result = ipd.findIncomingFlows(to);
+            if (result.isEmpty()) {
+                throw new ExecutionException("Invalid process definition '%s': no flows to '%s'", pd.getId(), to);
+            }
+            return result;
+        }
+
         List<SequenceFlow> result = new ArrayList<>();
 
         ProcessDefinition sub = findElementProcess(pd, to);
@@ -195,7 +213,8 @@ public final class ProcessDefinitionUtils {
      * Loops are cut when the search returns to an element that's already on the current path.
      */
     public static Map<String, Integer> findReachableJoinFlows(IndexedProcessDefinition pd, String fromId) throws ExecutionException {
-        return reach(pd, fromId, new HashSet<>(), new HashMap<>()).flows;
+        // the result depends only on the definition, it is computed once
+        return pd.getReachableJoinFlows(fromId, id -> reach(pd, id, new HashSet<>(), new HashMap<>()).flows);
     }
 
     private static final class Reach {

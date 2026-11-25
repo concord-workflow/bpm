@@ -97,27 +97,33 @@ public class Events implements Serializable {
         return count == 0;
     }
 
+    /**
+     * @return {@code true} if there are no events in the specified scope and its children.
+     */
     public boolean isEmpty(Scopes scopes, UUID scopeId) {
         Map<UUID, Scope> m = scopes.values();
 
-        Map<?, ?> em = events.get(scopeId);
-        if (em != null && !em.isEmpty()) {
-            log.debug("isEmpty ['{}'] -> false", scopeId);
-            return false;
-        }
+        // walk up from each scope that has events: O(number of scopes with events * depth)
+        for (Map.Entry<UUID, PMap<UUID, EventRecord>> e : events.entrySet()) {
+            if (e.getValue().isEmpty()) {
+                continue;
+            }
 
-        for (Map.Entry<?, Scope> e : m.entrySet()) {
-            Scope next = e.getValue();
-            if (scopeId.equals(next.getParentId())) {
-                if (!isEmpty(scopes, next.getId())) {
+            UUID id = e.getKey();
+            while (id != null) {
+                if (id.equals(scopeId)) {
+                    log.debug("isEmpty ['{}'] -> false", scopeId);
                     return false;
                 }
+                Scope s = m.get(id);
+                id = s != null ? s.getParentId() : null;
             }
         }
 
         log.debug("isEmpty ['{}'] -> true", scopeId);
         return true;
     }
+
 
     public Map<UUID, Map<UUID, EventRecord>> values() {
         Map<UUID, Map<UUID, EventRecord>> result = new HashMap<>(events.size());
