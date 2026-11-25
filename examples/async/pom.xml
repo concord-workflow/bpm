@@ -13,6 +13,7 @@
 
     <groupId>io.takari.bpm.examples</groupId>
     <artifactId>examples-async</artifactId>
+    <name>${project.groupId}:${project.artifactId}</name>
 
     <dependencies>
         <dependency>
