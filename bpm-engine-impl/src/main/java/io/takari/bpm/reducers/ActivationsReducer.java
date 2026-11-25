@@ -7,6 +7,7 @@ import io.takari.bpm.actions.Action;
 import io.takari.bpm.actions.ActivateElementAction;
 import io.takari.bpm.actions.ActivateFlowsAction;
 import io.takari.bpm.actions.ActivateFlowsAction.Flow;
+import io.takari.bpm.actions.RetargetFlowsAction;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.model.AbstractElement;
 import io.takari.bpm.model.SequenceFlow;
@@ -45,6 +46,12 @@ public class ActivationsReducer implements Reducer {
             }
 
             return state;
+
+        } else if (action instanceof RetargetFlowsAction) {
+
+            RetargetFlowsAction a = (RetargetFlowsAction) action;
+            IndexedProcessDefinition pd = state.getDefinition(a.getDefinitionId());
+            return ProcessDefinitionUtils.retarget(state, pd, a.getFromIds(), a.getToIds());
 
         } else if (action instanceof ActivateElementAction) {
 

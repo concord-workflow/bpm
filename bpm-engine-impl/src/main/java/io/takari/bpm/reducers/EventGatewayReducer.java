@@ -27,7 +27,10 @@ public class EventGatewayReducer implements Reducer {
 
         ProcessEventGatewayAction a = (ProcessEventGatewayAction) action;
 
-        CommandStack stack = state.getStack();
+        // close the gateway's scope once all events are created. The scope itself is kept
+        // while it has events; the events will close it when resumed
+        CommandStack stack = state.getStack()
+                .push(new PerformActionsCommand(new PopScopeAction()));
 
         // find all events and create actions to handle them
         IndexedProcessDefinition pd = state.getDefinition(a.getDefinitionId());

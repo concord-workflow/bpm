@@ -13,6 +13,7 @@ import io.takari.bpm.commands.ProcessElementCommand;
 import io.takari.bpm.commands.ResumeElementCommand;
 import io.takari.bpm.event.Event;
 import io.takari.bpm.event.EventPersistenceManager;
+import io.takari.bpm.model.EventBasedGateway;
 import io.takari.bpm.model.SequenceFlow;
 import io.takari.bpm.state.Events;
 import io.takari.bpm.state.ProcessInstance;
@@ -66,6 +67,14 @@ public class EventsReducer implements Reducer {
             cmds.add(new ResumeElementCommand(pd.getId(), a.getElementId(), a.getCtxChangesBeforeSuspend()));
         } else {
             cmds.add(new ProcessElementCommand(pd.getId(), next.getId()));
+        }
+
+        // an event of an event-based gateway: the token continues only from this event
+        if (scope.isExclusive()) {
+            EventBasedGateway gw = ProcessDefinitionUtils.findEventGateway(pd, a.getElementId());
+            if (gw != null) {
+                cmds.add(new PerformActionsCommand(new RetargetFlowsAction(pd.getId(), List.of(gw.getId()), List.of(a.getElementId()))));
+            }
         }
 
         // restore the scope on resume

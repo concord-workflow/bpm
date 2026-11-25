@@ -106,15 +106,12 @@ public class EvaluatedFlowsReducer implements Reducer {
     private static ProcessInstance activateUnusedFlows(ProcessInstance state, String definitionId, String elementId, String usedFlowId)
             throws ExecutionException {
 
+        // the token goes only into the selected flow: the joins that are reachable only through
+        // the other flows shouldn't wait for it anymore
         IndexedProcessDefinition pd = state.getDefinition(definitionId);
-        for (SequenceFlow f : ProcessDefinitionUtils.findOutgoingFlows(pd, elementId)) {
-            if (f.getId().equals(usedFlowId)) {
-                continue;
-            }
-            state = ProcessDefinitionUtils.activateGatewayFlow(state, pd, elementId, -1);
-            log.debug("activateUnusedFlows ['{}', '{}', '{}'] -> single activation of '{}'", state.getBusinessKey(), definitionId,
-                    elementId, f.getId());
-        }
+        state = ProcessDefinitionUtils.retarget(state, pd, List.of(elementId), List.of(usedFlowId));
+        log.debug("activateUnusedFlows ['{}', '{}', '{}'] -> retargeted to '{}'", state.getBusinessKey(), definitionId,
+                elementId, usedFlowId);
 
         return state;
     }

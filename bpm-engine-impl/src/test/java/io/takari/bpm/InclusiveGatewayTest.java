@@ -366,12 +366,11 @@ public class InclusiveGatewayTest extends AbstractEngineTest {
         
         getEngine().resume(key, "ev2", null);
         
+        // sub1 ended with an unhandled error, its token doesn't reach gw2
         assertActivations(key, processId,
             "f10",
             "sub2_end",
             "f11",
-            "gw2",
-            "f6",
             "gw2",
             "f13",
             "end");

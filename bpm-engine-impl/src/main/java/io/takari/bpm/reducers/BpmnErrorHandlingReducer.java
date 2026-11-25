@@ -1,6 +1,7 @@
 package io.takari.bpm.reducers;
 
 import io.takari.bpm.Configuration;
+import io.takari.bpm.actions.RetargetFlowsAction;
 import io.takari.bpm.actions.SetVariableAction;
 import io.takari.bpm.api.BpmnError;
 import io.takari.bpm.api.ExecutionContext;
@@ -11,6 +12,7 @@ import io.takari.bpm.commands.PerformActionsCommand;
 import io.takari.bpm.state.BpmnErrorHelper;
 import io.takari.bpm.state.ProcessInstance;
 
+import java.util.List;
 import java.util.Map;
 
 public abstract class BpmnErrorHandlingReducer implements Reducer {
@@ -73,7 +75,9 @@ public abstract class BpmnErrorHandlingReducer implements Reducer {
             // the parent execution
 
             CommandStack stack = state.getStack()
-                    .push(new PerformActionsCommand(BpmnErrorHelper.raiseError(definitionId, elementId, errorRef, e.getCause())));
+                    .push(new PerformActionsCommand(BpmnErrorHelper.raiseError(definitionId, elementId, errorRef, e.getCause())))
+                    // the element's token doesn't continue
+                    .push(new PerformActionsCommand(new RetargetFlowsAction(definitionId, List.of(elementId), List.of())));
             state = state.setStack(stack);
         } else {
             // the element has an boundary error event - the process execution

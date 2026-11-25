@@ -10,7 +10,6 @@ import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.commands.ActivityFinalizerCommand;
 import io.takari.bpm.commands.PerformActionsCommand;
 import io.takari.bpm.model.BoundaryEvent;
-import io.takari.bpm.model.SequenceFlow;
 import io.takari.bpm.state.BpmnErrorHelper;
 import io.takari.bpm.state.Events;
 import io.takari.bpm.state.ProcessInstance;
@@ -69,19 +68,23 @@ public class ActivityFinalizerCommandHandler implements CommandHandler<ActivityF
                 }
                 case PROPAGATE: {
                     log.debug("handle ['{}', '{}'] -> propagating the error: '{}'", state.getBusinessKey(), cmd.getElementId(), error.getErrorRef());
+                    actions.add(new PushCommandAction(new PerformActionsCommand(Arrays.asList(
+                            // the activity's token doesn't continue
+                            new RetargetFlowsAction(cmd.getDefinitionId(), List.of(cmd.getElementId()), List.of())))));
                     actions.add(new PushCommandAction(new PerformActionsCommand(new PopScopeAction())));
                     return actions;
                 }
                 case IGNORE: {
                     log.warn("handle ['{}', '{}'] -> unhandled BPMN error: '{}'", state.getBusinessKey(), cmd.getElementId(), error.getErrorRef());
                     actions.add(BpmnErrorHelper.clear());
+                    actions.add(new PushCommandAction(new PerformActionsCommand(Arrays.asList(
+                            // the activity's token doesn't continue
+                            new RetargetFlowsAction(cmd.getDefinitionId(), List.of(cmd.getElementId()), List.of())))));
                     actions.add(new PushCommandAction(new PerformActionsCommand(new PopScopeAction())));
                     return actions;
                 }
             }
         }
-
-        List<SequenceFlow> flows = ProcessDefinitionUtils.findOptionalOutgoingFlows(pd, cmd.getElementId());
 
         log.debug("handle ['{}', '{}'] -> handling boundary error '{}'", state.getBusinessKey(), cmd.getElementId(), error.getErrorRef());
 
@@ -96,8 +99,8 @@ public class ActivityFinalizerCommandHandler implements CommandHandler<ActivityF
 
         // Use a deferred action, so the activation will be performed after the call's scope is closed
         actions.add(new PushCommandAction(new PerformActionsCommand(Arrays.asList( //
-                // notify that an error is incoming and no normal flows
-                new ActivateFlowsAction(cmd.getDefinitionId(), ev.getId(), 1).addFlows(ProcessDefinitionUtils.toIds(flows), -1),
+                // the token leaves the activity through the boundary event instead of its normal flows
+                new RetargetFlowsAction(cmd.getDefinitionId(), List.of(cmd.getElementId()), List.of(ev.getId())),
                 // follow the outbound flow
                 new FollowFlowsAction(cmd.getDefinitionId(), ev.getId())))));
 
