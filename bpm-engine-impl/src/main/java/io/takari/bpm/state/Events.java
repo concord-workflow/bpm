@@ -84,6 +84,11 @@ public class Events implements Serializable {
         return state.setStack(stack);
     }
 
+    public boolean contains(UUID scopeId, UUID eventId) {
+        Map<UUID, EventRecord> scope = events.get(scopeId);
+        return scope != null && scope.containsKey(eventId);
+    }
+
     public boolean isEmpty() {
         int count = 0;
         for (Map.Entry<?, PMap<UUID, EventRecord>> e : events.entrySet()) {

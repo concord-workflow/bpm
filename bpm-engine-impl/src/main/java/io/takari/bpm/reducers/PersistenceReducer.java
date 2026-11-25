@@ -6,6 +6,7 @@ import io.takari.bpm.actions.SuspendAndPersistAction;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.api.Variables;
 import io.takari.bpm.persistence.PersistenceManager;
+import io.takari.bpm.persistence.UnitOfWork;
 import io.takari.bpm.state.BpmnErrorHelper;
 import io.takari.bpm.state.ProcessInstance;
 import io.takari.bpm.state.ProcessStatus;
@@ -28,10 +29,23 @@ public class PersistenceReducer implements Reducer {
             // they should be handled by the engine after we suspend
             // the process
             ProcessInstance s = clearErrors(state);
-            persistenceManager.save(s);
+
+            // the state is stored at the end of the run, together with the events
+            UnitOfWork uow = UnitOfWork.current();
+            if (uow != null) {
+                uow.saveState(s);
+            } else {
+                persistenceManager.save(s);
+            }
         } else if (action instanceof RemoveInstanceAction) {
             RemoveInstanceAction a = (RemoveInstanceAction) action;
-            persistenceManager.remove(a.getInstanceId());
+
+            UnitOfWork uow = UnitOfWork.current();
+            if (uow != null) {
+                uow.removeState(a.getInstanceId());
+            } else {
+                persistenceManager.remove(a.getInstanceId());
+            }
         }
 
         return state;

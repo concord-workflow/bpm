@@ -29,6 +29,7 @@ import java.time.ZoneOffset;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -272,6 +273,55 @@ class MvStoreEngineIntegrationTest {
 
             assertFalse(db.isClosed());
             assertTrue(engine.getEventService().getEvents("sched-bk-1").isEmpty());
+        }
+    }
+
+    @Test
+    void failedResumeKeepsTheEventAndTheState() throws Exception {
+        ProcessDefinition pd = new ProcessDefinition("flaky-flow", List.of(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "wait"),
+                new IntermediateCatchEvent("wait", "go"),
+                new SequenceFlow("f2", "wait", "t1"),
+                new ServiceTask("t1", ExpressionType.DELEGATE, "${flaky}"),
+                new SequenceFlow("f3", "t1", "end"),
+                new EndEvent("end")
+        ));
+
+        ProcessDefinitionProvider pdp = id -> "flaky-flow".equals(id) ? pd : null;
+
+        java.util.concurrent.atomic.AtomicBoolean fail = new java.util.concurrent.atomic.AtomicBoolean(true);
+        ServiceTaskRegistry tasks = key -> "flaky".equals(key) ? (JavaDelegate) ctx -> {
+            if (fail.get()) {
+                throw new RuntimeException("transient");
+            }
+        } : null;
+
+        try (MvStoreDatabase db = MvStoreDatabase.open(MvStoreConfig.file(tempDir.resolve("flaky.mv")).build())) {
+            Engine engine = new EngineBuilder()
+                    .withDefinitionProvider(pdp)
+                    .withTaskRegistry(tasks)
+                    .withPersistenceManager(db.persistenceManager())
+                    .withEventStorage(db.eventStorage())
+                    .build();
+
+            String businessKey = "flaky-1";
+            engine.start(businessKey, "flaky-flow", Map.of());
+
+            Collection<io.takari.bpm.event.Event> before = db.eventStorage().find(businessKey);
+            assertEquals(1, before.size());
+            UUID executionId = before.iterator().next().getExecutionId();
+
+            assertThrows(Exception.class, () -> engine.resume(businessKey, "go", Map.of()));
+
+            assertEquals(1, db.eventStorage().find(businessKey).size());
+            assertNotNull(db.persistenceManager().get(executionId));
+
+            fail.set(false);
+            engine.resume(businessKey, "go", Map.of());
+
+            assertTrue(db.eventStorage().find(businessKey).isEmpty());
+            assertNull(db.persistenceManager().get(executionId));
         }
     }
 }
