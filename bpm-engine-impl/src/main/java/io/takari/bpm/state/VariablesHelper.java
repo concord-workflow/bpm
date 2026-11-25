@@ -29,6 +29,7 @@ public final class VariablesHelper {
             return dst;
         }
 
+        Map<String, Object> result = new LinkedHashMap<>();
         for (VariableMapping m : mapping) {
             String source = m.getSource();
             String sourceExpression = m.getSourceExpression();
@@ -50,7 +51,7 @@ public final class VariablesHelper {
                     v = ctx.eval(sourceExpression, Object.class);
                 }
 
-                dst = dst.setVariable(m.getTarget(), v);
+                result.put(m.getTarget(), v);
             } catch (PropertyNotFoundException e) {
                 if (!ignoreMappingErrors) {
                     throw e;
@@ -58,16 +59,17 @@ public final class VariablesHelper {
             }
         }
 
-        return dst;
+        // a single copy of the map
+        return result.isEmpty() ? dst : dst.setVariables(result);
     }
 
     public static Variables copyVariables(Variables src, Variables dst) {
         Set<String> keys = src.getVariableNames();
+        Map<String, Object> result = new LinkedHashMap<>();
         for (String k : keys) {
-            Object v = src.getVariable(k);
-            dst = dst.setVariable(k, v);
+            result.put(k, src.getVariable(k));
         }
-        return dst;
+        return result.isEmpty() ? dst : dst.setVariables(result);
     }
 
     public static Variables applyInVariables(ExecutionContextFactory<?> contextFactory, Variables src,

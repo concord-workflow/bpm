@@ -234,8 +234,8 @@ public final class EngineBuilder {
             executor = executorWrappingFn.apply(executor);
         }
 
-        IndexedProcessDefinitionProvider pdp = new IndexedProcessDefinitionProvider(definitionProvider);
-        return new EngineImpl(pdp,
+        // the same provider (e.g. a caching one, see #wrapDefinitionProviderWith) is used to start the processes
+        return new EngineImpl(indexedDefinitionProvider,
                 eventStorage,
                 eventManager,
                 persistenceManager,

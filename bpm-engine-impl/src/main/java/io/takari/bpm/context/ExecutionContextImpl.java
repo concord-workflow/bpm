@@ -113,15 +113,22 @@ public class ExecutionContextImpl implements ExecutionContext {
     public Variables toVariables() {
         Variables dst = source;
 
+        // apply all SETs at once: each Variables#setVariable copies the whole map
+        // (there is only one change per key, so the order doesn't matter)
+        Map<String, Object> sets = new LinkedHashMap<>();
         for (Map.Entry<String, Change> e : changes.entrySet()) {
             String key = e.getKey();
             Change c = e.getValue();
 
             if (c.getType() == ChangeType.SET) {
-                dst = dst.setVariable(key, c.getValue());
+                sets.put(key, c.getValue());
             } else if (c.getType() == ChangeType.UNSET) {
                 dst = dst.removeVariable(key);
             }
+        }
+
+        if (!sets.isEmpty()) {
+            dst = dst.setVariables(sets);
         }
 
         return dst;
