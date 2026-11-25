@@ -14,6 +14,24 @@ public class Configuration implements Serializable {
 
     private boolean copyAllCallActivityOutVariables = false;
 
+    private boolean storeDefinitionsByReference = false;
+
+    public boolean isStoreDefinitionsByReference() {
+        return storeDefinitionsByReference;
+    }
+
+    /**
+     * Store process definitions as references (definition ID and a fingerprint of its content) instead of
+     * embedding them into each saved process state. The definitions are resolved using the engine's
+     * definition provider when the process is resumed. A process can't be resumed if its definition
+     * was changed after the process was suspended, so each version of a definition should have its own ID.
+     * <p>
+     * Reduces the size of the stored states. Disabled by default.
+     */
+    public void setStoreDefinitionsByReference(boolean storeDefinitionsByReference) {
+        this.storeDefinitionsByReference = storeDefinitionsByReference;
+    }
+
     public boolean isThrowExceptionOnUnhandledBpmnError() {
         return unhandledBpmnErrorStrategy == UnhandledBpmnErrorStrategy.EXCEPTION;
     }

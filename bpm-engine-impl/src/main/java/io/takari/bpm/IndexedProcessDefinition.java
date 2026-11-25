@@ -5,20 +5,56 @@ import io.takari.bpm.model.BoundaryEvent;
 import io.takari.bpm.model.ProcessDefinition;
 import io.takari.bpm.model.SequenceFlow;
 
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.security.DigestOutputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 public class IndexedProcessDefinition extends ProcessDefinition {
 
     private static final long serialVersionUID = 1L;
 
-    private final Map<String, List<SequenceFlow>> outgoingFlows;
-    private final Map<String, List<BoundaryEvent>> boundaryEvents;
+    // the indexes are not serialized, they are rebuilt when the definition is deserialized
+    private transient Map<String, List<SequenceFlow>> outgoingFlows;
+    private transient Map<String, List<BoundaryEvent>> boundaryEvents;
+    private transient volatile String fingerprint;
 
     public IndexedProcessDefinition(ProcessDefinition pd) {
         super(pd.getId(), pd.getChildren(), pd.getAttributes() != null ? pd.getAttributes() : Collections.emptyMap());
         setName(pd.getName());
         this.outgoingFlows = indexOutgoingFlows();
         this.boundaryEvents = indexBoundaryEvents();
+    }
+
+    private Object readResolve() {
+        return new IndexedProcessDefinition(this);
+    }
+
+    /**
+     * @return a hash of the definition's content.
+     */
+    public String getFingerprint() {
+        String result = fingerprint;
+        if (result == null) {
+            result = fingerprint = computeFingerprint(this);
+        }
+        return result;
+    }
+
+    private static String computeFingerprint(ProcessDefinition pd) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            try (ObjectOutputStream out = new ObjectOutputStream(new DigestOutputStream(OutputStream.nullOutputStream(), md))) {
+                out.writeObject(new ArrayList<>(pd.getChildren()));
+                out.writeObject(pd.getAttributes() != null ? new TreeMap<>(pd.getAttributes()) : null);
+            }
+            return HexFormat.of().formatHex(md.digest());
+        } catch (NoSuchAlgorithmException | IOException e) {
+            throw new IllegalStateException("Can't compute the fingerprint of the process definition: " + pd.getId(), e);
+        }
     }
 
     public List<SequenceFlow> findOptionalOutgoingFlows(String from) {
