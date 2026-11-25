@@ -173,6 +173,10 @@ public abstract class AbstractEngine implements Engine {
             throw new ExecutionException("No execution '%s' found for the process '%s'", eid, businessKey);
         }
 
+        // the definitions can be stored as references
+        IndexedProcessDefinitionProvider pdp = getProcessDefinitionProvider();
+        state = state.setDefinitions(state.getDefinitions().resolve(pdp::getById));
+
         if (!state.getEvents().contains(e.getScopeId(), e.getId())) {
             // the event was already processed (e.g. the engine crashed before the event was removed)
             em.remove(e.getId());
@@ -247,6 +251,11 @@ public abstract class AbstractEngine implements Engine {
 
         // store the state and the events
         PersistenceChanges changes = uow.toChanges();
+        if (changes.getSavedState() != null && getConfiguration().isStoreDefinitionsByReference()) {
+            ProcessInstance s = changes.getSavedState();
+            changes = new PersistenceChanges(s.setDefinitions(s.getDefinitions().toReferences()), changes.getRemovedStateId(),
+                    changes.getAddedEvents(), changes.getRemovedEvents(), changes.getExpectedVersion());
+        }
         uow.end();
         getEventManager().commit(getPersistenceManager(), changes);
 

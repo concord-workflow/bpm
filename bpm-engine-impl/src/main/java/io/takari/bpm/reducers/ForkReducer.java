@@ -91,10 +91,11 @@ public class ForkReducer implements Reducer {
             actions.add(activateFlows);
             actions.add(new FollowFlowsAction(a.getDefinitionId(), a.getElementId(), flows));
 
+            // the branches run in the current scope: join activations are tracked per container
+            // (see Activations#containerOf), a scope per fork would only nest the scopes of
+            // the consecutive forks, e.g. in loops
             CommandStack stack = state.getStack()
-                    .push(new PerformActionsCommand(new PopScopeAction()))
-                    .push(new PerformActionsCommand(actions))
-                    .push(new PerformActionsCommand(new PushScopeAction(a.getDefinitionId(), a.getElementId(), false)));
+                    .push(new PerformActionsCommand(actions));
 
             return state.setForks(forks.removeFork(scopeId, a.getElementId()))
                     .setStack(stack);
