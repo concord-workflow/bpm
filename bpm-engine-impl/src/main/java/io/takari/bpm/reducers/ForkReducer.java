@@ -43,7 +43,8 @@ public class ForkReducer implements Reducer {
             state = consumeJoin(state, pd, a.getElementId());
 
             // parallel gateway doesn't evaluate the expressions
-            List<SequenceFlow> out = ProcessDefinitionUtils.findOutgoingFlows(pd, a.getElementId());
+            // (the list is modified by #follow, the definition's list is immutable)
+            List<SequenceFlow> out = new ArrayList<>(ProcessDefinitionUtils.findOutgoingFlows(pd, a.getElementId()));
 
             return follow(pd, state, a.getDefinitionId(), a.getElementId(), out, null);
         } else if (action instanceof InclusiveForkAction) {

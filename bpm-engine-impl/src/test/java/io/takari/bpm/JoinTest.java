@@ -441,4 +441,86 @@ public class JoinTest extends AbstractEngineTest {
         assertEquals(0, afterJoin.get());
         assertTrue(getEventManager().find(key, "ev").isEmpty());
     }
+
+    /**
+     * A parallel fork/join inside a loop.
+     * <pre>
+     * start --> inc --> gw1 --> t1 --> gw2 --> xor --> after --> end
+     *           ^          \          /          /
+     *           |           --> t2 ---          /
+     *           ------------------------- (loop)
+     * </pre>
+     */
+    @Test
+    public void testParallelForkJoinInLoop() throws Exception {
+        AtomicInteger counter = new AtomicInteger();
+        getServiceTaskRegistry().register("inc", (JavaDelegate) ctx -> ctx.setVariable("cnt", counter.incrementAndGet()));
+
+        String processId = "test";
+        deploy(new ProcessDefinition(processId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "inc"),
+                new ServiceTask("inc", ExpressionType.DELEGATE, "${inc}"),
+                new SequenceFlow("f2", "inc", "gw1"),
+                new ParallelGateway("gw1"),
+                new SequenceFlow("f3", "gw1", "t1"),
+                new ServiceTask("t1", ExpressionType.DELEGATE, "${noop}"),
+                new SequenceFlow("f4", "t1", "gw2"),
+                new SequenceFlow("f5", "gw1", "t2"),
+                new ServiceTask("t2", ExpressionType.DELEGATE, "${noop}"),
+                new SequenceFlow("f6", "t2", "gw2"),
+                new ParallelGateway("gw2"),
+                new SequenceFlow("f7", "gw2", "xor"),
+                new ExclusiveGateway("xor", "f8"),
+                new SequenceFlow("f8", "xor", "inc"),
+                new SequenceFlow("f9", "xor", "after", "${cnt >= 5}"),
+                new ServiceTask("after", ExpressionType.DELEGATE, "${after}"),
+                new SequenceFlow("f10", "after", "end"),
+                new EndEvent("end"))));
+
+        getEngine().start(UUID.randomUUID().toString(), processId, null);
+
+        assertEquals(5, counter.get());
+        assertEquals(1, afterJoin.get());
+    }
+
+    /**
+     * A parallel gateway with a flow that loops directly back to it.
+     * <pre>
+     *                  <---- t1 <---- (cnt < 3)
+     *                 /                   \
+     * start --> inc --> gw1 --> floop --> xor --> end2
+     *                      \
+     *                       --> t2 --> end
+     * </pre>
+     */
+    @Test
+    public void testParallelSelfLoop() throws Exception {
+        AtomicInteger counter = new AtomicInteger();
+        AtomicInteger t2 = new AtomicInteger();
+        getServiceTaskRegistry().register("inc", (JavaDelegate) ctx -> ctx.setVariable("cnt", counter.incrementAndGet()));
+        getServiceTaskRegistry().register("t2", (JavaDelegate) ctx -> t2.incrementAndGet());
+
+        String processId = "test";
+        deploy(new ProcessDefinition(processId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "inc"),
+                new ServiceTask("inc", ExpressionType.DELEGATE, "${inc}"),
+                new SequenceFlow("f2", "inc", "gw1"),
+                new ParallelGateway("gw1"),
+                new SequenceFlow("floop", "gw1", "xor"),
+                new ExclusiveGateway("xor", "f3"),
+                new SequenceFlow("f3", "xor", "end2"),
+                new EndEvent("end2"),
+                new SequenceFlow("f4", "xor", "inc", "${cnt < 3}"),
+                new SequenceFlow("f5", "gw1", "t2"),
+                new ServiceTask("t2", ExpressionType.DELEGATE, "${t2}"),
+                new SequenceFlow("f6", "t2", "end"),
+                new EndEvent("end"))));
+
+        getEngine().start(UUID.randomUUID().toString(), processId, null);
+
+        assertEquals(3, counter.get());
+        assertEquals(3, t2.get());
+    }
 }
