@@ -3,10 +3,13 @@ package io.takari.bpm.mvstore;
 import io.takari.bpm.IndexedProcessDefinition;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.api.Variables;
+import io.takari.bpm.event.Event;
+import io.takari.bpm.event.InMemEventStorage;
 import io.takari.bpm.model.EndEvent;
 import io.takari.bpm.model.ProcessDefinition;
 import io.takari.bpm.model.SequenceFlow;
 import io.takari.bpm.model.StartEvent;
+import io.takari.bpm.persistence.PersistenceChanges;
 import io.takari.bpm.state.ProcessInstance;
 import io.takari.bpm.state.ProcessStatus;
 import org.junit.jupiter.api.Test;
@@ -110,5 +113,45 @@ class MvStorePersistenceManagerTest {
 
         assertTrue(db.isClosed());
         assertThrows(IllegalStateException.class, () -> pm.get(UUID.randomUUID()));
+    }
+
+    @Test
+    void commitsStateAndEventsTogether() throws Exception {
+        try (MvStoreDatabase db = MvStoreDatabase.open(MvStoreConfig.inMemory().build())) {
+            MvStorePersistenceManager pm = db.persistenceManager();
+            MvStoreEventStorage events = db.eventStorage();
+
+            UUID id = UUID.randomUUID();
+            Event consumed = new Event(UUID.randomUUID(), id, "test-proc", UUID.randomUUID(), "ev1", "bk", false, null, null);
+            events.add(consumed);
+
+            ProcessInstance state = createInstance(id, "bk", "v1");
+            Event added = new Event(UUID.randomUUID(), id, "test-proc", UUID.randomUUID(), "ev2", "bk", false, null, null);
+
+            assertTrue(pm.commit(new PersistenceChanges(state, null, List.of(added), List.of(consumed.getId())), events));
+
+            assertNotNull(pm.get(id));
+            assertNull(events.get(consumed.getId()));
+            assertNotNull(events.get(added.getId()));
+            assertEquals(1, events.find("bk").size());
+
+            assertTrue(pm.commit(new PersistenceChanges(null, id, List.of(), List.of(added.getId())), events));
+            assertNull(pm.get(id));
+            assertTrue(events.find("bk").isEmpty());
+        }
+    }
+
+    @Test
+    void doesNotCommitWithForeignEventStorage() throws Exception {
+        try (MvStoreDatabase db = MvStoreDatabase.open(MvStoreConfig.inMemory().build())) {
+            UUID id = UUID.randomUUID();
+            ProcessInstance state = createInstance(id, "bk", "v1");
+
+            boolean committed = db.persistenceManager().commit(new PersistenceChanges(state, null, List.of(), List.of()),
+                    new InMemEventStorage());
+
+            assertFalse(committed);
+            assertNull(db.persistenceManager().get(id));
+        }
     }
 }

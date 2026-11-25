@@ -41,14 +41,7 @@ public class MvStoreEventStorage implements EventStorage {
     public Event remove(UUID id) {
         Objects.requireNonNull(id, "id must not be null");
 
-        byte[] removed = database.write(() -> {
-            byte[] prev = database.eventsMap().remove(id);
-            if (prev == null) {
-                return null;
-            }
-            removeIndexEntriesForPreviousRecord(id, prev);
-            return prev;
-        });
+        byte[] removed = database.write(() -> removeInTx(id));
 
         Event event = null;
         if (removed != null) {
@@ -130,26 +123,48 @@ public class MvStoreEventStorage implements EventStorage {
         byte[] encoded = EventCodec.encode(event, database.getSerializer());
 
         database.write(() -> {
-            byte[] prev = database.eventsMap().put(id, encoded);
-            if (prev != null) {
-                removeIndexEntriesForPreviousRecord(id, prev);
-            }
-
-            if (event.getProcessBusinessKey() != null) {
-                database.businessKeyIndex().put(
-                        new BusinessKeyIndexKey(event.getProcessBusinessKey(), event.getName(), id),
-                        Unit.INSTANCE);
-            }
-
-            if (event.getExpiredAt() != null) {
-                database.expiredEventsIndex().put(
-                        new ExpiredEventIndexKey(event.getExpiredAt().getTime(), id),
-                        Unit.INSTANCE);
-            }
+            putInTx(event, encoded);
             return null;
         });
 
         log.debug("add ['{}'] -> done", id);
+    }
+
+    /**
+     * Stores an encoded event and its index entries. Must be called inside {@link MvStoreDatabase#write}.
+     */
+    void putInTx(Event event, byte[] encoded) {
+        UUID id = event.getId();
+        byte[] prev = database.eventsMap().put(id, encoded);
+        if (prev != null) {
+            removeIndexEntriesForPreviousRecord(id, prev);
+        }
+
+        if (event.getProcessBusinessKey() != null) {
+            database.businessKeyIndex().put(
+                    new BusinessKeyIndexKey(event.getProcessBusinessKey(), event.getName(), id),
+                    Unit.INSTANCE);
+        }
+
+        if (event.getExpiredAt() != null) {
+            database.expiredEventsIndex().put(
+                    new ExpiredEventIndexKey(event.getExpiredAt().getTime(), id),
+                    Unit.INSTANCE);
+        }
+    }
+
+    /**
+     * Removes an event and its index entries. Must be called inside {@link MvStoreDatabase#write}.
+     *
+     * @return the removed record or {@code null}.
+     */
+    byte[] removeInTx(UUID id) {
+        byte[] prev = database.eventsMap().remove(id);
+        if (prev == null) {
+            return null;
+        }
+        removeIndexEntriesForPreviousRecord(id, prev);
+        return prev;
     }
 
     @Override

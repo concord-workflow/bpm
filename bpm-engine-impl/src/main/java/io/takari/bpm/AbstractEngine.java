@@ -6,7 +6,9 @@ import io.takari.bpm.api.interceptors.ExecutionInterceptor;
 import io.takari.bpm.event.Event;
 import io.takari.bpm.event.EventPersistenceManager;
 import io.takari.bpm.lock.LockManager;
+import io.takari.bpm.persistence.PersistenceChanges;
 import io.takari.bpm.persistence.PersistenceManager;
+import io.takari.bpm.persistence.UnitOfWork;
 import io.takari.bpm.planner.Planner;
 import io.takari.bpm.state.*;
 import org.slf4j.Logger;
@@ -65,14 +67,16 @@ public abstract class AbstractEngine implements Engine {
             state = StateHelper.push(state, new InterpolateCurrentVariablesAction());
         }
 
+        UnitOfWork uow = UnitOfWork.begin();
         try {
-            runLockSafe(state);
+            runLockSafe(state, uow);
         } catch (Exception e) {
             // TODO move to the executor?
             UUID scopeId = state.getScopes().getCurrentId();
             getInterceptorHolder().fireOnError(processBusinessKey, pd.getId(), state.getId(), scopeId, e);
             throw e;
         } finally {
+            uow.end();
             lm.unlock(processBusinessKey);
         }
     }
@@ -149,54 +153,71 @@ public abstract class AbstractEngine implements Engine {
     private void resumeLockSafe(Event e, Map<String, Object> variables, boolean merge) throws ExecutionException {
         String businessKey = e.getProcessBusinessKey();
         String eventName = e.getName();
-
         UUID eid = e.getExecutionId();
+
         log.debug("resumeLockSafe ['{}', '{}'] -> got '{}'", businessKey, eventName, eid);
 
         EventPersistenceManager em = getEventManager();
-        if (e.isExclusive()) {
-            // exclusive event means that only one event from the group of
-            // events can happen. The rest of the events must be removed.
-            em.clearGroup(businessKey, e.getScopeId());
-        } else {
-            em.remove(e.getId());
-        }
-
         PersistenceManager pm = getPersistenceManager();
+
         ProcessInstance state = pm.get(eid);
         if (state == null) {
+            // the event doesn't belong to any execution, remove it
+            em.remove(e.getId());
             throw new ExecutionException("No execution '%s' found for the process '%s'", eid, businessKey);
         }
 
-        // enable the execution
-        state = state.setStatus(ProcessStatus.RUNNING);
+        if (!state.getEvents().contains(e.getScopeId(), e.getId())) {
+            // the event was already processed (e.g. the engine crashed before the event was removed)
+            em.remove(e.getId());
+            throw new NoEventFoundException("Event '%s' (%s) was already processed by the process '%s'", eventName, e.getId(), businessKey);
+        }
 
-        // apply the external variables (no additional attributes provided)
-        state = StateHelper.applyArguments(state, null, variables, merge);
+        UnitOfWork uow = UnitOfWork.begin();
+        try {
+            // the event is removed only if the execution succeeds
+            if (e.isExclusive()) {
+                // exclusive event means that only one event from the group of
+                // events can happen. The rest of the events must be removed.
+                em.clearGroup(businessKey, e.getScopeId());
+            } else {
+                em.remove(e.getId());
+            }
 
-        // fire the interceptors
-        // TODO move to the planner?
-        state = getExecutor().eval(state, singletonList(new FireOnResumeInterceptorsAction()));
+            // enable the execution
+            state = state.setStatus(ProcessStatus.RUNNING);
 
-        // process event-to-command mappings (e.g. add next command of the flow
-        // to the stack)
-        state = pushEventCommands(state, e);
+            // apply the external variables (no additional attributes provided)
+            state = StateHelper.applyArguments(state, null, variables, merge);
 
-        runLockSafe(state);
+            // fire the interceptors
+            // TODO move to the planner?
+            state = getExecutor().eval(state, singletonList(new FireOnResumeInterceptorsAction()));
+
+            // process event-to-command mappings (e.g. add next command of the flow
+            // to the stack)
+            state = pushEventCommands(state, e);
+
+            runLockSafe(state, uow);
+        } finally {
+            uow.end();
+        }
     }
 
     public void run(ProcessInstance state) throws ExecutionException {
         LockManager lm = getLockManager();
         lm.lock(state.getBusinessKey());
 
+        UnitOfWork uow = UnitOfWork.begin();
         try {
-            runLockSafe(state);
+            runLockSafe(state, uow);
         } finally {
+            uow.end();
             lm.unlock(state.getBusinessKey());
         }
     }
 
-    private void runLockSafe(ProcessInstance state) throws ExecutionException {
+    private void runLockSafe(ProcessInstance state, UnitOfWork uow) throws ExecutionException {
         log.debug("runLockSafe ['{}'] -> started...", state.getBusinessKey());
 
         try {
@@ -209,9 +230,15 @@ public abstract class AbstractEngine implements Engine {
                 state = getExecutor().eval(state, actions);
             }
         } catch (Exception e) {
+            // nothing is persisted: the stored state and events remain as they were before the run
             getListenerHolder().fireOnUnhandledException(state);
             throw e;
         }
+
+        // store the state and the events
+        PersistenceChanges changes = uow.toChanges();
+        uow.end();
+        getEventManager().commit(getPersistenceManager(), changes);
 
         // fire the listeners
         state = getListenerHolder().fireOnFinalize(state);
