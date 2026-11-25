@@ -16,12 +16,14 @@ import io.takari.bpm.model.SequenceFlow.ExecutionListener;
 import io.takari.bpm.model.ServiceTask;
 import io.takari.bpm.model.StartEvent;
 import io.takari.bpm.model.SubProcess;
+import io.takari.bpm.model.TerminateEvent;
 import io.takari.bpm.model.VariableMapping;
 import io.takari.bpm.xml.Parser;
 import io.takari.bpm.xml.ParserException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import javax.xml.XMLConstants;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -43,8 +45,7 @@ public class ActivitiParser implements Parser {
         }
 
         try {
-            SAXParserFactory spf = SAXParserFactory.newInstance();
-            SAXParser p = spf.newSAXParser();
+            SAXParser p = newSecureParserFactory().newSAXParser();
 
             Handler h = new Handler();
             p.parse(in, h);
@@ -54,6 +55,30 @@ public class ActivitiParser implements Parser {
             throw new ParserException("Parsing error", e);
         }
     }
+
+    /**
+     * Creates a parser factory that doesn't process DTDs and external entities (XXE).
+     */
+    private static SAXParserFactory newSecureParserFactory() throws ParserConfigurationException, SAXException {
+        SAXParserFactory spf = SAXParserFactory.newInstance();
+        spf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        spf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        spf.setFeature("http://xml.org/sax/features/external-general-entities", false);
+        spf.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+        spf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        spf.setXIncludeAware(false);
+        return spf;
+    }
+
+    /**
+     * BPMN elements that are not supported. They are rejected instead of being silently ignored, which would
+     * change the process' behavior.
+     */
+    private static final Set<String> UNSUPPORTED_ELEMENTS = Set.of(
+            "task", "userTask", "manualTask", "scriptTask", "businessRuleTask", "sendTask", "receiveTask",
+            "intermediateThrowEvent", "complexGateway", "transaction", "adHocSubProcess",
+            "signalEventDefinition", "escalationEventDefinition", "compensateEventDefinition",
+            "cancelEventDefinition", "conditionalEventDefinition", "linkEventDefinition");
 
     private static final class Handler extends DefaultHandler {
         
@@ -90,12 +115,17 @@ public class ActivitiParser implements Parser {
         private Collection<ExecutionListener> listeners;
         private Set<VariableMapping> in;
         private Set<VariableMapping> out;
+        private boolean terminate;
 
         @Override
         public void startElement(String uri, String qName, String localName, Attributes attributes) throws SAXException {
             log.debug("startElement ['{}']", localName);
             
             localName = stripNamespace(localName);
+
+            if (UNSUPPORTED_ELEMENTS.contains(localName)) {
+                throw new SAXException("Unsupported element: " + localName + " (id: " + attributes.getValue("id") + ")");
+            }
 
             switch (localName) {  
                 case "process":
@@ -105,6 +135,10 @@ public class ActivitiParser implements Parser {
                     break;
                     
                 case "subProcess":
+                    if ("true".equals(attributes.getValue("triggeredByEvent"))) {
+                        throw new SAXException("Unsupported element: event subprocess (id: " + attributes.getValue("id") + ")");
+                    }
+
                     name = attributes.getValue("name");                    
                     items.push(new Item(processId, name, children));
                     processId = attributes.getValue("id");
@@ -132,8 +166,13 @@ public class ActivitiParser implements Parser {
                     errorRef = attributes.getValue("errorRef");
                     break;
 
+                case "terminateEventDefinition":
+                    terminate = true;
+                    break;
+
                 case "endEvent":
                     id = attributes.getValue("id");
+                    terminate = false;
 
                     break;
 
@@ -329,10 +368,14 @@ public class ActivitiParser implements Parser {
                     break;
 
                 case "endEvent":
-                    EndEvent ee = new EndEvent(id, errorRef);
-                    children.add(ee);
+                    if (terminate) {
+                        children.add(new TerminateEvent(id));
+                    } else {
+                        children.add(new EndEvent(id, errorRef));
+                    }
 
                     errorRef = null;
+                    terminate = false;
                     break;
                     
                 case "callActivity":
