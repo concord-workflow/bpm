@@ -187,6 +187,10 @@ public abstract class AbstractEngine implements Engine {
             // enable the execution
             state = state.setStatus(ProcessStatus.RUNNING);
 
+            // switch to the event's scope, so the external variables are applied to the variables
+            // of the event's process (e.g. a call activity)
+            state = getExecutor().eval(state, singletonList(new SetCurrentScopeAction(e.getScopeId())));
+
             // apply the external variables (no additional attributes provided)
             state = StateHelper.applyArguments(state, null, variables, merge);
 

@@ -5,6 +5,7 @@ import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.api.ExecutionContextFactory;
 import io.takari.bpm.api.Variables;
 import io.takari.bpm.context.ExecutionContextImpl;
+import io.takari.bpm.state.Frames;
 import io.takari.bpm.state.ProcessInstance;
 import io.takari.bpm.state.VariablesHelper;
 
@@ -57,7 +58,10 @@ public class VariablesReducer implements Reducer {
             }
 
             dst = VariablesHelper.copyVariables(contextFactory, src, dst, a.getInVariables());
-            return state.setVariables(dst);
+
+            // the current scope (the call activity or the subprocess) gets its own variables
+            // and keeps them while suspended
+            return Frames.enter(state, dst);
         } else if (action instanceof InterpolateCurrentVariablesAction) {
             return VariablesHelper.interpolate(contextFactory, state);
         }

@@ -7,6 +7,7 @@ import io.takari.bpm.api.ExecutionContextFactory;
 import io.takari.bpm.commands.CommandStack;
 import io.takari.bpm.commands.PerformActionsCommand;
 import io.takari.bpm.state.Definitions;
+import io.takari.bpm.state.Frames;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,7 +82,8 @@ public class CallActivityReducer implements Reducer {
             return a.getCalledElement();
         }
 
-        ExecutionContext ctx = contextFactory.create(state.getVariables());
+        // the expression is evaluated using the caller's variables
+        ExecutionContext ctx = contextFactory.create(Frames.getParentVariables(state));
         return ctx.eval(a.getCalledElementExpression(), String.class);
     }
 }

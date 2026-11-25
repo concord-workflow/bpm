@@ -33,15 +33,12 @@ public class SubProcessHandler implements ElementHandler {
         finishers.add(errorHandlingCmd);
 
         if (s.isUseSeparateContext()) {
-            // set a new variables container (aka child's "ExecutionContext") as our current
-            actions.add(new MakeSubProcessVariablesAction(true));
-
             Set<VariableMapping> outVariables = s.getOutVariables();
             if (outVariables == null) {
                 outVariables = Collections.emptySet();
             }
 
-            // restore the original variables
+            // merge the subprocess variables into the parent's when the subprocess is done
             Command mergeCommand = new MergeVariablesCommand(state.getVariables(), outVariables);
             actions.add(new PushCommandAction(mergeCommand));
             finishers.add(mergeCommand);
@@ -54,6 +51,12 @@ public class SubProcessHandler implements ElementHandler {
         // add a start command to the stack
         Command startCmd = new ProcessElementCommand(cmd.getDefinitionId(), start.getId());
         actions.add(new PushCommandAction(startCmd));
+
+        if (s.isUseSeparateContext()) {
+            // once the scope is created, set a new variables container (aka child's "ExecutionContext")
+            // as our current
+            actions.add(new PushCommandAction(new PerformActionsCommand(new MakeSubProcessVariablesAction(true))));
+        }
 
         // push the new scope when the subprocess execution begins
         // the scope will be "popped" by one of the finishing actions

@@ -47,18 +47,18 @@ public class CallActivityHandler implements ElementHandler {
 
         Set<VariableMapping> outVariables = a.getOut();
 
-        // set a new variables container (aka child's "ExecutionContext") as the current one
-        actions.add(new MakeSubProcessVariablesAction(inVariables, a.isCopyAllVariables()));
-
         // add a variables merging command to the stack
         Command mergeCommand = new MergeVariablesCommand(state.getVariables(), outVariables,
                 cfg.isCopyAllCallActivityOutVariables() && a.isCopyAllVariables());
         finishers.add(mergeCommand);
         actions.add(new PushCommandAction(mergeCommand));
 
-        // find the called process and start its execution
-        CallActivity e = (CallActivity) ProcessDefinitionUtils.findElement(pd, cmd.getElementId());
-        actions.add(new FindAndCallActivityAction(e.getCalledElement(), e.getCalledElementExpression()));
+        // once the scope is created: set a new variables container (aka child's "ExecutionContext")
+        // as the current one, then find the called process and start its execution
+        actions.add(new PushCommandAction(new PerformActionsCommand(
+                new FindAndCallActivityAction(a.getCalledElement(), a.getCalledElementExpression()))));
+        actions.add(new PushCommandAction(new PerformActionsCommand(
+                new MakeSubProcessVariablesAction(inVariables, a.isCopyAllVariables()))));
 
         // push the new scope when the call begins
         // the scope will be "popped" by one of the finishing actions

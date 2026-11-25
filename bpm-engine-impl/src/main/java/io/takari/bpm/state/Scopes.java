@@ -1,5 +1,6 @@
 package io.takari.bpm.state;
 
+import io.takari.bpm.api.Variables;
 import io.takari.bpm.commands.Command;
 import org.pcollections.HashTreePMap;
 import org.pcollections.PMap;
@@ -97,6 +98,60 @@ public class Scopes implements Serializable {
         return result;
     }
 
+    /**
+     * @return the ID of the scope that owns the variables of the specified scope: the nearest scope
+     * (including the specified one) that has its own variables (a call activity or a subprocess with
+     * a separate context) or the root scope.
+     */
+    public UUID getVariablesOwnerId(UUID scopeId) {
+        UUID id = scopeId;
+        while (id != null) {
+            Scope s = scopes.get(id);
+            if (s == null) {
+                return null;
+            }
+            if (s.isOwnsVariables() || s.getParentId() == null) {
+                return id;
+            }
+            id = s.getParentId();
+        }
+        return null;
+    }
+
+    /**
+     * @return the ID of the root scope or {@code null}.
+     */
+    public UUID getRootId() {
+        for (Scope s : scopes.values()) {
+            if (s.getParentId() == null) {
+                return s.getId();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Marks the scope as the owner of its own variables (see {@link #getVariablesOwnerId(UUID)}).
+     */
+    public Scopes markVariablesOwner(UUID scopeId) {
+        Scope s = scopes.get(scopeId);
+        if (s == null) {
+            throw new IllegalArgumentException("Unknown scope: " + scopeId);
+        }
+        return new Scopes(currentId, scopes.plus(scopeId, s.withVariables(true, s.getVariables())));
+    }
+
+    /**
+     * Stores the variables of the scope while the scope isn't the current one.
+     */
+    public Scopes setVariables(UUID scopeId, Variables variables) {
+        Scope s = scopes.get(scopeId);
+        if (s == null) {
+            throw new IllegalArgumentException("Unknown scope: " + scopeId);
+        }
+        return new Scopes(currentId, scopes.plus(scopeId, s.withVariables(s.isOwnsVariables(), variables)));
+    }
+
     public Scopes remove(UUID scopeId) {
         if (scopeId == currentId) {
             throw new IllegalArgumentException("Can't remove the current scope: " + scopeId);
@@ -120,12 +175,38 @@ public class Scopes implements Serializable {
         private final UUID id;
         private final boolean exclusive;
         private final Command[] finishers;
+        private final boolean ownsVariables;
+        private final Variables variables;
 
         public Scope(UUID parentId, UUID id, boolean exclusive, Command[] finishers) {
+            this(parentId, id, exclusive, finishers, false, null);
+        }
+
+        private Scope(UUID parentId, UUID id, boolean exclusive, Command[] finishers, boolean ownsVariables, Variables variables) {
             this.parentId = parentId;
             this.id = id;
             this.exclusive = exclusive;
             this.finishers = finishers;
+            this.ownsVariables = ownsVariables;
+            this.variables = variables;
+        }
+
+        private Scope withVariables(boolean ownsVariables, Variables variables) {
+            return new Scope(parentId, id, exclusive, finishers, ownsVariables, variables);
+        }
+
+        /**
+         * @return {@code true} if the scope has its own variables, e.g. a call activity.
+         */
+        public boolean isOwnsVariables() {
+            return ownsVariables;
+        }
+
+        /**
+         * @return the scope's variables saved while the scope isn't the current one or {@code null}.
+         */
+        public Variables getVariables() {
+            return variables;
         }
 
         public UUID getParentId() {
