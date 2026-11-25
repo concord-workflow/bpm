@@ -39,10 +39,8 @@ public class CallActivityHandler implements ElementHandler {
         IndexedProcessDefinition pd = state.getDefinition(cmd.getDefinitionId());
         CallActivity a = (CallActivity) ProcessDefinitionUtils.findElement(pd, cmd.getElementId());
 
-        Set<VariableMapping> inVariables = a.getIn();
-        if (inVariables == null) {
-            inVariables = new HashSet<>();
-        }
+        // the definition is shared between the process instances, don't modify it
+        Set<VariableMapping> inVariables = a.getIn() != null ? new HashSet<>(a.getIn()) : new HashSet<>();
         inVariables.add(VariableMapping.copy(ExecutionContext.PROCESS_BUSINESS_KEY, ExecutionContext.PROCESS_BUSINESS_KEY));
 
         Set<VariableMapping> outVariables = a.getOut();
