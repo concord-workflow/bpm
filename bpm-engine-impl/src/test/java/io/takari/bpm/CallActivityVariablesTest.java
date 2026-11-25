@@ -167,4 +167,36 @@ public class CallActivityVariablesTest extends AbstractEngineTest {
                 "outer=O,inner=I,result=null",
                 "outer=O,inner=null,result=I"), seen);
     }
+
+    /**
+     * The call activity must not modify its (shared) definition, e.g. by adding the implicit
+     * variable mappings.
+     */
+    @Test
+    public void testDefinitionIsNotModified() throws Exception {
+        registerPeek("peek", "x");
+
+        Set<VariableMapping> in = Set.of(VariableMapping.copy("x", "x"));
+        CallActivity call = new CallActivity("call", "child", in, null);
+
+        deploy(new ProcessDefinition("parent", Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "call"),
+                call,
+                new SequenceFlow("f2", "call", "end"),
+                new EndEvent("end"))));
+
+        deploy(new ProcessDefinition("child", Arrays.asList(
+                new StartEvent("cstart"),
+                new SequenceFlow("c1", "cstart", "p1"),
+                new ServiceTask("p1", ExpressionType.DELEGATE, "${peek}"),
+                new SequenceFlow("c2", "p1", "cend"),
+                new EndEvent("cend"))));
+
+        getEngine().start(UUID.randomUUID().toString(), "parent", Map.of("x", "X"));
+        getEngine().start(UUID.randomUUID().toString(), "parent", Map.of("x", "Y"));
+
+        assertEquals(List.of("x=X", "x=Y"), seen);
+        assertEquals(Set.of(VariableMapping.copy("x", "x")), call.getIn());
+    }
 }
