@@ -4,9 +4,12 @@ import io.takari.bpm.UuidGenerator;
 import io.takari.bpm.actions.*;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.commands.PerformActionsCommand;
+import io.takari.bpm.state.BpmnErrorHelper;
 import io.takari.bpm.state.Events;
+import io.takari.bpm.state.Joins;
 import io.takari.bpm.state.ProcessInstance;
 import io.takari.bpm.state.Scopes;
+import io.takari.bpm.state.Scopes.Scope;
 
 import java.util.UUID;
 
@@ -40,6 +43,14 @@ public class ScopeReducer implements Reducer {
             // TODO move into a separate action?
             Events e = state.getEvents();
             if (e.isEmpty(s, id)) {
+                Scope removed = state.getScopes().values().get(id);
+                if (removed != null && removed.getParentId() == null
+                        && BpmnErrorHelper.getRaisedError(state.getVariables()) == null) {
+                    // the process is done, no tokens should be left waiting in joins
+                    Joins.assertNoWaitingTokens(state, id);
+                }
+
+                state = state.setActivations(state.getActivations().removeScope(id));
                 s = s.remove(id);
 
                 FireOnScopeDestroyedInterceptorsAction i = new FireOnScopeDestroyedInterceptorsAction(id);
