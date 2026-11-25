@@ -12,6 +12,7 @@ import io.takari.bpm.commands.PerformActionsCommand;
 import io.takari.bpm.model.BoundaryEvent;
 import io.takari.bpm.state.BpmnErrorHelper;
 import io.takari.bpm.state.Events;
+import io.takari.bpm.state.Joins;
 import io.takari.bpm.state.ProcessInstance;
 import io.takari.bpm.state.Scopes;
 import org.slf4j.Logger;
@@ -44,6 +45,9 @@ public class ActivityFinalizerCommandHandler implements CommandHandler<ActivityF
 
         BpmnError error = BpmnErrorHelper.getRaisedError(state.getVariables());
         if (error == null) {
+            // the activity is done, no tokens should be left waiting in its joins
+            Joins.assertNoWaitingTokens(state, scopes.getCurrentId());
+
             // no errors were raised, will continue the execution
             log.debug("handle ['{}', '{}'] -> no errors, will continue from '{}'", state.getBusinessKey(), cmd.getElementId(),
                     cmd.getElementId());

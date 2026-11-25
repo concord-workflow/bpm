@@ -1,6 +1,7 @@
 package io.takari.bpm;
 
 import io.takari.bpm.api.BpmnError;
+import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.api.JavaDelegate;
 import io.takari.bpm.model.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,6 +12,8 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Join semantics: a join waits for all tokens that can still reach it.
@@ -339,5 +342,103 @@ public class JoinTest extends AbstractEngineTest {
         getEngine().start(UUID.randomUUID().toString(), processId, null);
 
         assertEquals(1, afterJoin.get());
+    }
+
+    /**
+     * The join waits for a flow that can never be activated. The process must not finish silently.
+     * <pre>
+     * start --> gw1 --> gw2 --> after --> end
+     *                  /
+     *         t0 ------
+     * </pre>
+     */
+    @Test
+    public void testUnsatisfiableJoinFails() throws Exception {
+        String processId = "test";
+        deploy(new ProcessDefinition(processId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "gw1"),
+                new ParallelGateway("gw1"),
+                new SequenceFlow("f2", "gw1", "gw2"),
+                new ServiceTask("t0", ExpressionType.DELEGATE, "${noop}"),
+                new SequenceFlow("f3", "t0", "gw2"),
+                new ParallelGateway("gw2"),
+                new SequenceFlow("f4", "gw2", "after"),
+                new ServiceTask("after", ExpressionType.DELEGATE, "${after}"),
+                new SequenceFlow("f5", "after", "end"),
+                new EndEvent("end"))));
+
+        ExecutionException e = assertThrows(ExecutionException.class,
+                () -> getEngine().start(UUID.randomUUID().toString(), processId, null));
+        assertTrue(e.getMessage().contains("tokens waiting in joins"), e.getMessage());
+        assertEquals(0, afterJoin.get());
+    }
+
+    /**
+     * Same as {@link #testUnsatisfiableJoinFails()}, but inside a subprocess.
+     */
+    @Test
+    public void testUnsatisfiableJoinInSubprocessFails() throws Exception {
+        String processId = "test";
+        deploy(new ProcessDefinition(processId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "sub"),
+                new SubProcess("sub", Arrays.asList(
+                        new StartEvent("sstart"),
+                        new SequenceFlow("s1", "sstart", "gw1"),
+                        new ParallelGateway("gw1"),
+                        new SequenceFlow("s2", "gw1", "gw2"),
+                        new ServiceTask("t0", ExpressionType.DELEGATE, "${noop}"),
+                        new SequenceFlow("s3", "t0", "gw2"),
+                        new ParallelGateway("gw2"),
+                        new SequenceFlow("s4", "gw2", "send"),
+                        new EndEvent("send"))),
+                new SequenceFlow("f2", "sub", "after"),
+                new ServiceTask("after", ExpressionType.DELEGATE, "${after}"),
+                new SequenceFlow("f3", "after", "end"),
+                new EndEvent("end"))));
+
+        ExecutionException e = assertThrows(ExecutionException.class,
+                () -> getEngine().start(UUID.randomUUID().toString(), processId, null));
+        assertTrue(e.getMessage().contains("tokens waiting in joins"), e.getMessage());
+        assertEquals(0, afterJoin.get());
+    }
+
+    /**
+     * A terminate end event discards the tokens waiting in joins.
+     * <pre>
+     * start --> gw1 --> t1 --> gw2 --> after --> end
+     *              \          /
+     *               --> ev ---
+     *                \
+     *                 --> terminate
+     * </pre>
+     */
+    @Test
+    public void testTerminateWithWaitingJoin() throws Exception {
+        String processId = "test";
+        deploy(new ProcessDefinition(processId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "gw1"),
+                new ParallelGateway("gw1"),
+                new SequenceFlow("f2", "gw1", "t1"),
+                new ServiceTask("t1", ExpressionType.DELEGATE, "${noop}"),
+                new SequenceFlow("f3", "t1", "gw2"),
+                new SequenceFlow("f4", "gw1", "ev"),
+                new IntermediateCatchEvent("ev", "ev"),
+                new SequenceFlow("f5", "ev", "gw2"),
+                new SequenceFlow("f6", "gw1", "terminate"),
+                new TerminateEvent("terminate"),
+                new ParallelGateway("gw2"),
+                new SequenceFlow("f7", "gw2", "after"),
+                new ServiceTask("after", ExpressionType.DELEGATE, "${after}"),
+                new SequenceFlow("f8", "after", "end"),
+                new EndEvent("end"))));
+
+        String key = UUID.randomUUID().toString();
+        getEngine().start(key, processId, null);
+
+        assertEquals(0, afterJoin.get());
+        assertTrue(getEventManager().find(key, "ev").isEmpty());
     }
 }

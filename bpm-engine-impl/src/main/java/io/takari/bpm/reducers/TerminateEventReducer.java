@@ -6,7 +6,9 @@ import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.commands.CommandStack;
 import io.takari.bpm.event.EventPersistenceManager;
 import io.takari.bpm.event.EventStorage;
+import io.takari.bpm.state.Activations;
 import io.takari.bpm.state.Events;
+import io.takari.bpm.state.Forks;
 import io.takari.bpm.state.ProcessInstance;
 import io.takari.bpm.state.Scopes;
 import org.slf4j.Logger;
@@ -34,6 +36,8 @@ public class TerminateEventReducer  implements Reducer {
         return state
                 .setStack(new CommandStack())
                 .setEvents(new Events())
+                .setActivations(new Activations())
+                .setForks(new Forks())
                 .setScopes(new Scopes());
     }
 }
