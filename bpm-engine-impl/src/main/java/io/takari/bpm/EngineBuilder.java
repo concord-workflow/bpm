@@ -201,7 +201,8 @@ public final class EngineBuilder {
         }
 
         if (threadPool == null) {
-            threadPool = Executors.newCachedThreadPool();
+            // service tasks with timer boundary events run in their own threads
+            threadPool = Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("bpm-task-", 0).factory());
         }
 
         IndexedProcessDefinitionProvider indexedDefinitionProvider;

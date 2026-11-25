@@ -50,6 +50,16 @@ public class DelegatingElementHandler implements ElementHandler {
             throw new ExecutionException("Unsupported element: %s", e);
         }
 
+        if (!(e instanceof ServiceTask)) {
+            // timer boundary events are implemented only for service tasks, don't ignore them silently
+            for (BoundaryEvent ev : ProcessDefinitionUtils.findOptionalBoundaryEvents(pd, e.getId())) {
+                if (ev.getTimeDuration() != null) {
+                    throw new ExecutionException("Invalid process definition '%s': timer boundary event '%s' is attached to '%s'. " +
+                            "Timer boundary events are supported only for service tasks", pd.getId(), ev.getId(), e.getId());
+                }
+            }
+        }
+
         actions = delegate.handle(state, cmd, actions);
         log.debug("handle ['{}', '{}'] -> done", state.getBusinessKey(), cmd.getElementId());
 

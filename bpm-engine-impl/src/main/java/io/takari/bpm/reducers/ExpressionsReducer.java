@@ -61,13 +61,21 @@ public class ExpressionsReducer extends BpmnErrorHandlingReducer {
             boolean storeResult = cfg.isStoreExpressionEvalResultsInContext();
             Callable<Command> fn = new DelegateFn(javaDelegateHandler, ctx, a.getType(), a.getExpression(), a.getDefaultCommand(), storeResult);
 
+            TimeoutCallable<Command> timeoutFn = null;
             List<Timeout<Command>> timeouts = a.getTimeouts();
             if (timeouts != null && !timeouts.isEmpty()) {
                 // a timeout handling decorator
-                fn = new TimeoutCallable<>(executor, timeouts, fn);
+                fn = timeoutFn = new TimeoutCallable<>(executor, timeouts, fn);
             }
 
             Command next = fn.call();
+
+            if (timeoutFn != null && timeoutFn.isTimedOut()) {
+                // the task was abandoned and may still be running: its context is discarded
+                // and the process continues from the timer boundary event
+                return state.setStack(state.getStack().push(next));
+            }
+
             state = ContextUtils.handleSuspend(state ,ctx, a.getDefinitionId(), a.getElementId(), next);
         } catch (ELException e) {
             Throwable cause = e.getCause();
