@@ -130,7 +130,13 @@ public abstract class AbstractEngine implements Engine {
         lm.lock(businessKey);
 
         try {
-            resumeLockSafe(ev, variables, merge);
+            // the event could've been processed while we were waiting for the lock
+            Event current = em.get(eventId);
+            if (current == null) {
+                throw new NoEventFoundException("No event '%s' found", eventId);
+            }
+
+            resumeLockSafe(current, variables, merge);
         } catch (Exception e) {
             // TODO move to the executor?
             getInterceptorHolder().fireOnError(businessKey, ev.getDefinitionId(), ev.getExecutionId(), null, e);

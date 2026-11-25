@@ -10,6 +10,7 @@ import io.takari.bpm.model.ProcessDefinition;
 import io.takari.bpm.model.SequenceFlow;
 import io.takari.bpm.model.StartEvent;
 import io.takari.bpm.persistence.PersistenceChanges;
+import io.takari.bpm.persistence.StaleStateException;
 import io.takari.bpm.state.ProcessInstance;
 import io.takari.bpm.state.ProcessStatus;
 import org.junit.jupiter.api.Test;
@@ -152,6 +153,41 @@ class MvStorePersistenceManagerTest {
 
             assertFalse(committed);
             assertNull(db.persistenceManager().get(id));
+        }
+    }
+
+    @Test
+    void rejectsStaleChanges() throws Exception {
+        try (MvStoreDatabase db = MvStoreDatabase.open(MvStoreConfig.inMemory().build())) {
+            MvStorePersistenceManager pm = db.persistenceManager();
+            MvStoreEventStorage events = db.eventStorage();
+
+            UUID id = UUID.randomUUID();
+            ProcessInstance v1 = createInstance(id, "bk", "v1").setVersion(1);
+            pm.save(v1, 0);
+            assertEquals(1, pm.get(id).getVersion());
+
+            // stale: the stored version is 1
+            ProcessInstance stale = createInstance(id, "bk", "stale").setVersion(1);
+            assertThrows(StaleStateException.class, () -> pm.save(stale, 0));
+
+            Event ev = new Event(UUID.randomUUID(), id, "test-proc", UUID.randomUUID(), "ev", "bk", false, null, null);
+            assertThrows(StaleStateException.class,
+                    () -> pm.commit(new PersistenceChanges(stale, null, List.of(ev), List.of(), 0), events));
+
+            // nothing is applied
+            assertEquals("v1", pm.get(id).getVariables().getVariable("k"));
+            assertNull(events.get(ev.getId()));
+
+            // the expected version matches
+            ProcessInstance v2 = createInstance(id, "bk", "v2").setVersion(2);
+            assertTrue(pm.commit(new PersistenceChanges(v2, null, List.of(ev), List.of(), 1), events));
+            assertEquals("v2", pm.get(id).getVariables().getVariable("k"));
+            assertNotNull(events.get(ev.getId()));
+
+            assertThrows(StaleStateException.class, () -> pm.remove(id, 1));
+            pm.remove(id, 2);
+            assertNull(pm.get(id));
         }
     }
 }

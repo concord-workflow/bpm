@@ -42,6 +42,7 @@ public final class UnitOfWork {
     private final Set<UUID> removedEvents = new LinkedHashSet<>();
     private ProcessInstance savedState;
     private UUID removedStateId;
+    private long expectedVersion;
 
     private UnitOfWork() {
     }
@@ -65,18 +66,28 @@ public final class UnitOfWork {
         return new ArrayList<>(addedEvents.values());
     }
 
+    /**
+     * @param state the state to save. Its version must be the version of the loaded state,
+     *              the saved state gets the next version.
+     */
     public void saveState(ProcessInstance state) {
-        this.savedState = state;
+        this.expectedVersion = state.getVersion();
+        this.savedState = state.setVersion(state.getVersion() + 1);
         this.removedStateId = null;
     }
 
-    public void removeState(UUID id) {
+    /**
+     * @param state the state to remove.
+     */
+    public void removeState(ProcessInstance state) {
+        this.expectedVersion = state.getVersion();
         this.savedState = null;
-        this.removedStateId = id;
+        this.removedStateId = state.getId();
     }
 
     public PersistenceChanges toChanges() {
-        return new PersistenceChanges(savedState, removedStateId, new ArrayList<>(addedEvents.values()), new ArrayList<>(removedEvents));
+        return new PersistenceChanges(savedState, removedStateId, new ArrayList<>(addedEvents.values()), new ArrayList<>(removedEvents),
+                expectedVersion);
     }
 
     /**

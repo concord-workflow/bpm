@@ -16,12 +16,28 @@ public final class PersistenceChanges {
     private final UUID removedStateId;
     private final List<Event> addedEvents;
     private final List<UUID> removedEvents;
+    private final long expectedVersion;
 
     public PersistenceChanges(ProcessInstance savedState, UUID removedStateId, List<Event> addedEvents, List<UUID> removedEvents) {
+        this(savedState, removedStateId, addedEvents, removedEvents, savedState != null ? Math.max(0, savedState.getVersion() - 1) : 0);
+    }
+
+    public PersistenceChanges(ProcessInstance savedState, UUID removedStateId, List<Event> addedEvents, List<UUID> removedEvents,
+                              long expectedVersion) {
         this.savedState = savedState;
         this.removedStateId = removedStateId;
         this.addedEvents = List.copyOf(addedEvents);
         this.removedEvents = List.copyOf(removedEvents);
+        this.expectedVersion = expectedVersion;
+    }
+
+    /**
+     * @return the version of the state that must be currently stored for the changes to be applied:
+     * the version of the state loaded by the run, {@code 0} for a new instance.
+     * See {@link PersistenceManager#save(ProcessInstance, long)}.
+     */
+    public long getExpectedVersion() {
+        return expectedVersion;
     }
 
     /**
