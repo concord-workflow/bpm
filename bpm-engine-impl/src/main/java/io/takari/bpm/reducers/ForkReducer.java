@@ -9,6 +9,7 @@ import io.takari.bpm.commands.CommandStack;
 import io.takari.bpm.commands.PerformActionsCommand;
 import io.takari.bpm.api.ExecutionContextFactory;
 import io.takari.bpm.model.SequenceFlow;
+import io.takari.bpm.state.Activations;
 import io.takari.bpm.state.Forks;
 import io.takari.bpm.state.Forks.Fork;
 import io.takari.bpm.state.ProcessInstance;
@@ -33,17 +34,30 @@ public class ForkReducer implements Reducer {
         if (action instanceof ParallelForkAction) {
             ParallelForkAction a = (ParallelForkAction) action;
 
-            // parallel gateway doesn't evaluate the expressions
             IndexedProcessDefinition pd = state.getDefinition(a.getDefinitionId());
+            if (!ProcessDefinitionUtils.isJoinComplete(state, pd, a.getElementId(), false)) {
+                // the join was already activated (e.g. re-evaluated after one of the tokens took another path)
+                log.debug("reduce ['{}', '{}'] -> join is not complete, skipping", state.getBusinessKey(), a.getElementId());
+                return state;
+            }
+            state = consumeJoin(state, pd, a.getElementId());
+
+            // parallel gateway doesn't evaluate the expressions
             List<SequenceFlow> out = ProcessDefinitionUtils.findOutgoingFlows(pd, a.getElementId());
 
             return follow(pd, state, a.getDefinitionId(), a.getElementId(), out, null);
         } else if (action instanceof InclusiveForkAction) {
             InclusiveForkAction a = (InclusiveForkAction) action;
 
+            IndexedProcessDefinition pd = state.getDefinition(a.getDefinitionId());
+            if (!ProcessDefinitionUtils.isJoinComplete(state, pd, a.getElementId(), false)) {
+                log.debug("reduce ['{}', '{}'] -> join is not complete, skipping", state.getBusinessKey(), a.getElementId());
+                return state;
+            }
+            state = consumeJoin(state, pd, a.getElementId());
+
             // inclusive gateway should evaluate flow expression and filter out
             // those, which was evaluated into 'false'
-            IndexedProcessDefinition pd = state.getDefinition(a.getDefinitionId());
             List<SequenceFlow> out = ProcessDefinitionUtils.findOutgoingFlows(pd, a.getElementId());
 
             ExecutionContext ctx = contextFactory.create(state.getVariables(), a.getDefinitionId(), a.getElementId());
@@ -88,6 +102,17 @@ public class ForkReducer implements Reducer {
         return state;
     }
 
+    /**
+     * Removes the join's activations: the tokens are consumed by the gateway.
+     * The next activation of the same gateway (e.g. in a loop) starts from scratch.
+     */
+    private static ProcessInstance consumeJoin(ProcessInstance state, IndexedProcessDefinition pd, String elementId) throws ExecutionException {
+        List<SequenceFlow> in = ProcessDefinitionUtils.findIncomingFlows(pd, elementId);
+        Activations acts = state.getActivations()
+                .consume(state.getScopes(), state.getScopes().getCurrentId(), ProcessDefinitionUtils.toIds(in));
+        return state.setActivations(acts);
+    }
+
     private static ProcessInstance follow(IndexedProcessDefinition pd, ProcessInstance state, String definitionId, String elementId, List<SequenceFlow> flows, List<SequenceFlow> inactiveFlows) throws ExecutionException {
 
         CommandStack stack = state.getStack();
@@ -103,7 +128,7 @@ public class ForkReducer implements Reducer {
         // activation counts before commencing
         if (flows.size() > 0) {
             SequenceFlow ff = flows.get(0);
-            if (ProcessDefinitionUtils.isTracedToElement(pd, ff.getId(), elementId)) {
+            if (isSelfLoop(pd, ff, elementId)) {
                 flows.remove(0);
                 stack = stack.push(new PerformActionsCommand(Arrays.asList(
                         new ActivateFlowsAction(definitionId, ff.getId(), 1),
@@ -125,6 +150,20 @@ public class ForkReducer implements Reducer {
         }
 
         return state.setForks(forks).setStack(stack);
+    }
+
+    /**
+     * @return {@code true} if a token sent into the flow returns directly to the gateway, i.e. without
+     * passing through any other join.
+     */
+    private static boolean isSelfLoop(IndexedProcessDefinition pd, SequenceFlow flow, String gatewayId) throws ExecutionException {
+        for (String flowId : ProcessDefinitionUtils.findReachableJoinFlows(pd, flow.getId()).keySet()) {
+            SequenceFlow f = (SequenceFlow) ProcessDefinitionUtils.findElement(pd, flowId);
+            if (gatewayId.equals(f.getTo())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static List<SequenceFlow> filterInactive(ExecutionContext ctx, List<SequenceFlow> flows) throws ExecutionException {

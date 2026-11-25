@@ -1,10 +1,15 @@
 package io.takari.bpm;
 
+import io.takari.bpm.actions.Action;
+import io.takari.bpm.actions.InclusiveForkAction;
+import io.takari.bpm.actions.ParallelForkAction;
 import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.commands.Command;
+import io.takari.bpm.commands.PerformActionsCommand;
 import io.takari.bpm.commands.ProcessElementCommand;
 import io.takari.bpm.model.*;
 import io.takari.bpm.state.Activations;
+import io.takari.bpm.state.Activations.Activation;
 import io.takari.bpm.state.ProcessInstance;
 import io.takari.bpm.state.Scopes;
 import io.takari.bpm.utils.Timeout;
@@ -175,108 +180,210 @@ public final class ProcessDefinitionUtils {
         return null;
     }
 
-    private static void fillQueue(Queue<FlowSignal> q, IndexedProcessDefinition pd, String elemId, int count) throws ExecutionException {
-        findOptionalOutgoingFlows(pd, elemId).stream()
-                .map(s -> new FlowSignal(s, count))
-                .forEach(q::add);
-
-        for (BoundaryEvent be : findOptionalBoundaryEvents(pd, elemId)) {
-            findOptionalOutgoingFlows(pd, be.getId()).stream()
-                    .map(s -> new FlowSignal(s, 0)) // assuming no errors at first
-                    .forEach(q::add);
-        }
-    }
-
-    private static class FlowSignal {
-        final SequenceFlow flow;
-        final int count;
-
-        public FlowSignal(SequenceFlow flow, int count) {
-            this.flow = flow;
-            this.count = count;
-        }
-    }
-
     /**
-     * Collects all (not just the first ones) downstream parallel gateways' incoming flows
+     * Computes the incoming flows of the parallel and inclusive gateways that a single token, positioned at
+     * the specified element (or sequence flow), can reach next. The search stops at the first gateway on each path.
+     * <p>
+     * The result maps the gateway's incoming flow ID to the number of tokens expected to arrive on that flow:
+     * <ul>
+     *     <li>exclusive and event-based gateways send the token to only one of their outgoing flows, so the
+     *     alternatives are merged using {@code max} (a token arrives at most once, regardless of the path taken);</li>
+     *     <li>other elements send a token into each of their outgoing flows, so the counts are added;</li>
+     *     <li>flows reachable only through boundary events are included with {@code 0}: no tokens are expected,
+     *     but the flow is known to be "activated".</li>
+     * </ul>
+     * Loops are cut when the search returns to an element that's already on the current path.
      */
-    private static List<FlowSignal> findDownstreamGatewayFlows(IndexedProcessDefinition pd, String from, int count) throws ExecutionException {
-        Set<String> memento = new HashSet<>();
-        Queue<FlowSignal> processingQueue = new LinkedList<>();
+    public static Map<String, Integer> findReachableJoinFlows(IndexedProcessDefinition pd, String fromId) throws ExecutionException {
+        return reach(pd, fromId, new HashSet<>(), new HashMap<>()).flows;
+    }
 
-        List<FlowSignal> results = new ArrayList<>();
+    private static final class Reach {
 
-        AbstractElement elem = findElement(pd, from);
-        if (elem instanceof SequenceFlow) {
-            processingQueue.add(new FlowSignal((SequenceFlow) elem, count));
-        } else {
-            fillQueue(processingQueue, pd, elem.getId(), count);
+        private static final Reach CUT = new Reach(Collections.emptyMap(), true);
+
+        private final Map<String, Integer> flows;
+        private final boolean cut;
+
+        private Reach(Map<String, Integer> flows, boolean cut) {
+            this.flows = flows;
+            this.cut = cut;
+        }
+    }
+
+    private static Reach reach(IndexedProcessDefinition pd, String id, Set<String> path, Map<String, Map<String, Integer>> memo) throws ExecutionException {
+        Map<String, Integer> cached = memo.get(id);
+        if (cached != null) {
+            return new Reach(cached, false);
         }
 
-        while (!processingQueue.isEmpty()) {
-            FlowSignal fs = processingQueue.poll();
-
-            if (!memento.add(fs.flow.getId())) {
-                continue;
-            }
-
-            AbstractElement target = findElement(pd, fs.flow.getTo());
-            if (target instanceof EndEvent) {
-                continue;
-            }
-
-            if (isParallelGateway(target)) {
-                results.add(fs);
-                continue;
-            }
-
-            fillQueue(processingQueue, pd, target.getId(), fs.count);
+        if (!path.add(id)) {
+            return Reach.CUT;
         }
 
-        return results;
+        try {
+            Map<String, Integer> result = new HashMap<>();
+            boolean cut = false;
+
+            AbstractElement e = findElement(pd, id);
+            if (e instanceof SequenceFlow f) {
+                AbstractElement target = findElement(pd, f.getTo());
+                if (isParallelGateway(target)) {
+                    result.put(f.getId(), 1);
+                } else {
+                    Reach r = reach(pd, target.getId(), path, memo);
+                    result.putAll(r.flows);
+                    cut = r.cut;
+                }
+            } else if (!(e instanceof EndEvent)) {
+                boolean exclusive = e instanceof ExclusiveGateway || e instanceof EventBasedGateway;
+
+                List<SequenceFlow> out = findOptionalOutgoingFlows(pd, id);
+                if (out != null) {
+                    for (SequenceFlow f : out) {
+                        Reach r = reach(pd, f.getId(), path, memo);
+                        for (Map.Entry<String, Integer> x : r.flows.entrySet()) {
+                            if (exclusive) {
+                                result.merge(x.getKey(), x.getValue(), Math::max);
+                            } else {
+                                result.merge(x.getKey(), x.getValue(), Integer::sum);
+                            }
+                        }
+                        cut |= r.cut;
+                    }
+                }
+
+                for (BoundaryEvent be : findOptionalBoundaryEvents(pd, id)) {
+                    // assuming no errors at first
+                    Reach r = reach(pd, be.getId(), path, memo);
+                    for (String k : r.flows.keySet()) {
+                        result.putIfAbsent(k, 0);
+                    }
+                    cut |= r.cut;
+                }
+            }
+
+            if (!cut) {
+                memo.put(id, result);
+            }
+
+            return new Reach(result, cut);
+        } finally {
+            path.remove(id);
+        }
     }
 
     public static boolean isParallelGateway(AbstractElement e) {
         return e instanceof ParallelGateway;
     }
 
+    /**
+     * Registers the expected join activations for {@code count} tokens positioned at the specified element.
+     * A negative {@code count} removes the expectations.
+     */
     public static ProcessInstance activateGatewayFlow(ProcessInstance state, IndexedProcessDefinition pd, String elementId, int count) throws ExecutionException {
         Activations acts = state.getActivations();
         Scopes scopes = state.getScopes();
         UUID scopeId = scopes.getCurrentId();
-        for (FlowSignal fs : findDownstreamGatewayFlows(pd, elementId, count)) {
-            acts = acts.incExpectation(scopes, scopeId, fs.flow.getId(), fs.count);
+        for (Map.Entry<String, Integer> e : findReachableJoinFlows(pd, elementId).entrySet()) {
+            acts = acts.incExpectation(scopes, scopeId, e.getKey(), e.getValue() * count);
         }
-        return state.setActivations(acts);
+        state = state.setActivations(acts);
+
+        if (count < 0) {
+            state = recheckJoins(state, pd, findReachableJoinFlows(pd, elementId).keySet());
+        }
+
+        return state;
     }
 
     /**
-     * Tests whether the normal (non-error) flow can be traced to the specified element
+     * Moves a token from one position to another (e.g. when an exclusive gateway selects one of its flows or
+     * when an activity is interrupted by a boundary event). The expected join activations are adjusted to the
+     * difference between what's reachable from the new position and what was reachable from the old one.
+     * Joins that no longer wait for the token are re-evaluated.
      */
-    public static boolean isTracedToElement(IndexedProcessDefinition pd, String flowId, String elementId) throws ExecutionException {
-        Set<String> memento = new HashSet<>();
-        Queue<String> processingQueue = new LinkedList<>();
-        processingQueue.add(flowId);
-        while (!processingQueue.isEmpty()) {
-            String nextId = processingQueue.poll();
-
-            if (nextId.equals(elementId)) {
-                return true;
-            }
-
-            if (!memento.add(nextId)) {
-                continue;
-            }
-            AbstractElement target = findElement(pd, nextId);
-            if (target instanceof SequenceFlow) {
-                processingQueue.add(((SequenceFlow) target).getTo());
-                continue;
-            }
-            findOptionalOutgoingFlows(pd, nextId).stream()
-                    .forEach(f -> processingQueue.add(f.getId()));
+    public static ProcessInstance retarget(ProcessInstance state, IndexedProcessDefinition pd, Collection<String> fromIds, Collection<String> toIds) throws ExecutionException {
+        Map<String, Integer> before = new HashMap<>();
+        for (String id : fromIds) {
+            findReachableJoinFlows(pd, id).forEach((k, v) -> before.merge(k, v, Integer::sum));
         }
 
-        return false;
+        Map<String, Integer> after = new HashMap<>();
+        for (String id : toIds) {
+            findReachableJoinFlows(pd, id).forEach((k, v) -> after.merge(k, v, Integer::sum));
+        }
+
+        Activations acts = state.getActivations();
+        Scopes scopes = state.getScopes();
+        UUID scopeId = scopes.getCurrentId();
+
+        Set<String> decreased = new LinkedHashSet<>();
+        Set<String> keys = new LinkedHashSet<>(before.keySet());
+        keys.addAll(after.keySet());
+        for (String k : keys) {
+            int diff = after.getOrDefault(k, 0) - before.getOrDefault(k, 0);
+            if (diff == 0 && !after.containsKey(k)) {
+                continue;
+            }
+
+            acts = acts.incExpectation(scopes, scopeId, k, diff);
+            if (diff < 0) {
+                decreased.add(k);
+            }
+        }
+
+        state = state.setActivations(acts);
+        return recheckJoins(state, pd, decreased);
+    }
+
+    /**
+     * Re-evaluates the joins of the specified flows. Joins that are complete and have tokens waiting
+     * are scheduled for activation.
+     */
+    private static ProcessInstance recheckJoins(ProcessInstance state, IndexedProcessDefinition pd, Collection<String> flowIds) throws ExecutionException {
+        Set<String> gateways = new LinkedHashSet<>();
+        for (String flowId : flowIds) {
+            SequenceFlow f = (SequenceFlow) findElement(pd, flowId);
+            gateways.add(f.getTo());
+        }
+
+        for (String gwId : gateways) {
+            if (!isJoinComplete(state, pd, gwId, true)) {
+                continue;
+            }
+
+            AbstractElement gw = findElement(pd, gwId);
+            Action a = gw instanceof InclusiveGateway
+                    ? new InclusiveForkAction(pd.getId(), gwId)
+                    : new ParallelForkAction(pd.getId(), gwId);
+
+            state = state.setStack(state.getStack().push(new PerformActionsCommand(a)));
+        }
+
+        return state;
+    }
+
+    /**
+     * Checks whether all expected tokens arrived to the specified join.
+     *
+     * @param requireTokens if {@code true}, the join must have at least one token waiting.
+     */
+    public static boolean isJoinComplete(ProcessInstance state, IndexedProcessDefinition pd, String gatewayId, boolean requireTokens) throws ExecutionException {
+        Activations acts = state.getActivations();
+        Scopes scopes = state.getScopes();
+        UUID scopeId = scopes.getCurrentId();
+
+        boolean hasTokens = false;
+        for (SequenceFlow flow : findIncomingFlows(pd, gatewayId)) {
+            Activation act = acts.getActivation(scopes, scopeId, flow.getId());
+            if (!act.isActivated() || act.getReceived() < act.getExpected()) {
+                return false;
+            }
+            hasTokens |= act.getReceived() > 0;
+        }
+
+        return hasTokens || !requireTokens;
     }
 
     public static List<String> toIds(List<? extends AbstractElement> elements) {
@@ -287,7 +394,7 @@ public final class ProcessDefinitionUtils {
         return result;
     }
 
-    private static EventBasedGateway findEventGateway(ProcessDefinition pd, String eventElementId) throws ExecutionException {
+    public static EventBasedGateway findEventGateway(ProcessDefinition pd, String eventElementId) throws ExecutionException {
         for (SequenceFlow flow : findIncomingFlows(pd, eventElementId)) {
             AbstractElement elem = findElement(pd, flow.getFrom());
             if (elem instanceof EventBasedGateway) {
