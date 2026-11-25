@@ -6,6 +6,7 @@ import io.takari.bpm.api.ExecutionException;
 import io.takari.bpm.commands.PerformActionsCommand;
 import io.takari.bpm.state.BpmnErrorHelper;
 import io.takari.bpm.state.Events;
+import io.takari.bpm.state.Frames;
 import io.takari.bpm.state.Joins;
 import io.takari.bpm.state.ProcessInstance;
 import io.takari.bpm.state.Scopes;
@@ -57,10 +58,10 @@ public class ScopeReducer implements Reducer {
                 state = state.setStack(state.getStack().push(new PerformActionsCommand(i)));
             }
 
-            return state.setScopes(s);
+            return Frames.switchTo(state, s);
         } else if (action instanceof SetCurrentScopeAction) {
             SetCurrentScopeAction a = (SetCurrentScopeAction) action;
-            return state.setScopes(state.getScopes().setCurrentId(a.getScopeId()));
+            return Frames.switchTo(state, state.getScopes().setCurrentId(a.getScopeId()));
         }
 
         return state;
