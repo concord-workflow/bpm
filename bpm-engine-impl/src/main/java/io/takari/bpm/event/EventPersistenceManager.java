@@ -23,6 +23,13 @@ public interface EventPersistenceManager {
     List<ExpiredEvent> findNextExpiredEvent(int maxEvents) throws ExecutionException;
 
     /**
+     * @see EventStorage#findNextExpiredEvent(int, long)
+     */
+    default List<ExpiredEvent> findNextExpiredEvent(int maxEvents, long leaseMillis) throws ExecutionException {
+        return findNextExpiredEvent(maxEvents);
+    }
+
+    /**
      * Applies the changes of an engine run. The default implementation applies them one by one, in the order
      * that keeps the data recoverable if the process crashes in the middle: new events, the state,
      * removed events.

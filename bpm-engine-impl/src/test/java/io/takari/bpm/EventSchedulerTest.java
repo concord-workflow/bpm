@@ -22,7 +22,7 @@ public class EventSchedulerTest {
         ExpiredEvent ev1 = new ExpiredEvent(UUID.randomUUID(), new Date());
         
         EventPersistenceManager events = mock(EventPersistenceManager.class);
-        when(events.findNextExpiredEvent(anyInt())).thenReturn(Arrays.asList(ev1));
+        when(events.findNextExpiredEvent(anyInt(), anyLong())).thenReturn(Arrays.asList(ev1));
         when(events.get(any(UUID.class))).thenAnswer(new Answer<Event>() {
             @Override
             public Event answer(InvocationOnMock invocation) throws Throwable {
