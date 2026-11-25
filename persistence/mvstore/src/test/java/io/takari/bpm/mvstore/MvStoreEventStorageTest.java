@@ -275,4 +275,37 @@ class MvStoreEventStorageTest {
             assertEquals(Set.copyOf(allIds), Set.copyOf(totalClaimed));
         }
     }
+
+    @Test
+    void leasedEventsAreReacquiredUntilRemoved() {
+        MutableClock clock = new MutableClock(Instant.ofEpochMilli(10_000));
+        try (MvStoreDatabase db = MvStoreDatabase.open(MvStoreConfig.inMemory().clock(clock).build())) {
+            MvStoreEventStorage storage = db.eventStorage();
+
+            Event e1 = event(UUID.randomUUID(), "bk", "e1", new Date(5_000), null);
+            Event e2 = event(UUID.randomUUID(), "bk", "e2", new Date(6_000), null);
+            storage.add(e1);
+            storage.add(e2);
+
+            List<ExpiredEvent> first = storage.findNextExpiredEvent(10, 1_000);
+            assertEquals(2, first.size());
+
+            // leased
+            assertTrue(storage.findNextExpiredEvent(10, 1_000).isEmpty());
+
+            // e1 is processed, e2 isn't (e.g. its resume failed)
+            storage.remove(e1.getId());
+
+            clock.set(Instant.ofEpochMilli(11_000));
+            List<ExpiredEvent> second = storage.findNextExpiredEvent(10, 1_000);
+            assertEquals(1, second.size());
+            assertEquals(e2.getId(), second.getFirst().geId());
+
+            // the stale index entry of e1 is gone
+            storage.remove(e2.getId());
+            clock.set(Instant.ofEpochMilli(20_000));
+            assertTrue(storage.findNextExpiredEvent(10, 1_000).isEmpty());
+            assertTrue(db.read(() -> db.expiredEventsIndex().isEmpty()));
+        }
+    }
 }

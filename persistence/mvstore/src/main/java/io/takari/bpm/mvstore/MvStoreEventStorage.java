@@ -201,6 +201,49 @@ public class MvStoreEventStorage implements EventStorage {
         return result;
     }
 
+    @Override
+    public List<ExpiredEvent> findNextExpiredEvent(int maxEvents, long leaseMillis) {
+        if (maxEvents <= 0) {
+            return new ArrayList<>();
+        }
+
+        long nowMillis = database.getClock().millis();
+        long leaseUntil = nowMillis + Math.max(0, leaseMillis);
+
+        List<ExpiredEvent> result = database.write(() -> {
+            MVMap<ExpiredEventIndexKey, Unit> index = database.expiredEventsIndex();
+            MVMap<UUID, byte[]> events = database.eventsMap();
+            List<ExpiredEventIndexKey> claimedKeys = new ArrayList<>();
+            List<ExpiredEvent> expired = new ArrayList<>();
+
+            Cursor<ExpiredEventIndexKey, Unit> cursor = index.cursor(null);
+            while (cursor.hasNext() && expired.size() < maxEvents) {
+                ExpiredEventIndexKey key = cursor.next();
+                if (key.expiredAtMillis() > nowMillis) {
+                    break;
+                }
+                claimedKeys.add(key);
+                if (events.containsKey(key.eventId())) {
+                    expired.add(new ExpiredEvent(key.eventId(), new Date(key.expiredAtMillis())));
+                }
+            }
+
+            // keep the claimed events scheduled: they are acquired again after the lease expires
+            // unless they are removed (i.e. processed) first. Entries of removed events are dropped
+            for (ExpiredEventIndexKey key : claimedKeys) {
+                index.remove(key);
+                if (events.containsKey(key.eventId())) {
+                    index.put(new ExpiredEventIndexKey(leaseUntil, key.eventId()), Unit.INSTANCE);
+                }
+            }
+
+            return expired;
+        });
+
+        log.debug("findNextExpiredEvent [{}, {}] -> done ({})", maxEvents, leaseMillis, result.size());
+        return result;
+    }
+
     private void removeIndexEntriesForPreviousRecord(UUID id, byte[] prevBytes) {
         try {
             EventMetadata metadata = EventCodec.decodeMetadata(prevBytes);

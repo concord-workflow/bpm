@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.UUID;
 
@@ -82,6 +83,25 @@ public class InMemEventStorage implements EventStorage {
                 }
                 if (result.size() >= maxEvents) {
                     break;
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public List<ExpiredEvent> findNextExpiredEvent(int maxEvents, long leaseMillis) {
+        List<ExpiredEvent> result = new ArrayList<>(maxEvents);
+        synchronized (events) {
+            Date now = new Date();
+            Date leaseUntil = new Date(now.getTime() + leaseMillis);
+            for (ListIterator<ExpiredEvent> it = eventsToExecute.listIterator(); it.hasNext() && result.size() < maxEvents; ) {
+                ExpiredEvent e = it.next();
+                Date expiredAt = e.getExpiredAt();
+                if (now.after(expiredAt) || now.equals(expiredAt)) {
+                    result.add(e);
+                    // keep the event scheduled until it is removed
+                    it.set(new ExpiredEvent(e.geId(), leaseUntil));
                 }
             }
         }

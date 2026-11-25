@@ -106,6 +106,13 @@ public class EventPersistenceManagerImpl implements EventPersistenceManager {
     }
 
     @Override
+    public List<ExpiredEvent> findNextExpiredEvent(int maxEvents, long leaseMillis) throws ExecutionException {
+        List<ExpiredEvent> result = eventStorage.findNextExpiredEvent(maxEvents, leaseMillis);
+        log.debug("findNextExpiredEvent [{}, {}] -> done ({})", maxEvents, leaseMillis, result.size());
+        return result;
+    }
+
+    @Override
     public void commit(PersistenceManager persistenceManager, PersistenceChanges changes) throws ExecutionException {
         if (changes.isEmpty()) {
             return;

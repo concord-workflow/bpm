@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 public final class EventScheduler {
@@ -27,6 +28,7 @@ public final class EventScheduler {
     private long acquisitionDelay = SECONDS.toMillis(5);
     private long acquisitionErrorDelay = SECONDS.toMillis(5);
     private long executionErrorDelay = SECONDS.toMillis(5);
+    private long leaseDuration = MINUTES.toMillis(5);
 
     public EventScheduler(EventPersistenceManager eventManager, int maxAcquiredEventQueueSize, EventDispatcher dispatcher) {
         this.eventManager = eventManager;
@@ -52,6 +54,15 @@ public final class EventScheduler {
 
     public void setExecutionErrorDelay(long executionErrorDelay) {
         this.executionErrorDelay = executionErrorDelay;
+    }
+
+    /**
+     * Sets for how long an acquired event is reserved for this scheduler. If the event is still there after
+     * the lease expires (e.g. the resume failed or the process crashed), it is acquired again.
+     * Should be longer than the typical resume time.
+     */
+    public void setLeaseDuration(long leaseDuration) {
+        this.leaseDuration = leaseDuration;
     }
 
     public synchronized void start() {
@@ -104,7 +115,7 @@ public final class EventScheduler {
     private void eventAcquisitionLoop() {
         while (!Thread.currentThread().isInterrupted() && !stopped) {
             try {
-                List<ExpiredEvent> acquiredEvents = eventManager.findNextExpiredEvent(maxEventsPerAcquisition);
+                List<ExpiredEvent> acquiredEvents = eventManager.findNextExpiredEvent(maxEventsPerAcquisition, leaseDuration);
                 if (!acquiredEvents.isEmpty()) {
                     for (ExpiredEvent e : acquiredEvents) {
                         acquiredEventQueue.put(e);
@@ -142,6 +153,7 @@ public final class EventScheduler {
                 log.info("eventExecutionLoop -> interrupted");
                 Thread.currentThread().interrupt();
             } catch (Exception e) {
+                // the event remains in the storage and will be acquired again after its lease expires
                 log.error("eventExecutionLoop -> error, retry in {} ms", executionErrorDelay, e);
                 sleep(executionErrorDelay);
             }
