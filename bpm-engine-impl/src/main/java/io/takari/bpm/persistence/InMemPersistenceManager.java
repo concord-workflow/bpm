@@ -23,6 +23,27 @@ public class InMemPersistenceManager implements PersistenceManager {
     }
 
     @Override
+    public void save(ProcessInstance state, long expectedVersion) throws ExecutionException {
+        check(state.getId(), expectedVersion, () -> data.put(state.getId(), state));
+        log.debug("save ['{}', {}] -> done", state.getId(), expectedVersion);
+    }
+
+    @Override
+    public void remove(UUID id, long expectedVersion) throws ExecutionException {
+        check(id, expectedVersion, () -> data.remove(id));
+        log.debug("remove ['{}', {}] -> done", id, expectedVersion);
+    }
+
+    private synchronized void check(UUID id, long expectedVersion, Runnable action) throws ExecutionException {
+        ProcessInstance current = data.get(id);
+        long actual = current != null ? current.getVersion() : 0;
+        if (actual != expectedVersion) {
+            throw new StaleStateException(id, expectedVersion, actual);
+        }
+        action.run();
+    }
+
+    @Override
     public ProcessInstance get(UUID id) {
         ProcessInstance i = data.get(id);
         if (i == null) {

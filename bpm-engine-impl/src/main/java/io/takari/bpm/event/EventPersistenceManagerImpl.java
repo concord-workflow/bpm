@@ -131,11 +131,11 @@ public class EventPersistenceManagerImpl implements EventPersistenceManager {
         }
 
         if (changes.getSavedState() != null) {
-            persistenceManager.save(changes.getSavedState());
+            persistenceManager.save(changes.getSavedState(), changes.getExpectedVersion());
         }
 
         if (changes.getRemovedStateId() != null) {
-            persistenceManager.remove(changes.getRemovedStateId());
+            persistenceManager.remove(changes.getRemovedStateId(), changes.getExpectedVersion());
         }
 
         for (UUID id : changes.getRemovedEvents()) {

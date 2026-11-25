@@ -42,7 +42,7 @@ public class PersistenceReducer implements Reducer {
 
             UnitOfWork uow = UnitOfWork.current();
             if (uow != null) {
-                uow.removeState(a.getInstanceId());
+                uow.removeState(state);
             } else {
                 persistenceManager.remove(a.getInstanceId());
             }
