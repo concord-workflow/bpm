@@ -1,5 +1,37 @@
 # Change Log
 
+## [2.1.0] - Unreleased
+
+Fixes from the architecture review of the engine ([#21](https://github.com/concord-workflow/bpm/pull/21)).
+
+### Added
+
+- optimistic versioning of process instances: concurrent modifications of the same instance fail with `StaleStateException` instead of losing updates. MVStore uses a new versioned record format; old records are still readable.
+- leases for expired timer events (`EventScheduler#setLeaseDuration`, 5 minutes by default): a timer whose dispatch failed or was interrupted fires again after the lease expires.
+- `Configuration#storeDefinitionsByReference` (off by default): store process definitions in the state as ID and fingerprint references instead of copies.
+
+### Changed
+
+- the state and the events of a run are committed together and only if the run succeeds (atomically with MVStore). A failed resume can be retried.
+- a process or subprocess that finishes with tokens waiting in a join now fails instead of completing.
+- a join no longer waits for tokens that can't reach it (e.g. a parallel branch that left through an error boundary).
+- timer boundary events on elements other than service tasks are rejected with an explicit error instead of being ignored.
+- the default expression executor uses virtual threads.
+- `activiti-compat`: the BPMN parser disables external entities (XXE) and rejects unsupported elements instead of silently dropping them; `terminateEventDefinition` is parsed as a terminate event.
+
+### Fixed
+
+- join counting with exclusive gateways, loops, boundary events, nested forks resumed in any order and inclusive loops.
+- event-based gateways didn't close their scope.
+- crash of a parallel gateway with a self-loop.
+- a failing service task with a timer boundary event spun instead of failing; variable changes of a timed-out task are discarded.
+- variables of call activities and subprocesses with a separate context are kept across suspension and no longer overwrite the changes of sibling branches.
+- the stored state no longer grows with each loop iteration.
+- call activities modified their shared definition at runtime.
+- `start()` ignored the configured definition cache; definition indexing is linear and variable updates are applied in bulk.
+
+
+
 ## [2.0.0] - 2026-11-24
 
 ### Added
